@@ -17,6 +17,7 @@ public interface FileStoreInterface {
     boolean isAuthenticated();
     void loadTasksFromFile (String path, TaskCache taskCache)  throws IOException;
     void startLogin(Activity caller, int i);
+    void finishLogin();
     void deauthenticate();
     void browseForNewFile(Activity act, String path, FileSelectedListener listener, boolean txtOnly);
     void saveTasksToFile(String path, TaskCache taskCache);

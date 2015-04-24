@@ -33,7 +33,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import nl.mpcjanssen.simpletask.TodoException;
+import nl.mpcjanssen.simpletask.SimpletaskException;
 
 public class LinkParser {
     private static final Pattern LINK_PATTERN = Pattern
@@ -62,7 +62,7 @@ public class LinkParser {
                 link = new URL(m.group());
                 links.add(link);
             } catch (MalformedURLException e) {
-                throw new TodoException("Malformed URL matched the regex", e);
+                throw new SimpletaskException("Malformed URL matched the regex", e);
             }
         }
         return links;

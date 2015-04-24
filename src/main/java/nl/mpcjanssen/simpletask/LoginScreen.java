@@ -89,6 +89,7 @@ public class LoginScreen extends Activity {
     }
 
     private void finishLogin() {
+        m_app.finishLogin();
         if (m_app.isAuthenticated()) {
             m_app.fileUpdated();
             switchToTodolist();

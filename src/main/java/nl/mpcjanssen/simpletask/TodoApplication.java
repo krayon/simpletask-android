@@ -484,4 +484,8 @@ public class TodoApplication extends Application implements SharedPreferences.On
     public boolean initialSyncDone() {
         return mFileStore != null && mFileStore.initialSyncDone();
     }
+
+    public void finishLogin() {
+        getFileStore().finishLogin();
+    }
 }
