@@ -14,8 +14,12 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.dropbox.client2.DropboxAPI;
+import com.dropbox.client2.RESTUtility;
 import com.dropbox.client2.android.AndroidAuthSession;
 import com.dropbox.client2.exception.DropboxException;
+import com.dropbox.client2.jsonextract.JsonExtractionException;
+import com.dropbox.client2.jsonextract.JsonMap;
+import com.dropbox.client2.jsonextract.JsonThing;
 import com.dropbox.client2.session.AppKeyPair;
 import nl.mpcjanssen.simpletask.task.Task;
 import nl.mpcjanssen.simpletask.task.TaskCache;
@@ -44,6 +48,9 @@ public class FileStore implements FileStoreInterface {
     private DropboxAPI<AndroidAuthSession> mDBApi;
 
     private Context mCtx;
+    private String mWatchedFile;
+    private String latestCursor;
+    private AsyncTask<Void, Void, Void> pollingTask;
 
     public FileStore( Context ctx, String eol) {
         mPrefs = ctx.getSharedPreferences("filestore", Context.MODE_PRIVATE);
@@ -120,14 +127,68 @@ public class FileStore implements FileStoreInterface {
     }
 
     private void startWatching(final String path) {
-        // some longpolling voodoo here
+        mWatchedFile = path;
+        if (pollingTask == null) {
+            Log.v(TAG, "Initializing slow polling thread");
+            try {
+                while (true) {
+                    DropboxAPI.DeltaPage delta = mDBApi.delta(latestCursor);
+                    if (delta.hasMore) {
+                        latestCursor = delta.cursor;
+                        continue;
+                    }
+                    break;
+                }
+            } catch (DropboxException e) {
+                e.printStackTrace();
+            }
+            startLongPoll();
+        }
     }
 
-    private void stopWatching(String path) {
 
-
+    private void startLongPoll ()  {
+        pollingTask = new AsyncTask<Void,Void,Void>() {
+            @Override
+            protected Void doInBackground(Void... v) {
+                try {
+                    Log.v(TAG, "Long polling");
+                    ArrayList<String> params = new ArrayList<>();
+                    params.add("cursor");
+                    params.add(latestCursor);
+                    params.add("timeout");
+                    params.add("120");
+                    Object response = RESTUtility.request(RESTUtility.RequestMethod.GET, "api-notify.dropbox.com", "longpoll_delta", 1, params.toArray(new String[0]), mDBApi.getSession());
+                    Log.v(TAG, "Longpoll response: " + response.toString());
+                    JsonThing result = new JsonThing(response);
+                    JsonMap resultMap = result.expectMap();
+                    boolean changes = resultMap.get("changes").expectBoolean();
+                    JsonThing backoff =  resultMap.getOrNull("backoff");
+                    Log.v(TAG, "Longpoll ended, changes " + changes + " backoff " + backoff);
+                    if (changes) {
+                        DropboxAPI.DeltaPage<DropboxAPI.Entry> delta = mDBApi.delta(latestCursor);
+                        latestCursor = delta.cursor;
+                        for (DropboxAPI.DeltaEntry entry : delta.entries) {
+                            if (entry.lcPath.equalsIgnoreCase(mWatchedFile)) {
+                                Log.v (TAG, "File " + mWatchedFile + " changed, reloading");
+                                LocalBroadcastManager.getInstance(mCtx).sendBroadcast(new Intent(Constants.BROADCAST_FILE_CHANGED));
+                                return null;
+                            }
+                        }
+                    }
+                } catch (DropboxException e) {
+                    e.printStackTrace();
+                } catch (JsonExtractionException e) {
+                    e.printStackTrace();
+                }
+                return null;
+            }
+            @Override
+            protected void onPostExecute(Void v) {
+                startLongPoll();
+            }
+        }.execute();
     }
-
 
     @Override
     public void deauthenticate() {
@@ -146,8 +207,6 @@ public class FileStore implements FileStoreInterface {
     @Override
     public void saveTasksToFile(String path, TaskCache taskCache) {
         LocalBroadcastManager.getInstance(mCtx).sendBroadcast(new Intent(Constants.BROADCAST_SYNC_START));
-        stopWatching(path);
-        startWatching(path);
         LocalBroadcastManager.getInstance(mCtx).sendBroadcast(new Intent(Constants.BROADCAST_SYNC_DONE));
     }
 
