@@ -6,6 +6,7 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Environment;
 import android.support.v4.content.LocalBroadcastManager;
@@ -18,15 +19,13 @@ import com.dropbox.client2.exception.DropboxException;
 import com.dropbox.client2.session.AppKeyPair;
 import nl.mpcjanssen.simpletask.task.Task;
 import nl.mpcjanssen.simpletask.task.TaskCache;
+import nl.mpcjanssen.simpletask.util.Util;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
 
 import nl.mpcjanssen.simpletask.Constants;
 import nl.mpcjanssen.simpletask.R;
@@ -40,12 +39,14 @@ import nl.mpcjanssen.simpletask.util.Strings;
 public class FileStore implements FileStoreInterface {
 
     private final String TAG = getClass().getName();
+    private final SharedPreferences mPrefs;
     private String mEol;
     private DropboxAPI<AndroidAuthSession> mDBApi;
 
     private Context mCtx;
 
     public FileStore( Context ctx, String eol) {
+        mPrefs = ctx.getSharedPreferences("filestore", Context.MODE_PRIVATE);
         mCtx = ctx;
         mEol = eol;
         setDbxAPI();
@@ -57,9 +58,10 @@ public class FileStore implements FileStoreInterface {
 
     private void setDbxAPI () {
         String app_secret = mCtx.getString(R.string.dropbox_consumer_secret);
-        String app_key = mCtx.getString(R.string.dropbox_consumer_key).replace("db-","");
+        String app_key = mCtx.getString(R.string.dropbox_consumer_key).replace("db-", "");
+        String savedAuth = mPrefs.getString("token", null);
         AppKeyPair appKeys = new AppKeyPair(app_key, app_secret);
-        AndroidAuthSession session = new AndroidAuthSession(appKeys);
+        AndroidAuthSession session = new AndroidAuthSession(appKeys, savedAuth);
         mDBApi = new DropboxAPI<AndroidAuthSession>(session);
     }
 
@@ -110,6 +112,7 @@ public class FileStore implements FileStoreInterface {
                 mDBApi.getSession().finishAuthentication();
 
                 String accessToken = mDBApi.getSession().getOAuth2AccessToken();
+                mPrefs.edit().putString("token", accessToken).apply();
             } catch (IllegalStateException e) {
                 Log.i("DbAuthLog", "Error authenticating", e);
             }
@@ -125,9 +128,12 @@ public class FileStore implements FileStoreInterface {
 
     }
 
+
     @Override
     public void deauthenticate() {
         mDBApi.getSession().unlink();
+        mPrefs.edit().remove("token").commit();
+        mDBApi = null;
     }
 
     @Override
@@ -197,12 +203,13 @@ public class FileStore implements FileStoreInterface {
     public static class FileDialog {
         private static final String PARENT_DIR = "..";
         private String[] fileList;
+        private HashMap<String,DropboxAPI.Entry> entryHash = new HashMap<>();
         private File currentPath;
 
         private ListenerList<FileSelectedListener> fileListenerList = new ListenerList<FileSelectedListener>();
         private final Activity activity;
         private boolean txtOnly;
-        File path;
+        Dialog dialog;
 
         /**
          * @param activity
@@ -211,38 +218,62 @@ public class FileStore implements FileStoreInterface {
         public FileDialog(Activity activity, String pathName, boolean txtOnly) {
             this.activity = activity;
             this.txtOnly=txtOnly;
-            path = new File(pathName);
+            currentPath = new File(pathName);
 
         }
 
         /**
-         * @return file dialog
+         *
          */
-        public Dialog createFileDialog(Context ctx, FileStoreInterface fs) {
-            Dialog dialog;
+        public void createFileDialog(final Context ctx, final FileStoreInterface fs) {
+
             final DropboxAPI<AndroidAuthSession> api = ((FileStore)fs).mDBApi;
             if (api==null) {
-                return null;
+                return;
             }
-            AlertDialog.Builder builder = new AlertDialog.Builder(activity);
-            loadFileList(api,path);
-            builder.setTitle(currentPath.getPath());
+            new AsyncTask<Void,Void, AlertDialog.Builder>() {
 
-            builder.setItems(fileList, new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int which) {
-                    String fileChosen = fileList[which];
-                    File chosenFile = getChosenFile(fileChosen);
-                    if (chosenFile.isDirectory()) {
-                        loadFileList(api,chosenFile);
+                @Override
+                protected AlertDialog.Builder doInBackground(Void... params) {
+                    loadFileList(api, currentPath);
+                    AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+                    builder.setTitle(currentPath.getPath());
+
+                    builder.setItems(fileList, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            String fileChosen = fileList[which];
+                            if (fileChosen.equals(PARENT_DIR)) {
+                                currentPath = new File(currentPath.getParent());
+                                createFileDialog(ctx, fs);
+                                return;
+                            }
+                            File chosenFile = getChosenFile(fileChosen);
+                            Log.w("FileStore", "Selected file " + chosenFile.getName());
+                            DropboxAPI.Entry entry = entryHash.get(fileChosen);
+                            if (entry.isDir) {
+                                currentPath = chosenFile;
+                                createFileDialog(ctx, fs);
+                            } else {
+                                dialog.cancel();
+                                dialog.dismiss();
+                                fireFileSelectedEvent(chosenFile);
+                            }
+                        }
+                    });
+                    return builder;
+                }
+
+                @Override
+                protected void onPostExecute(AlertDialog.Builder builder) {
+                    if (dialog!=null) {
                         dialog.cancel();
                         dialog.dismiss();
-                        showDialog();
-                    } else fireFileSelectedEvent(chosenFile);
+                    }
+                    dialog = builder.create();
+                    dialog.show();
                 }
-            });
 
-            dialog = builder.show();
-            return dialog;
+            }.execute();
         }
 
 
@@ -250,12 +281,6 @@ public class FileStore implements FileStoreInterface {
             fileListenerList.add(listener);
         }
 
-        /**
-         * Show file dialog
-         */
-        public void showDialog() {
-            createFileDialog(null,null).show();
-        }
 
         private void fireFileSelectedEvent(final File file) {
             fileListenerList.fireEvent(new ListenerList.FireHandler<FileSelectedListener>() {
@@ -265,24 +290,42 @@ public class FileStore implements FileStoreInterface {
             });
         }
 
+        private DropboxAPI.Entry getPathMetaData(DropboxAPI api, File path) throws DropboxException {
+            if (api!=null) {
+                return api.metadata(path.toString(), 0, null, true, null);
+            } else {
+                return null;
+            }
+        }
+
         private void loadFileList(DropboxAPI<AndroidAuthSession> api, File path) {
+            if (path==null) {
+                path = new File("/");
+            }
             this.currentPath = path;
             List<String> f = new ArrayList<String>();
             List<String> d = new ArrayList<String>();
-            if (!path.toString().equals("/")) d.add(PARENT_DIR);
+
             try {
-                DropboxAPI.Entry entries = api.metadata(path.getAbsolutePath(), 0, null, true, null);
+                DropboxAPI.Entry entries = getPathMetaData(api,path) ;
+                entryHash.clear();
                 if (!entries.isDir) return;
+                if (!path.toString().equals("/")) {
+                    d.add(PARENT_DIR);
+                }
                 for (DropboxAPI.Entry entry : entries.contents) {
                     if (entry.isDeleted) continue;
                     if (entry.isDir) {
-                        d.add(entry.path);
+                        d.add(entry.fileName());
                     } else {
-                        f.add(entry.path);
+                        f.add(entry.fileName());
                     }
+                    entryHash.put(entry.fileName(), entry);
                 }
             } catch (DropboxException e) {
-                e.printStackTrace();
+                Log.w("FileStore", "Couldn't load list from " + path.getName() + " loading root instead.");
+                loadFileList(api, null);
+                return;
             }
             Collections.sort(d);
             Collections.sort(f);
