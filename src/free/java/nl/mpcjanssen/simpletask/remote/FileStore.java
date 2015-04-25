@@ -131,15 +131,20 @@ public class FileStore implements FileStoreInterface {
         if (pollingTask == null) {
             Log.v(TAG, "Initializing slow polling thread");
             try {
-                while (true) {
-                    DropboxAPI.DeltaPage delta = mDBApi.delta(latestCursor);
-                    if (delta.hasMore) {
-                        latestCursor = delta.cursor;
-                        continue;
-                    }
-                    break;
-                }
+                Log.v(TAG, "Finding latest cursor");
+                ArrayList<String> params = new ArrayList<>();
+                params.add("include_media_info");
+                params.add("false");
+                Object response = RESTUtility.request(RESTUtility.RequestMethod.POST, "api.dropbox.com", "delta/latest_cursor", 1, params.toArray(new String[0]), mDBApi.getSession());
+                Log.v(TAG, "Longpoll latestcursor response: " + response.toString());
+                JsonThing result = new JsonThing(response);
+                JsonMap resultMap = result.expectMap();
+                latestCursor = resultMap.get("cursor").expectString();
             } catch (DropboxException e) {
+                e.printStackTrace();
+                latestCursor = null;
+            } catch (JsonExtractionException e) {
+                latestCursor = null;
                 e.printStackTrace();
             }
             startLongPoll();
