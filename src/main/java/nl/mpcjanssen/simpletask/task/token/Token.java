@@ -3,6 +3,8 @@ package nl.mpcjanssen.simpletask.task.token;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
+
 /**
  * Created Mark Janssen
  */
@@ -18,7 +20,7 @@ abstract public class Token {
     public static final int THRESHOLD_DATE = 0x1 << 8;
     public static final int DUE_DATE = 0x1 << 9;
     public static final int HIDDEN = 0x1 << 10;
-    public static final int SHOW_ALL = ~0x0;
+    public static final int SHOW_ALL = WHITE_SPACE + LIST + TTAG + COMPLETED + COMPLETED_DATE + CREATION_DATE + TEXT + PRIO + THRESHOLD_DATE + DUE_DATE + HIDDEN;
     public int type;
     public String value;
 
@@ -37,15 +39,10 @@ abstract public class Token {
     public boolean equals(@Nullable Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-
         Token token = (Token) o;
+        return type == token.type && value.equals(token.value);
 
-        if (!(type == token.type)) return false;
-        if (!value.equals(token.value)) return false;
-
-        return true;
     }
-
 
     @Override
     public int hashCode() {

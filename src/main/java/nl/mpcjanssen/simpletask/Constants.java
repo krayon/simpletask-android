@@ -32,7 +32,9 @@ public class Constants {
     public final static String BROADCAST_ACTION_ARCHIVE = "ACTION_ARCHIVE";
     public final static String BROADCAST_ACTION_LOGOUT = "ACTION_LOGOUT";
     public final static String BROADCAST_UPDATE_UI = "UPDATE_UI";
+    public final static String BROADCAST_TASKCACHE_CHANGED = "TASKCACHE_CHANGED";
     public final static String BROADCAST_FILE_CHANGED = "FILE_CHANGED";
+    public final static String BROADCAST_FILE_WRITE_FAILED = "FILE_WRITE_FAILED";
     public final static String BROADCAST_SYNC_START = "SYNC_START";
     public final static String BROADCAST_SYNC_DONE = "SYNC_DONE";
 
@@ -56,7 +58,7 @@ public class Constants {
     public static final int STORE_SDCARD = 0x1;
 
     // Help pages
-    public static final String HELP_INDEX = "index.md";
-    public static final String HELP_ADD_TASK = "addtask.md";
+    public static final String HELP_INDEX = "index.en.md";
+    public static final String HELP_ADD_TASK = "addtask.en.md";
 
 }

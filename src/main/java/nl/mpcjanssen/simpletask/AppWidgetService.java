@@ -76,11 +76,11 @@ class AppWidgetRemoteViewsFactory implements RemoteViewsService.RemoteViewsFacto
         if (!application.isAuthenticated()) {
             return;
         }
-        if (application.getTaskCache()==null)  {
+        if (application.getTaskCache(null)==null)  {
             Log.v(TAG, "taskcache object was null");
             return;
         }
-        ArrayList<Task> tasks = application.getTaskCache().getTasks();
+        ArrayList<Task> tasks = application.getTaskCache(null).getTasks();
         if (tasks==null) {
             return;
         }
@@ -89,7 +89,7 @@ class AppWidgetRemoteViewsFactory implements RemoteViewsService.RemoteViewsFacto
                 visibleTasks.add(t);
             }
         }
-        MultiComparator comp = new MultiComparator(mFilter.getSort(application.getDefaultSorts()));
+        MultiComparator comp = new MultiComparator(mFilter.getSort(application.getDefaultSorts()), application.sortCaseSensitive());
         Collections.sort(visibleTasks, comp);
     }
 

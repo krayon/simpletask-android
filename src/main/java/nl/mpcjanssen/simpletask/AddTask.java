@@ -34,6 +34,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.v4.app.NavUtils;
@@ -58,9 +59,15 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.google.common.base.Charsets;
+import com.google.common.io.Files;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -147,7 +154,7 @@ public class AddTask extends ThemedActivity {
 
     private void showHelp() {
         Intent i = new Intent(this, HelpScreen.class);
-        i.putExtra(Constants.EXTRA_HELP_PAGE,Constants.HELP_ADD_TASK);
+        i.putExtra(Constants.EXTRA_HELP_PAGE,getText(R.string.help_add_task));
         startActivity(i);
     }
 
@@ -200,14 +207,14 @@ public class AddTask extends ThemedActivity {
                 }
             }
         }
-        m_app.getTaskCache().modify(originalLines, updatedTasks, addedTasks, null);
+        m_app.getTaskCache(this).modify(originalLines, updatedTasks, addedTasks, null);
         finish();
     }
 
     private void noteToSelf(@NotNull Intent intent) {
         String task = intent.getStringExtra(Intent.EXTRA_TEXT);
         if (intent.hasExtra(Intent.EXTRA_STREAM)) {
-            Log.v(TAG,"Voice note added.");
+            Log.v(TAG, "Voice note added.");
         }
         addBackgroundTask(task);
     }
@@ -229,7 +236,7 @@ public class AddTask extends ThemedActivity {
                 bgTask.add(new Task(0,taskText));
             }
         }
-        m_app.getTaskCache().modify(null,null,bgTask,null);
+        m_app.getTaskCache(null).modify(null,null,bgTask,null);
         m_app.updateWidgets();
         Util.showToastShort(m_app, R.string.task_added);
     }
@@ -278,7 +285,20 @@ public class AddTask extends ThemedActivity {
             return;
         } else if (Intent.ACTION_SEND.equals(action)) {
             Log.d(TAG, "Share");
-            if (intent.hasExtra(Intent.EXTRA_TEXT)) {
+            if (intent.hasExtra(Intent.EXTRA_STREAM)) {
+                Uri uri = (Uri) intent.getExtras().get(Intent.EXTRA_STREAM);
+                try {
+                    File sharedFile = new File(uri.getPath());
+                    share_text =  Files.toString(sharedFile, Charsets.UTF_8);
+                } catch (FileNotFoundException e) {
+                    share_text  = "";
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    share_text  = "";
+                    e.printStackTrace();
+                }
+
+            } else if (intent.hasExtra(Intent.EXTRA_TEXT)) {
                 share_text = intent.getCharSequenceExtra(Intent.EXTRA_TEXT).toString();
             } else {
                 share_text = "";
@@ -321,7 +341,7 @@ public class AddTask extends ThemedActivity {
         Task iniTask = null;
         setTitle(R.string.addtask);
 
-        m_backup = m_app.getTaskCache().getTasksToUpdate();
+        m_backup = m_app.getTaskCache(this).getTasksToUpdate();
         if (m_backup!=null && m_backup.size()>0) {
             ArrayList<String> prefill = new ArrayList<String>();
             for (Task t : m_backup) {
@@ -517,7 +537,7 @@ public class AddTask extends ThemedActivity {
 
     private void showTagMenu() {
         Set<String> items = new TreeSet<String>();
-        items.addAll(m_app.getTaskCache().getProjects());
+        items.addAll(m_app.getTaskCache(null).getProjects());
         // Also display contexts in tasks being added
         Task t = new Task(0,textInputField.getText().toString());
         items.addAll(t.getTags());
@@ -585,7 +605,7 @@ public class AddTask extends ThemedActivity {
 
     private void showContextMenu() {
         Set<String> items = new TreeSet<String>();
-        items.addAll(m_app.getTaskCache().getContexts());
+        items.addAll(m_app.getTaskCache(this).getContexts());
         // Also display contexts in tasks being added
         Task t = new Task(0,textInputField.getText().toString());
         items.addAll(t.getLists());

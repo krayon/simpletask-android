@@ -25,36 +25,27 @@
  */
 package nl.mpcjanssen.simpletask;
 
-import android.app.Activity;
-import android.app.AlertDialog;
-import android.app.Application;
-import android.app.Dialog;
+import android.app.*;
 import android.appwidget.AppWidgetManager;
-import android.content.BroadcastReceiver;
-import android.content.ComponentName;
-import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.content.SharedPreferences;
+import android.content.*;
 import android.content.pm.ActivityInfo;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.preference.PreferenceManager;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.view.Window;
 import android.widget.EditText;
-import android.widget.Toast;
-
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-
-import java.io.File;
-
 import nl.mpcjanssen.simpletask.remote.FileStore;
 import nl.mpcjanssen.simpletask.remote.FileStoreInterface;
 import nl.mpcjanssen.simpletask.task.TaskCache;
 import nl.mpcjanssen.simpletask.util.Util;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
 
 
 public class TodoApplication extends Application implements SharedPreferences.OnSharedPreferenceChangeListener {
@@ -62,6 +53,7 @@ public class TodoApplication extends Application implements SharedPreferences.On
     private static Context m_appContext;
     private static SharedPreferences m_prefs;
     private LocalBroadcastManager localBroadcastManager;
+    private ArrayList<File> todoTrail = new ArrayList<File>();
 
     @Nullable
     private FileStoreInterface mFileStore;
@@ -71,6 +63,7 @@ public class TodoApplication extends Application implements SharedPreferences.On
     private BroadcastReceiver m_broadcastReceiver;
 
     public static final boolean API16 = android.os.Build.VERSION.SDK_INT >= 16;
+    private int m_Theme = -1;
 
     public static Context getAppContext() {
         return m_appContext;
@@ -85,24 +78,35 @@ public class TodoApplication extends Application implements SharedPreferences.On
         super.onCreate();
         TodoApplication.m_appContext = getApplicationContext();
         TodoApplication.m_prefs = PreferenceManager.getDefaultSharedPreferences(getAppContext());
+        getTaskCache(null);
         m_calSync = new CalendarSync(this, isSyncDues(), isSyncThresholds());
         localBroadcastManager = LocalBroadcastManager.getInstance(this);
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(Constants.BROADCAST_UPDATE_UI);
         intentFilter.addAction(Constants.BROADCAST_FILE_CHANGED);
+        intentFilter.addAction(Constants.BROADCAST_FILE_WRITE_FAILED);
+        intentFilter.addAction(Constants.BROADCAST_TASKCACHE_CHANGED);
         m_broadcastReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, @NotNull Intent intent) {
                 if (intent.getAction().equals(Constants.BROADCAST_FILE_CHANGED)) {
                     // File change reload task cache
-                    resetTaskCache();
+                    try {
+                        getFileStore().loadTasksFromFile(getTodoFileName(),getTaskCache(null));
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                } else if (intent.getAction().equals(Constants.BROADCAST_TASKCACHE_CHANGED)) {
+                    getFileStore().saveTasksToFile(getTodoFileName(), getTaskCache(null));
                 } else if (intent.getAction().equals(Constants.BROADCAST_UPDATE_UI)) {
                     m_calSync.syncLater();
                     updateWidgets();
+                } else if (intent.getAction().equals(Constants.BROADCAST_FILE_WRITE_FAILED)) {
+                    Util.showToastLong(getApplicationContext(), R.string.write_failed);
                 }
             }
         };
-        localBroadcastManager.registerReceiver(m_broadcastReceiver,intentFilter);
+        localBroadcastManager.registerReceiver(m_broadcastReceiver, intentFilter);
         prefsChangeListener(this);
     }
 
@@ -123,19 +127,7 @@ public class TodoApplication extends Application implements SharedPreferences.On
     }
 
     public boolean fileStoreCanSync() {
-        if (mFileStore!=null) {
-            return mFileStore.supportsSync();
-        } else {
-            return false;
-        }
-    }
-
-    public boolean isSynching() {
-        if (mFileStore==null) {
-            return true;
-        } else {
-            return mFileStore.isSyncing();
-        }
+        return mFileStore != null && mFileStore.supportsSync();
     }
 
     public void sync() {
@@ -150,10 +142,6 @@ public class TodoApplication extends Application implements SharedPreferences.On
                 }
             }.execute(mFileStore);
         }
-    }
-    
-    private boolean hasPushSync() {
-        return true;
     }
 
     @Override
@@ -208,7 +196,13 @@ public class TodoApplication extends Application implements SharedPreferences.On
     }
 
     public String getTodoFileName() {
-        return m_prefs.getString(getString(R.string.todo_file_key), FileStore.getDefaultPath());
+        String name =  m_prefs.getString(getString(R.string.todo_file_key), FileStore.getDefaultPath());
+        File todoFile = new File(name);
+        try {
+            return todoFile.getCanonicalPath();
+        } catch (IOException e) {
+            return FileStore.getDefaultPath();
+        }
     }
 
     public File getTodoFile() {
@@ -280,6 +274,11 @@ public class TodoApplication extends Application implements SharedPreferences.On
         return m_prefs.getBoolean(getString(R.string.use_rhino),false);
     }
 
+    public boolean showTodoPath() {
+        return m_prefs.getBoolean(getString(R.string.show_todo_path),false);
+    }
+
+
     public boolean backClearsFilter() {
         return m_prefs.getBoolean(getString(R.string.back_clears_filter),false);
     }
@@ -305,23 +304,38 @@ public class TodoApplication extends Application implements SharedPreferences.On
         }
     }
 
+
+
     public void setWordWrap(boolean bool) {
         m_prefs.edit()
-                .putBoolean(getString(R.string.word_wrap_key),bool)
+                .putBoolean(getString(R.string.word_wrap_key), bool)
                 .apply();
     }
 
-    public void resetTaskCache() {
-        m_taskCache = null;
-        getTaskCache();
-    }
-
     @NotNull
-    public TaskCache getTaskCache() {
-        if (this.m_taskCache==null) {
-            this.m_taskCache = new TaskCache(this,
-                    getFileStore(),
-                    getTodoFileName());
+    public TaskCache getTaskCache(final Activity act) {
+        if (this.m_taskCache!=null) {
+            return m_taskCache;
+        }
+
+        this.m_taskCache = new TaskCache(this);
+        final FileStoreInterface store = getFileStore();
+        try {
+            store.loadTasksFromFile(getTodoFileName(), m_taskCache);
+        } catch (IOException e) {
+            e.printStackTrace();
+            if (act!=null) {
+                store.browseForNewFile(act, getTodoFileName(), new FileStoreInterface.FileSelectedListener() {
+                    @Override
+                    public void fileSelected(String file) {
+                        setTodoFile(file);
+                        getTaskCache(act);
+                    }
+                }, showTxtOnly());
+            } else {
+                m_taskCache = new TaskCache(this);
+            }
+
         }
         return this.m_taskCache;
     }
@@ -347,17 +361,41 @@ public class TodoApplication extends Application implements SharedPreferences.On
         }
     }
 
-    public int getActiveTheme() {
-        String theme =  getPrefs().getString(getString(R.string.theme_pref_key), "");
-        if (theme.equals("android.R.style.Theme_Holo")) {
-            return android.R.style.Theme_Holo;
-        } else if (theme.equals("android.R.style.Theme_Holo_Light_DarkActionBar")) {
-            return android.R.style.Theme_Holo_Light_DarkActionBar;
-        } else if (theme.equals("android.R.style.Theme_Holo_Light")) {
-            return android.R.style.Theme_Holo_Light;
-        } else  {
-            return android.R.style.Theme_Holo_Light_DarkActionBar;
+    private int themeStringToId (String theme) {
+        switch (theme) {
+            case "android.R.style.Theme_Holo":
+                return android.R.style.Theme_Holo;
+            case "android.R.style.Theme_Holo_Light_DarkActionBar":
+                return android.R.style.Theme_Holo_Light_DarkActionBar;
+            case "android.R.style.Theme_Holo_Light":
+                return android.R.style.Theme_Holo_Light;
         }
+        int currentapiVersion = android.os.Build.VERSION.SDK_INT;
+        if ( currentapiVersion >= Build.VERSION_CODES.LOLLIPOP) {
+            switch (theme) {
+                case "android.R.style.Theme_Material":
+                    return android.R.style.Theme_Material;
+                case "android.R.style.Theme_Material_Light_DarkActionBar":
+                    return android.R.style.Theme_Material_Light_DarkActionBar;
+                case "android.R.style.Theme_Material_Light":
+                    return android.R.style.Theme_Material_Light;
+            }
+
+        }
+        return android.R.style.Theme_Holo_Light_DarkActionBar;
+
+    }
+
+    public void reloadTheme() {
+        m_Theme = -1;
+    }
+    public int getActiveTheme() {
+        if (m_Theme != -1 ) {
+            return m_Theme;
+        }
+        m_Theme = themeStringToId(getPrefs().getString(getString(R.string.theme_pref_key), ""));
+        return m_Theme;
+
     }
 
     public void setActionBarStyle(@NotNull Window window) {
@@ -369,10 +407,8 @@ public class TodoApplication extends Application implements SharedPreferences.On
     public boolean isDarkTheme() {
         switch (getActiveTheme()) {
             case android.R.style.Theme_Holo:
+            case android.R.style.Theme_Material:
                 return true;
-            case android.R.style.Theme_Holo_Light_DarkActionBar:
-            case android.R.style.Theme_Holo_Light:
-                return false;
             default:
                 return false;
         }
@@ -382,9 +418,9 @@ public class TodoApplication extends Application implements SharedPreferences.On
         switch (getActiveTheme()) {
             case android.R.style.Theme_Holo:
             case android.R.style.Theme_Holo_Light_DarkActionBar:
+            case android.R.style.Theme_Material:
+            case android.R.style.Theme_Material_Light_DarkActionBar:
                 return true;
-            case android.R.style.Theme_Holo_Light:
-                return false;
             default:
                 return false;
         }
@@ -412,14 +448,39 @@ public class TodoApplication extends Application implements SharedPreferences.On
         }
     }
 
+    private void loadTodoFile(File newTodo) {
+        setTodoFile(newTodo.getPath());
+        m_taskCache = null;
+        getTaskCache(null);
+    }
+
+    public void switchTodoFile(File newTodo) {
+        todoTrail.add(getTodoFile());
+        loadTodoFile(newTodo);
+
+    }
+
+    public boolean switchPreviousTodoFile() {
+        int size = todoTrail.size();
+        if (todoTrail.size()==0) {
+            return false;
+        } else {
+            File newTodo = todoTrail.get(size - 1);
+            todoTrail.remove(size - 1);
+            loadTodoFile(newTodo);
+            return true;
+        }
+    }
+
     public int getActiveFont() {
         String fontsize =  getPrefs().getString("fontsize", "medium");
-        if (fontsize.equals("small")) {
-            return R.style.FontSizeSmall;
-        } else if (fontsize.equals("large")) {
-            return R.style.FontSizeLarge;
-        } else {
-            return R.style.FontSizeMedium;
+        switch (fontsize) {
+            case "small":
+                return R.style.FontSizeSmall;
+            case "large":
+                return R.style.FontSizeLarge;
+            default:
+                return R.style.FontSizeMedium;
         }
     }
 
@@ -462,21 +523,15 @@ public class TodoApplication extends Application implements SharedPreferences.On
         return getFileStore().getType();
     }
 
-    public void browseForNewFile(@NotNull Activity act) {
+    public void browseForNewFile(@NotNull final Activity act) {
         FileStoreInterface fileStore = getFileStore();
-        if (fileStore == null) {
-            Util.showToastShort(act, "can't access filesystem");
-            return;
-        }
         fileStore.browseForNewFile(
                 act,
                 new File(getTodoFileName()).getParent(),
                 new FileStoreInterface.FileSelectedListener() {
                     @Override
                     public void fileSelected(String file) {
-                        setTodoFile(file);
-                        getFileStore().invalidateCache();
-                        localBroadcastManager.sendBroadcast(new Intent(Constants.BROADCAST_FILE_CHANGED));
+                        switchTodoFile(new File(file));
                     }
                 },
 		showTxtOnly());
@@ -488,10 +543,6 @@ public class TodoApplication extends Application implements SharedPreferences.On
     }
 
     public boolean initialSyncDone() {
-        if (mFileStore==null) {
-            return false;
-        } else {
-            return mFileStore.initialSyncDone();
-        }
+        return mFileStore != null && mFileStore.initialSyncDone();
     }
 }

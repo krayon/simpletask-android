@@ -70,6 +70,8 @@ You should have received a copy of the GNU General Public License along with Tod
     <string name="ok">OK</string>
     <string name="cancel">Cancel</string>
     <string name="clear_filter">Clear filter</string>
+    <string name="write_failed">Failed writing the file. Your changes were NOT saved. Note that Android above KitKat doesn\'t support writing to external SD Cards</string>
+
 
     <string name="tasktexthint">\@Discuss +Paris issue with +Hector @Troy\nTell +Hector to not be such a drag @Troy\nReview +Simpletask settings to remove this text @Phone</string>
 
@@ -124,8 +126,7 @@ You should have received a copy of the GNU General Public License along with Tod
     <string name="resume_sync_pref_title">Resume sync</string>
     <string name="resume_sync_pref_summary">Sync with dropbox when opening app.</string>
     <string name="font_size_delta_pref_title">Change font size</string>
-    <string name="font_size_delta_pref_summary">Change the font size in units of sp.
-        Use negative values to decrease the font size</string>
+    <string name="font_size_delta_pref_summary">Change the font size.</string>
     <string name="theme_pref_title">Application theme</string>
     <string name="theme_pref_summary">Change the theme used for the application</string>
 
@@ -184,6 +185,10 @@ You should have received a copy of the GNU General Public License along with Tod
     <string name="show_confirmation_dialogs_title">Show confirmation dialogs</string>
     <string name="show_confirmation_dialogs_summary">Show a confirmation dialog before executing undoable actions or actions that can lead to data loss.
         Disable this setting if you find this annoying. You have been warned though.</string>
+
+
+    <string name="show_todo_path_title">Show todo path</string>
+    <string name="show_todo_path_summary">Shows the path to the todo file. The directories are shortened to the first letter. For example /todo/home/todo.txt becomes /t/h/todo.txt.</string>
 
     <string name="show_calendarview_title">Use calendar for date entry</string>
 
@@ -268,6 +273,10 @@ You should have received a copy of the GNU General Public License along with Tod
     <string name="filter_saved_prompt">Saved filters</string>
 
 
+    <!-- task parts -->
+    <string name="task_select_parts">Select task parts</string>
+    <string name="task_show_all">All</string>
+
     <!-- title bar changes -->
     <string name="title_filter_applied">Filtered on:</string>
     <string name="add_task_help_btn">Help</string>
@@ -336,6 +345,7 @@ You should have received a copy of the GNU General Public License along with Tod
 
     <string name="donate_title">Donate</string>
     <string name="donate_summary">Donate if you like simpletask. NOTE: Donation is voluntary, simpletask will always be free.  </string>
+    <string name="donated_summary">Thanks for your donation.  </string>
     <string name="visit_donate_data">https://bitly.com/VYR7Fq</string>
     <string name="sort_reverse">Reverse sort</string>
 
@@ -347,4 +357,15 @@ You should have received a copy of the GNU General Public License along with Tod
     <string name="calendar_exists_warning">Warning: Calendar with the same name already exists, overwriting...</string>
 
     <string name="click_to_copy">Click to copy to clipboard.</string>
+
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+
+    <!-- Default Help localisation -->
+    <string name="help_locale">en</string>
+
+    <string name="task_action">Action</string>
+
+
+
 </resources>

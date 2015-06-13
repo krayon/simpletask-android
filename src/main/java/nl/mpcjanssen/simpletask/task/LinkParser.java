@@ -1,18 +1,18 @@
 /**
  * This file is part of Todo.txt Touch, an Android app for managing your todo.txt file (http://todotxt.com).
- *
+ * <p/>
  * Copyright (c) 2009-2013 Todo.txt contributors (http://todotxt.com)
- *
+ * <p/>
  * LICENSE:
- *
+ * <p/>
  * Todo.txt Touch is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
  * License as published by the Free Software Foundation, either version 2 of the License, or (at your option) any
  * later version.
- *
+ * <p/>
  * Todo.txt Touch is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
  * details.
- *
+ * <p/>
  * You should have received a copy of the GNU General Public License along with Todo.txt Touch.  If not, see
  * <http://www.gnu.org/licenses/>.
  *
@@ -37,7 +37,7 @@ import nl.mpcjanssen.simpletask.TodoException;
 
 public class LinkParser {
     private static final Pattern LINK_PATTERN = Pattern
-            .compile("(http|https)://[\\w\\-_]+(\\.[\\w\\-_]+)+([\\w\\-\\.,@?^=%&amp;:/~\\+#]*[\\w\\-\\@?^=%&amp;/~\\+#])?");
+            .compile("(http|https|todo)://[\\w\\-_./]+(\\.[\\w\\-_]+)+([\\w\\-\\.,@?^=%&amp;:/~\\+#]*[\\w\\-\\@?^=%&amp;/~\\+#])?");
     private static final LinkParser INSTANCE = new LinkParser();
 
     private LinkParser() {
@@ -49,21 +49,17 @@ public class LinkParser {
     }
 
     @NotNull
-    public List<URL> parse(@Nullable String inputText) {
+    public List<String> parse(@Nullable String inputText) {
         if (inputText == null) {
             return Collections.emptyList();
         }
 
         Matcher m = LINK_PATTERN.matcher(inputText);
-        List<URL> links = new ArrayList<URL>();
+        List<String> links = new ArrayList<String>();
         while (m.find()) {
-            URL link;
-            try {
-                link = new URL(m.group());
-                links.add(link);
-            } catch (MalformedURLException e) {
-                throw new TodoException("Malformed URL matched the regex", e);
-            }
+            String link;
+            link = new String(m.group());
+            links.add(link);
         }
         return links;
     }

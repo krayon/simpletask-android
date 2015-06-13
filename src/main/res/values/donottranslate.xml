@@ -69,11 +69,17 @@ You should have received a copy of the GNU General Public License along with Tod
         <item>Holo Light</item>
         <item>Holo Light (Dark Actionbar)</item>
         <item>Holo</item>
+        <item>Material Light</item>
+        <item>Material Light (Dark Actionbar)</item>
+        <item>Material</item>
     </string-array>
     <string-array name="theme_values">
         <item>android.R.style.Theme_Holo_Light</item>
         <item>android.R.style.Theme_Holo_Light_DarkActionBar</item>
         <item>android.R.style.Theme_Holo</item>
+        <item>android.R.style.Theme_Material_Light</item>
+        <item>android.R.style.Theme_Material_Light_DarkActionBar</item>
+        <item>android.R.style.Theme_Material</item>
     </string-array>
 
     <!-- Defined themes -->
@@ -87,6 +93,12 @@ You should have received a copy of the GNU General Public License along with Tod
         <item>medium</item>
         <item>large</item>
     </string-array>
+
+
+    <!-- Unlocalized Help names -->
+    <string name="help_add_task">addtask</string>
+
+
 
     <!-- Preference keys -->
     <string name="sort_complete_last_pref_key">todotxtsortcompletelast</string>
@@ -130,6 +142,9 @@ You should have received a copy of the GNU General Public License along with Tod
     <string name="ui_show_calendarview">ui_show_calendarview</string>
     <string name="ui_sort_case_sensitive">ui_sort_case_sensitive</string>
     <string name="use_rhino">use_rhino</string>
+    <string name="show_todo_path">show_todo_path</string>
     <string name="back_clears_filter">back_clears_filter</string>
     <string name="keep_prio">todotxt_completion</string>
 </resources>
+
+
