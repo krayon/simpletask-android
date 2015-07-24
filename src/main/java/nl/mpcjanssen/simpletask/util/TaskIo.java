@@ -22,7 +22,9 @@
  */
 package nl.mpcjanssen.simpletask.util;
 
+import android.content.Context;
 import android.support.annotation.NonNull;
+import android.support.v4.provider.DocumentFile;
 import com.google.common.base.Charsets;
 import com.google.common.io.Files;
 import com.google.common.io.LineProcessor;
@@ -37,15 +39,20 @@ public class TaskIo {
         return Files.readLines(file, Charsets.UTF_8, lineProc);
     }
 
-    public static void writeToFile(@NonNull String contents, @NonNull File file, boolean append) throws IOException {
-        Util.createParentDirectory(file);
-        FileOutputStream str = new FileOutputStream(file, append);
+    public static void writeToFile(@NonNull String contents, @NonNull Context ctx,  @NonNull DocumentFile out, boolean append) throws IOException {
+        Util.createParentDirectory(out);
+        OutputStream os;
+        if (append) {
+            os = ctx.getContentResolver().openOutputStream(out.getUri(), "wa");
+        } else {
+            os = ctx.getContentResolver().openOutputStream(out.getUri(), "w");
+        }
 
         Writer fw = new BufferedWriter(new OutputStreamWriter(
-                str, "UTF-8"));
+                os, "UTF-8"));
         fw.write(contents);
         fw.close();
-        str.close();
+        os.close();
     }
 }
 

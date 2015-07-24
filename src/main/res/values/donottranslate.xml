@@ -113,6 +113,7 @@ You should have received a copy of the GNU General Public License along with Tod
     <string name="word_wrap_key">word_wrap</string>
     <string name="color_due_date_key">color_due_date</string>
     <string name="todo_file_key">todo_file</string>
+    <string name="todo_file_uri_key">todo_file_uri</string>
     <string name="back_key_saves_key">back_saves</string>
     <string name="ui_drawer_fixed_landscape">ui_drawer_fixed_landscape</string>
     <string name="ui_show_edittext_hints">ui_show_edittext_hints</string>

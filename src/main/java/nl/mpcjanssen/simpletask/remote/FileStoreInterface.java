@@ -2,9 +2,12 @@ package nl.mpcjanssen.simpletask.remote;
 
 import android.app.Activity;
 import android.support.annotation.Nullable;
+import android.support.v4.provider.DocumentFile;
 import nl.mpcjanssen.simpletask.task.Task;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.List;
 
 /**
@@ -14,12 +17,12 @@ import java.util.List;
  */
 public interface FileStoreInterface {
     boolean isAuthenticated();
-    List<Task> loadTasksFromFile(String path, @Nullable BackupInterface backup)  throws IOException;
+    List<Task> loadTasksFromDocument(DocumentFile in, @Nullable BackupInterface backup)  throws IOException;
     void startLogin(Activity caller, int i);
     void logout();
     void browseForNewFile(Activity act, String path, FileSelectedListener listener, boolean txtOnly);
-    void saveTasksToFile(String path, List<Task> tasks, @Nullable BackupInterface backup) throws IOException;
-    void appendTaskToFile(String path, List<Task> tasks) throws IOException;
+    void saveTasksToDocument(DocumentFile out, List<Task> tasks, @Nullable BackupInterface backup) throws IOException;
+    void appendTaskToFile(DocumentFile out, List<Task> tasks) throws IOException;
 
     int getType();
     void setEol(String eol);

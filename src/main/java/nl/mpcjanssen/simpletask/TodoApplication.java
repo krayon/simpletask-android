@@ -27,19 +27,16 @@ package nl.mpcjanssen.simpletask;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.Application;
-import android.app.Dialog;
 import android.appwidget.AppWidgetManager;
 import android.content.*;
-import android.content.pm.ActivityInfo;
 import android.database.sqlite.SQLiteDatabase;
-import android.os.Build;
+import android.net.Uri;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
-import android.view.Window;
+import android.support.v4.provider.DocumentFile;
 import android.widget.EditText;
 import hirondelle.date4j.DateTime;
 import nl.mpcjanssen.simpletask.remote.BackupInterface;
@@ -52,6 +49,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
 import java.util.TimeZone;
 
 
@@ -96,7 +94,7 @@ public class TodoApplication extends Application implements
         m_broadcastReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, @NonNull Intent intent) {
-            if (intent.getAction().equals(Constants.BROADCAST_UPDATE_UI)) {
+                if (intent.getAction().equals(Constants.BROADCAST_UPDATE_UI)) {
                     m_calSync.syncLater();
                     redrawWidgets();
                     updateWidgets();
@@ -126,14 +124,14 @@ public class TodoApplication extends Application implements
     public void onTerminate() {
         log.info("Deregistered receiver");
         m_prefs.unregisterOnSharedPreferenceChangeListener(this);
-        if (m_broadcastReceiver!=null) {
+        if (m_broadcastReceiver != null) {
             localBroadcastManager.unregisterReceiver(m_broadcastReceiver);
         }
         super.onTerminate();
     }
 
 
-    public String[] getDefaultSorts () {
+    public String[] getDefaultSorts() {
         return getResources().getStringArray(R.array.sortKeys);
     }
 
@@ -173,23 +171,33 @@ public class TodoApplication extends Application implements
         return m_prefs.getInt(getString(R.string.calendar_reminder_time), 720);
     }
 
-    public String getTodoFileName() {
-        String name =  m_prefs.getString(getString(R.string.todo_file_key), FileStore.getDefaultPath());
-        File todoFile = new File(name);
-        try {
-            return todoFile.getCanonicalPath();
-        } catch (IOException e) {
-            return FileStore.getDefaultPath();
+    private String getTodoFileString() {
+        return m_prefs.getString(getString(R.string.todo_file_key), FileStore.getDefaultPath());
+    }
+
+    private boolean getTodoIsUri() {
+        return m_prefs.getBoolean(getString(R.string.todo_file_uri_key), false);
+    }
+
+    public String getTodoDisplayName() {
+        return getTodoFileString();
+    }
+
+    public DocumentFile getTodoFile() {
+        String fileStr = getTodoFileString();
+        if (getTodoIsUri()) {
+            Uri uri = Uri.parse(fileStr);
+            return DocumentFile.fromSingleUri(this, uri);
+        } else {
+            return DocumentFile.fromFile(new File(fileStr));
         }
     }
 
-    public File getTodoFile() {
-        return new File(getTodoFileName());
-    }
 
     @SuppressLint("CommitPrefEdits")
-    public void setTodoFile(String todo) {
+    public void setTodoFile(String todo, boolean isUri) {
         m_prefs.edit().putString(getString(R.string.todo_file_key), todo).commit();
+        m_prefs.edit().putBoolean(getString(R.string.todo_file_uri_key), isUri).commit();
     }
 
     public boolean isAutoArchive() {
@@ -294,14 +302,14 @@ public class TodoApplication extends Application implements
 
     public void loadTodoList(boolean background) {
         log.info("Load todolist");
-        m_todoList.reload(getTodoFileName(), TodoApplication.this, localBroadcastManager, background);
+        m_todoList.reload(getTodoFile(), TodoApplication.this, localBroadcastManager, background);
 
     }
 
 
-    public void fileChanged(@Nullable String newName) {
+    public void fileChanged(@Nullable String newName, boolean isUri) {
         if (newName!=null) {
-            setTodoFile(newName);
+            setTodoFile(newName, isUri);
         }
         loadTodoList(true);
     }
@@ -383,8 +391,8 @@ public class TodoApplication extends Application implements
         }
     }
 
-    public void switchTodoFile(String newTodo, boolean background) {
-        setTodoFile(newTodo);
+    public void switchTodoFile(String newTodo, boolean isUri, boolean background) {
+        setTodoFile(newTodo, isUri);
         loadTodoList(background);
 
     }
@@ -417,27 +425,15 @@ public class TodoApplication extends Application implements
         return m_todoList.getFileStore();
     }
 
-    public void showConfirmationDialog(@NonNull Context cxt, int msgid,
-                                              @NonNull DialogInterface.OnClickListener oklistener, int titleid) {
-        boolean show = getPrefs().getBoolean(getString(R.string.ui_show_confirmation_dialogs), true);
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(cxt);
-        builder.setTitle(titleid);
-        builder.setMessage(msgid);
-        builder.setPositiveButton(android.R.string.ok, oklistener);
-        builder.setNegativeButton(android.R.string.cancel, null);
-        builder.setCancelable(true);
-        Dialog dialog = builder.create();
-        if (show) {
-           dialog.show();
-        } else {
-            oklistener.onClick(dialog , DialogInterface.BUTTON_POSITIVE);
-        }
-    }
 
     public boolean isAuthenticated() {
         FileStoreInterface fs = getFileStore();
         return fs.isAuthenticated();
+    }
+
+    public boolean showConfirmation() {
+        return getPrefs().getBoolean(getString(R.string.ui_show_confirmation_dialogs), true);
     }
 
     public void startLogin(LoginScreen loginScreen, int i) {

@@ -22,6 +22,8 @@
  */
 package nl.mpcjanssen.simpletask.task;
 
+import android.content.ContentProvider;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Handler;
@@ -29,6 +31,7 @@ import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v4.provider.DocumentFile;
 import com.google.common.collect.Ordering;
 import hirondelle.date4j.DateTime;
 import nl.mpcjanssen.simpletask.ActiveFilter;
@@ -275,7 +278,7 @@ public class TodoList {
             public void run() {
                 log.info("Handler: Handle notifychanged");
                 log.info("Saving todo list, size {}", mTasks.size());
-                save(mApp.getTodoFileName(), mApp);
+                save(mApp.getTodoFile(), mApp);
                 clearSelectedTasks();
                 if (mTodoListChanged != null) {
                     log.info("TodoList changed, notifying listener and invalidating cached values");
@@ -325,7 +328,7 @@ public class TodoList {
         selectTask(mTasks.get(index));
     }
 
-    public void reload(final String filename, final BackupInterface backup, final LocalBroadcastManager lbm, boolean background) {
+    public void reload(final DocumentFile file, final BackupInterface backup, final LocalBroadcastManager lbm, boolean background) {
         if (TodoList.this.loadQueued()) {
             log.info("Todolist reload is already queued waiting");
             return;
@@ -337,10 +340,10 @@ public class TodoList {
             public void run() {
                 clearSelectedTasks();
                 try {
-                    List<Task> tasks = mFileStore.loadTasksFromFile(filename, backup);
+                    List<Task> tasks = mFileStore.loadTasksFromDocument(file, backup);
                     mTasks = tasks;
                 } catch (IOException e) {
-                    log.error("Todolist load failed: {}", filename, e);
+                    log.error("Todolist load failed: {}", file.getUri().toString(), e);
                     Util.showToastShort(mApp, "Loading of todo file failed");
                 }
                 loadQueued = false;
@@ -369,13 +372,14 @@ public class TodoList {
         return mFileStore != null && mFileStore.supportsSync();
     }
 
-    public void save(final String todoFileName, final BackupInterface backup) {
+    public void save(DocumentFile file, final BackupInterface backup) {
         queueRunnable("Save", new Runnable() {
             @Override
             public void run() {
 
                 try {
-                    mFileStore.saveTasksToFile(todoFileName, mTasks, backup);
+
+                    mFileStore.saveTasksToDocument(mApp.getTodoFile(), mTasks, backup);
                 } catch (IOException e) {
                     e.printStackTrace();
                     Util.showToastLong(mApp, R.string.write_failed);

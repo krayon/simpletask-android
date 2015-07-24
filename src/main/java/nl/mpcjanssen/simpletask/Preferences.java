@@ -148,25 +148,29 @@ public class Preferences extends ThemedActivity {
             switch (key) {
                 case "archive_now":
                     log.info("Archiving completed items from preferences");
-                    m_app.showConfirmationDialog(this.getActivity(), R.string.delete_task_message, new DialogInterface.OnClickListener() {
+                    Util.showConfirmationDialog(this.getActivity(), m_app.showConfirmation(),
+                            R.string.delete_task_message, R.string.archive_task_title,
+                            new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialogInterface, int i) {
                             ((Preferences) getActivity()).broadcastIntentAndClose(
                                     Constants.BROADCAST_ACTION_ARCHIVE,
                                     Preferences.RESULT_ARCHIVE);
                         }
-                    }, R.string.archive_task_title);
+                    });
                     break;
                 case "logout_dropbox":
                     log.info("Logging out from Dropbox");
-                    m_app.showConfirmationDialog(this.getActivity(), R.string.logout_message, new DialogInterface.OnClickListener() {
+                    Util.showConfirmationDialog(this.getActivity(), m_app.showConfirmation(),
+                            R.string.logout_message, R.string.dropbox_logout_pref_title,
+                            new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialogInterface, int i) {
                             ((Preferences) getActivity()).broadcastIntentAndClose(
                                     Constants.BROADCAST_ACTION_LOGOUT,
                                     Preferences.RESULT_LOGOUT);
                         }
-                    }, R.string.dropbox_logout_pref_title);
+                    });
 
                     break;
                 case "send_log":

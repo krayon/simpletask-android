@@ -37,6 +37,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.provider.DocumentFile;
 import android.support.v7.app.AlertDialog;
 import android.text.Spannable;
 import android.text.SpannableString;
@@ -130,21 +131,15 @@ public class Util {
         void onClick(String input);
     }
 
-    public static void createParentDirectory(@Nullable File dest) throws TodoException {
+    public static void createParentDirectory(@Nullable DocumentFile dest) throws TodoException {
         Logger log = LoggerFactory.getLogger(Util.class);
         if (dest == null) {
             throw new TodoException("createParentDirectory: dest is null");
         }
-        File dir = dest.getParentFile();
+        DocumentFile dir = dest.getParentFile();
         if (dir != null && !dir.exists()) {
             createParentDirectory(dir);
-            if (!dir.exists()) {
-                if (!dir.mkdirs()) {
-                    log.error("Could not create dirs: " + dir.getAbsolutePath());
-                    throw new TodoException("Could not create dirs: "
-                            + dir.getAbsolutePath());
-                }
-            }
+            dir.getParentFile().createDirectory(dir.getName());
         }
     }
 
@@ -445,5 +440,22 @@ public class Util {
             visibleDialog.dismiss();
         }
         return null;
+    }
+
+    public static void showConfirmationDialog(@NonNull Context cxt, boolean show, int msgid, int titleid,
+                                              @NonNull DialogInterface.OnClickListener oklistener) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(cxt);
+        builder.setTitle(titleid);
+        builder.setMessage(msgid);
+        builder.setPositiveButton(android.R.string.ok, oklistener);
+        builder.setNegativeButton(android.R.string.cancel, null);
+        builder.setCancelable(true);
+        Dialog dialog = builder.create();
+        dialog.show();
+        if (show) {
+            dialog.show();
+        } else {
+            oklistener.onClick(dialog , DialogInterface.BUTTON_POSITIVE);
+        }
     }
 }
