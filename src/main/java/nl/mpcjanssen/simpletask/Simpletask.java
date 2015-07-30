@@ -1169,18 +1169,21 @@ public class Simpletask extends ThemedActivity implements
 
         public void bindLine(TaskAdapter.VisibleLine line) {
 
+
             if (line.header) {
                 TextView t = (TextView) itemView
                         .findViewById(R.id.list_header_title);
                 t.setText(line.title);
 
             } else {
+                final int position = getAdapterPosition();
                 itemView.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
                         final ArrayList<String> links = new ArrayList<>();
                         final ArrayList<String> actions = new ArrayList<>();
                         itemView.setSelected(!itemView.isSelected());
+                        m_adapter.notifyItemChanged(position);
                         if (getTodoList().getSelectedTasks().size() > 0) {
                             //onItemLongClick(parent, view, position, id);
                             return;
