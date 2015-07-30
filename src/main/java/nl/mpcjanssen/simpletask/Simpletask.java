@@ -338,76 +338,6 @@ public class Simpletask extends ThemedActivity implements
 
         RecyclerView rv = getTaskListView();
 
-        rv.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                final ArrayList<String> links = new ArrayList<>();
-                final ArrayList<String> actions = new ArrayList<>();
-                // getListView().setItemChecked(position, !getListView().isItemChecked(position));
-                if (getTodoList().getSelectedTasks().size() > 0) {
-                    //onItemLongClick(parent, view, position, id);
-                    return;
-                }
-                int position = getTaskListView().getChildAdapterPosition(view);
-                Task t = getTaskAt(position);
-                if (t != null) {
-                    for (String link : t.getLinks()) {
-                        actions.add(ACTION_LINK);
-                        links.add(link);
-                    }
-                    for (String number : t.getPhoneNumbers()) {
-                        actions.add(ACTION_PHONE);
-                        links.add(number);
-                    }
-                    for (String mail : t.getMailAddresses()) {
-                        actions.add(ACTION_MAIL);
-                        links.add(mail);
-                    }
-                }
-                final String[] linksArray = links.toArray(new String[links.size()]);
-                if (linksArray.length == 0) {
-                    //onItemLongClick(parent, view, position, id);
-                } else {
-                    AlertDialog.Builder build = new AlertDialog.Builder(Simpletask.this);
-                    build.setTitle(R.string.task_action);
-                    build.setItems(linksArray, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            Intent intent;
-                            String url = links.get(which);
-                            log.info("" + actions.get(which) + ": " + url);
-                            switch (actions.get(which)) {
-                                case ACTION_LINK:
-                                    if (url.startsWith("todo://")) {
-                                        File todoFolder = m_app.getTodoFile().getParentFile();
-                                        File newName = new File(todoFolder, url.substring(7));
-                                        m_app.switchTodoFile(newName.getAbsolutePath(), true);
-                                    } else {
-                                        intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
-                                        startActivity(intent);
-                                    }
-                                    break;
-                                case ACTION_PHONE:
-                                    String encodedNumber = Uri.encode(url);
-                                    intent = new Intent(Intent.ACTION_DIAL, Uri.parse("tel:"
-                                            + encodedNumber));
-                                    startActivity(intent);
-                                    break;
-                                case ACTION_MAIL:
-                                    intent = new Intent(Intent.ACTION_SEND, Uri.parse(url));
-                                    intent.putExtra(android.content.Intent.EXTRA_EMAIL,
-                                            new String[]{url});
-                                    intent.setType("text/plain");
-                                    startActivity(intent);
-
-                            }
-                        }
-                    });
-                    build.create().show();
-                }
-            }
-        });
-
 
 
         // If we were started with a selected task,
@@ -1245,7 +1175,77 @@ public class Simpletask extends ThemedActivity implements
                 t.setText(line.title);
 
             } else {
-                    this.tasktext = (TextView) itemView
+                itemView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        final ArrayList<String> links = new ArrayList<>();
+                        final ArrayList<String> actions = new ArrayList<>();
+                        itemView.setSelected(!itemView.isSelected());
+                        if (getTodoList().getSelectedTasks().size() > 0) {
+                            //onItemLongClick(parent, view, position, id);
+                            return;
+                        }
+                        int position = getTaskListView().getChildAdapterPosition(view);
+                        Task t = getTaskAt(position);
+                        if (t != null) {
+                            for (String link : t.getLinks()) {
+                                actions.add(ACTION_LINK);
+                                links.add(link);
+                            }
+                            for (String number : t.getPhoneNumbers()) {
+                                actions.add(ACTION_PHONE);
+                                links.add(number);
+                            }
+                            for (String mail : t.getMailAddresses()) {
+                                actions.add(ACTION_MAIL);
+                                links.add(mail);
+                            }
+                        }
+                        final String[] linksArray = links.toArray(new String[links.size()]);
+                        if (linksArray.length == 0) {
+                            //onItemLongClick(parent, view, position, id);
+                        } else {
+                            AlertDialog.Builder build = new AlertDialog.Builder(Simpletask.this);
+                            build.setTitle(R.string.task_action);
+                            build.setItems(linksArray, new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    Intent intent;
+                                    String url = links.get(which);
+                                    log.info("" + actions.get(which) + ": " + url);
+                                    switch (actions.get(which)) {
+                                        case ACTION_LINK:
+                                            if (url.startsWith("todo://")) {
+                                                File todoFolder = m_app.getTodoFile().getParentFile();
+                                                File newName = new File(todoFolder, url.substring(7));
+                                                m_app.switchTodoFile(newName.getAbsolutePath(), true);
+                                            } else {
+                                                intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+                                                startActivity(intent);
+                                            }
+                                            break;
+                                        case ACTION_PHONE:
+                                            String encodedNumber = Uri.encode(url);
+                                            intent = new Intent(Intent.ACTION_DIAL, Uri.parse("tel:"
+                                                    + encodedNumber));
+                                            startActivity(intent);
+                                            break;
+                                        case ACTION_MAIL:
+                                            intent = new Intent(Intent.ACTION_SEND, Uri.parse(url));
+                                            intent.putExtra(android.content.Intent.EXTRA_EMAIL,
+                                                    new String[]{url});
+                                            intent.setType("text/plain");
+                                            startActivity(intent);
+
+                                    }
+                                }
+                            });
+                            build.create().show();
+                        }
+                    }
+                });
+
+                this.tasktext = (TextView) itemView
                             .findViewById(R.id.tasktext);
                     this.taskage = (TextView) itemView
                             .findViewById(R.id.taskage);
@@ -1436,7 +1436,9 @@ public class Simpletask extends ThemedActivity implements
             log.info("setFilteredTasks called: " + getTodoList());
             ArrayList<String> sorts = mFilter.getSort(m_app.getDefaultSorts());
             visibleTasks = getTodoList().getSortedTasksCopy(mFilter, sorts, m_app.sortCaseSensitive());
-            visibleLines.clear();
+
+
+            ArrayList<VisibleLine> newVisibleLines = new ArrayList<>();
 
             String header = "";
             String newHeader;
@@ -1455,11 +1457,11 @@ public class Simpletask extends ThemedActivity implements
                 newHeader = t.getHeader(firstSort, getString(R.string.no_header));
                 if (!header.equals(newHeader)) {
                     VisibleLine headerLine = new VisibleLine(newHeader);
-                    int last = visibleLines.size() - 1;
-                    if (last != -1 && visibleLines.get(last).header && !m_app.showEmptyLists()) {
-                        visibleLines.set(last, headerLine);
+                    int last = newVisibleLines.size() - 1;
+                    if (last != -1 && newVisibleLines.get(last).header && !m_app.showEmptyLists()) {
+                        newVisibleLines.set(last, headerLine);
                     } else {
-                        visibleLines.add(headerLine);
+                        newVisibleLines.add(headerLine);
                     }
                     header = newHeader;
                 }
@@ -1467,16 +1469,19 @@ public class Simpletask extends ThemedActivity implements
                 if (t.isVisible() || m_app.showHidden()) {
                     // enduring tasks should not be displayed
                     VisibleLine taskLine = new VisibleLine(t);
-                    visibleLines.add(taskLine);
+                    newVisibleLines.add(taskLine);
                     countVisbleTasks++;
                 }
             }
+            visibleLines = newVisibleLines;
+            getTaskListView().setAdapter(this);
+            m_adapter.notifyDataSetChanged();
             notifyDataSetChanged();
             updateFilterBar();
         }
 
         public int getCountVisbleTasks() {
-            return countVisbleTasks;
+            return visibleLines.size();
         }
 
         /*
@@ -1493,9 +1498,9 @@ public class Simpletask extends ThemedActivity implements
         }
 
         @Override
-        public LineHolder onCreateViewHolder(ViewGroup parent, int position) {
+        public LineHolder onCreateViewHolder(ViewGroup parent, int type) {
                 View view;
-                if (visibleLines.get(position).header) {
+                if (type==0) {
                     view = LayoutInflater.from(parent.getContext())
                             .inflate(R.layout.list_header, parent, false);
                 } else {
