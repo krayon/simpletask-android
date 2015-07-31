@@ -79,7 +79,7 @@ public class Simpletask extends ThemedActivity implements
     private BroadcastReceiver m_broadcastReceiver;
     private LocalBroadcastManager localBroadcastManager;
     @Nullable
-    private ActionMode actionMode;
+
     // Drawer vars
     private ListView m_leftDrawerList;
     private ListView m_rightDrawerList;
@@ -1497,6 +1497,10 @@ public class Simpletask extends ThemedActivity implements
 
         @Override
         public int getItemViewType(int position) {
+            // Last empty task under fab?
+            if (position==visibleLines.size()){
+                return 2;
+            }
             return visibleLines.get(position).header ? 0 : 1;
         }
 
@@ -1506,9 +1510,13 @@ public class Simpletask extends ThemedActivity implements
                 if (type==0) {
                     view = LayoutInflater.from(parent.getContext())
                             .inflate(R.layout.list_header, parent, false);
+                } else if (type == 1 ){
+                    view = LayoutInflater.from(parent.getContext())
+                            .inflate(R.layout.list_item, parent, false);view = LayoutInflater.from(parent.getContext())
+                            .inflate(R.layout.list_item, parent, false);
                 } else {
                     view = LayoutInflater.from(parent.getContext())
-                            .inflate(R.layout.list_item, parent, false);
+                            .inflate(R.layout.empty_list_item, parent, false);
                 }
                 return new LineHolder(view);
 
@@ -1516,13 +1524,15 @@ public class Simpletask extends ThemedActivity implements
 
         @Override
         public void onBindViewHolder(LineHolder lineHolder, int i) {
-            TaskAdapter.VisibleLine line  = m_adapter.visibleLines.get(i);
-            lineHolder.bindLine(line);
+            if (i != getCountVisbleTasks()) {
+                TaskAdapter.VisibleLine line = m_adapter.visibleLines.get(i);
+                lineHolder.bindLine(line);
+            }
         }
 
         @Override
         public int getItemCount() {
-            return visibleLines.size();
+            return visibleLines.size()+1;
         }
     }
 
