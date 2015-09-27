@@ -100,7 +100,7 @@ public class FilterScriptFragment extends Fragment {
 
                 } catch (TclException e) {
                     tvBooleanResult.setText("error");
-                    tvResult.setText(e.getMessage());
+                    tvResult.setText(interp.getResult().toString());
                 }
                 script.release();
             }
