@@ -354,12 +354,7 @@ public class ActiveFilter {
                     continue;
                 }
                 if  (m_script!=null && !m_script.trim().isEmpty()) {
-                    Util.initGlobals(globals,t);
-                    LuaClosure closure = new LuaClosure(prototype, globals);
-                    LuaValue result = closure.call(); 
-                    if (!result.toboolean()) {
-                        continue;
-                    }
+
                 }
                 matched.add(t);
             }

@@ -13,6 +13,13 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import nl.mpcjanssen.simpletask.task.Task;
 import nl.mpcjanssen.simpletask.util.Util;
+import tcl.lang.Interp;
+import tcl.lang.TCL;
+import tcl.lang.TclBoolean;
+import tcl.lang.TclException;
+import tcl.lang.TclObject;
+import tcl.lang.TclString;
+
 import org.luaj.vm2.*;
 import org.luaj.vm2.compiler.LuaC;
 import org.luaj.vm2.lib.jse.JsePlatform;
@@ -51,7 +58,7 @@ public class FilterScriptFragment extends Fragment {
     public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
         log.debug("onSaveInstanceState() this:" + this);
-        outState.putString(ActiveFilter.INTENT_SCRIPT_FILTER,getScript());
+        outState.putString(ActiveFilter.INTENT_SCRIPT_FILTER, getScript());
         outState.putString(ActiveFilter.INTENT_SCRIPT_TEST_TASK_FILTER,getTestTask());
     }
 
@@ -75,39 +82,34 @@ public class FilterScriptFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 Task t = new Task(getTestTask());
+                TclObject script = TclString.newInstance(getScript());
+                Interp interp = new Interp();
+                TclObject result;
                 try {
-                    String script = getScript();
-                    InputStream input = new ByteArrayInputStream(script.getBytes());
-                    Prototype prototype = LuaC.instance.compile(input, "script");
-                    Globals globals = JsePlatform.standardGlobals();
 
-                    Util.initGlobals(globals, t);
-                    LuaClosure closure = new LuaClosure(prototype, globals);
-                    LuaValue result = closure.call();
-
+                    Util.initGlobals(interp, t);
+                    interp.eval(script, TCL.EVAL_GLOBAL);
+                    result = interp.getResult();
                     tvResult.setText(result.toString());
 
-                    if (result.toboolean() || script.trim().isEmpty()) {
+                    if (TclBoolean.get(interp, result) || script.toString().trim().isEmpty()) {
                         tvBooleanResult.setText("true");
                     } else {
                         tvBooleanResult.setText("false");
                     }
-                } catch (LuaError e) {
-                    log.debug("Lua execution failed " + e.getMessage());
+
+                } catch (TclException e) {
                     tvBooleanResult.setText("error");
                     tvResult.setText(e.getMessage());
-                } catch (IOException e) {
-                    log.debug("Execution failed " + e.getMessage());
                 }
             }
-
         });
         if (savedInstanceState != null) {
-            txtScript.setText(savedInstanceState.getString(ActiveFilter.INTENT_SCRIPT_FILTER,""));
-            txtTestTask.setText(savedInstanceState.getString(ActiveFilter.INTENT_SCRIPT_TEST_TASK_FILTER,""));
+            txtScript.setText(savedInstanceState.getString(ActiveFilter.INTENT_SCRIPT_FILTER, ""));
+            txtTestTask.setText(savedInstanceState.getString(ActiveFilter.INTENT_SCRIPT_TEST_TASK_FILTER, ""));
         } else {
-            txtScript.setText(arguments.getString(ActiveFilter.INTENT_SCRIPT_FILTER,""));
-            txtTestTask.setText(arguments.getString(ActiveFilter.INTENT_SCRIPT_TEST_TASK_FILTER,""));
+            txtScript.setText(arguments.getString(ActiveFilter.INTENT_SCRIPT_FILTER, ""));
+            txtTestTask.setText(arguments.getString(ActiveFilter.INTENT_SCRIPT_TEST_TASK_FILTER, ""));
         }
         return layout;
     }
