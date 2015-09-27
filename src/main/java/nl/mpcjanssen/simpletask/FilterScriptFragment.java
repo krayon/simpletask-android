@@ -83,10 +83,10 @@ public class FilterScriptFragment extends Fragment {
             public void onClick(View v) {
                 Task t = new Task(getTestTask());
                 TclObject script = TclString.newInstance(getScript());
+                script.preserve();
                 Interp interp = new Interp();
                 TclObject result;
                 try {
-
                     Util.initGlobals(interp, t);
                     interp.eval(script, TCL.EVAL_GLOBAL);
                     result = interp.getResult();
@@ -102,6 +102,7 @@ public class FilterScriptFragment extends Fragment {
                     tvBooleanResult.setText("error");
                     tvResult.setText(e.getMessage());
                 }
+                script.release();
             }
         });
         if (savedInstanceState != null) {
