@@ -43,6 +43,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.Collections.*;
 
 
 
@@ -58,7 +59,8 @@ public class TodoList {
     private final boolean startLooper;
 
     @NonNull
-    private List<Task> mTasks = new ArrayList<>();
+    private List<Task> mInternalTasks = new ArrayList<>();
+    private List<Task> mTasks = Collections.synchronizedList(mInternalTasks);
     @NonNull
     private List<Task> mSelectedTask = new ArrayList<>();
     @Nullable
@@ -81,15 +83,14 @@ public class TodoList {
         this.startLooper = startLooper;
         // Set up the message queue
         if (startLooper) {
-            Thread t = new Thread(new Runnable() {
+            new Thread(new Runnable() {
                 @Override
                 public void run() {
                     Looper.prepare();
                     todolistQueue = new Handler();
                     Looper.loop();
                 }
-            });
-            t.start();
+            }).start();
         }
         log = LoggerFactory.getLogger(this.getClass());
         this.mTodoListChanged = todoListChanged;
