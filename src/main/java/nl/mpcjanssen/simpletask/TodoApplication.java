@@ -85,8 +85,12 @@ public class TodoApplication extends Application implements
         log = LoggerFactory.getLogger(this.getClass());
         log.debug("onCreate()");
 
-
         TodoApplication.m_appContext = getApplicationContext();
+
+        log.debug("Starting TaskList service");
+        Intent i = new Intent(this, TaskListService.class);
+        this.startService(i);
+
         TodoApplication.m_prefs = PreferenceManager.getDefaultSharedPreferences(getAppContext());
         localBroadcastManager = LocalBroadcastManager.getInstance(this);
         IntentFilter intentFilter = new IntentFilter();

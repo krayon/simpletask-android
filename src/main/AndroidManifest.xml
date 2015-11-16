@@ -168,6 +168,10 @@ You should have received a copy of the GNU General Public License along with Sim
         </receiver>
 
         <service
+            android:name=".TaskListService"
+            android:exported="false" />
+
+        <service
             android:name=".AppWidgetService"
             android:exported="false"
             android:permission="android.permission.BIND_REMOTEVIEWS" />

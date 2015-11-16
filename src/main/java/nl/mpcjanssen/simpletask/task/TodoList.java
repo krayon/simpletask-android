@@ -93,12 +93,10 @@ public class TodoList {
         }
         log = LoggerFactory.getLogger(this.getClass());
         this.mTodoListChanged = todoListChanged;
-
-
     }
 
 
-    public void queueRunnable(final String description, Runnable r) {
+    synchronized public void queueRunnable(final String description, Runnable r) {
         log.info("Handler: Queue " + description);
         while (todolistQueue==null && startLooper ) {
             try {
