@@ -147,6 +147,13 @@ public class TodoList {
         return mTasks.size();
     }
 
+    public int find (Task t) {
+        if (mTasks == null) {
+            return -1;
+        }
+        return mTasks.indexOf(t);
+    }
+
     public Task get(int position) {
         return mTasks.get(position);
     }
@@ -309,7 +316,11 @@ public class TodoList {
         mSelectedTask.remove(t);
     }
 
-    public void clearSelectedTasks() {
+    public void replaceSelection(List<Task> t) {
+        mSelectedTask = t;
+    }
+
+    private void clearSelectedTasks() {
         mSelectedTask = new ArrayList<>();
     }
 
