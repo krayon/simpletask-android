@@ -32,9 +32,9 @@ android {
     defaultConfig {
         versionName '6.2.0'
         versionCode 3001
-	    minSdkVersion 14
+        minSdkVersion 14
         targetSdkVersion 22
-        multiDexEnabled true
+        multiDexEnabled false
     }
 
     productFlavors {
@@ -53,10 +53,20 @@ android {
     }
 
     buildTypes {
+        debug {
+            signingConfig signingConfigs.release
+            minifyEnabled true
+            proguardFile 'proguard-rules.txt'
+        }
         release {
             //noinspection GroovyAssignabilityCheck
             signingConfig signingConfigs.release
+            minifyEnabled true
+            proguardFile 'proguard-rules.txt'
         }
+    }
+    dexOptions {
+        incremental true
     }
 }
 
@@ -66,7 +76,7 @@ repositories {
 
 dependencies {
     dropboxCompile fileTree(dir: 'libs', include: '*.jar')
-    compile "org.scala-lang:scala-library:2.11.7"
+    compile 'org.scala-lang:scala-library:2.11.7'
     compile 'com.intellij:annotations:12.0'
     compile 'com.android.support:support-v4:22.2.0'
     compile 'com.android.support:design:22.2.0'

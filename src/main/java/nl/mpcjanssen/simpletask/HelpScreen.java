@@ -166,6 +166,9 @@ public class HelpScreen extends ThemedActivity {
             case R.id.menu_ui:
                 showMarkdownAsset(wvHelp, this, "ui." + getText(R.string.help_locale) + ".md");
                 return true;
+            case R.id.menu_licenses:
+                showMarkdownAsset(wvHelp, this, "licenses.en.md"); 
+                return true;
             case R.id.menu_donate:
                 loadDesktop(wvHelp, "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=mpc%2ejanssen%40gmail%2ecom&lc=NL&item_name=mpcjanssen%2enl&item_number=Simpletask&currency_code=EUR&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted");
                 return true;
