@@ -8,3 +8,6 @@
 -keep class scala.collection.SeqLike {
     public protected *;
 }
+-keep class org.luaj.** {
+    *;
+}

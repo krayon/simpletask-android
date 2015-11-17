@@ -42,20 +42,7 @@ public class LogScreen extends ThemedActivity {
         myDataset = new ArrayList<>();
         File logFile = getLogFile();
         try {
-            TaskIo.loadFromFile(logFile, new LineProcessor<String>() {
-                @Override
-                public boolean processLine(String line) throws IOException {
-                    if (!line.trim().isEmpty()){
-                        myDataset.add(line);
-                    }
-                    return true;
-                }
-
-                @Override
-                public String getResult() {
-                    return null;
-                }
-            });
+            myDataset.addAll(TaskIo.loadFromFile(logFile));
         } catch (IOException e) {
             log.error("Failed to load logfile", e);
         }
