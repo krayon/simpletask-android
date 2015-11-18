@@ -484,7 +484,9 @@ public class Simpletask extends ThemedActivity implements
         });
         if(getTodoList().getSelectedTasks().size()==0) {
             closeSelectionMode();
-        } 
+        } else {
+            openSelectionMode();
+        }
         updateDrawers();
         mOverlayDialog = Util.showLoadingOverlay(this, mOverlayDialog, m_app.isLoading());
     }
