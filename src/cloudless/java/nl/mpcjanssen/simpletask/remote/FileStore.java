@@ -16,7 +16,7 @@ import nl.mpcjanssen.simpletask.Constants;
 import nl.mpcjanssen.simpletask.TodoApplication;
 import nl.mpcjanssen.simpletask.task.Task;
 import nl.mpcjanssen.simpletask.util.ListenerList;
-import nl.mpcjanssen.simpletask.util.TaskIo;
+import nl.mpcjanssen.simpletask.util.Io;
 import nl.mpcjanssen.simpletask.util.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -82,7 +82,7 @@ public class FileStore implements FileStoreInterface {
         mIsLoading = true;
         try {
             List<String> lines = new ArrayList<>();
-            lines.addAll(TaskIo.loadFromFile(new File(path)));
+            lines.addAll(Io.loadFromFile(new File(path)));
             String readFile = Util.join(lines, "\n");
             if (backup != null) {
                 backup.backup(path, readFile);
@@ -107,7 +107,7 @@ public class FileStore implements FileStoreInterface {
         mIsLoading = true;
         String contents = "";
         try {
-            contents = Util.join(TaskIo.loadFromFile(new File(file)), "\n");
+            contents = Util.join(Io.loadFromFile(new File(file)), "\n");
         } catch (IOException e) {
             e.printStackTrace();
             return "";
@@ -181,7 +181,7 @@ public class FileStore implements FileStoreInterface {
             @Override
             public void run() {
                 try {
-                    TaskIo.writeToFile(Util.join(output, eol) + eol, new File(path), false);
+                    Io.writeToFile(Util.join(output, eol) + eol, new File(path), false);
                 } catch (IOException e) {
                     e.printStackTrace();
                     bm.sendBroadcast(new Intent(Constants.BROADCAST_FILE_WRITE_FAILED));
@@ -204,7 +204,7 @@ public class FileStore implements FileStoreInterface {
             public void run() {
                 log.info("Appending " + size + " tasks to " + path);
                 try {
-                    TaskIo.writeToFile(Util.joinTasks(tasks, eol) + eol, new File(path), true);
+                    Io.writeToFile(Util.joinTasks(tasks, eol) + eol, new File(path), true);
                 } catch (IOException e) {
                     e.printStackTrace();
                     bm.sendBroadcast(new Intent(Constants.BROADCAST_FILE_WRITE_FAILED));

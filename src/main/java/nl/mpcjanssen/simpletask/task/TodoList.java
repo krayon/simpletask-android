@@ -37,6 +37,7 @@ import nl.mpcjanssen.simpletask.TodoApplication;
 import nl.mpcjanssen.simpletask.remote.BackupInterface;
 import nl.mpcjanssen.simpletask.remote.FileStoreInterface;
 import nl.mpcjanssen.simpletask.sort.MultiComparator;
+import nl.mpcjanssen.simpletask.util.Mappings;
 import nl.mpcjanssen.simpletask.util.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -199,11 +200,11 @@ public class TodoList {
 
 
     public ArrayList<String> getDecoratedContexts() {
-        return Util.prefixItems("@", getContexts());
+        return Mappings.prefixItems("@", getContexts());
     }
 
     public ArrayList<String> getDecoratedProjects() {
-        return Util.prefixItems("+", getProjects());
+        return Mappings.prefixItems("+", getProjects());
     }
 
 

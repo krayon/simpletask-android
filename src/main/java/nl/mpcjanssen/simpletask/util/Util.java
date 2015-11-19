@@ -126,24 +126,6 @@ public class Util {
         void onClick(String input);
     }
 
-    public static void createParentDirectory(@Nullable File dest) throws TodoException {
-        Logger log = LoggerFactory.getLogger(Util.class);
-        if (dest == null) {
-            throw new TodoException("createParentDirectory: dest is null");
-        }
-        File dir = dest.getParentFile();
-        if (dir != null && !dir.exists()) {
-            createParentDirectory(dir);
-            if (!dir.exists()) {
-                if (!dir.mkdirs()) {
-                    log.error("Could not create dirs: " + dir.getAbsolutePath());
-                    throw new TodoException("Could not create dirs: "
-                            + dir.getAbsolutePath());
-                }
-            }
-        }
-    }
-
     public static List<VisibleLine> addHeaderLines(List<Task> visibleTasks, String firstSort, String no_header, boolean showHidden, boolean showEmptyLists) {
         String header = "" ;
         String newHeader;
@@ -266,14 +248,6 @@ public class Util {
         return date;
     }
 
-    @NonNull
-    public static ArrayList<String> prefixItems(String prefix, @NonNull ArrayList<String> items) {
-        ArrayList<String> result = new ArrayList<>();
-        for (String item : items) {
-            result.add(prefix + item);
-        }
-        return result;
-    }
 
     @NonNull
     public static ArrayList<String> getCheckedItems(@NonNull ListView listView , boolean checked) {
