@@ -1,10 +1,13 @@
 package nl.mpcjanssen.simpletask.util
 
+import java.util.TimeZone
+
 import android.util._
 import java.io._
 import java.util
 
 import android.support.annotation.NonNull
+import hirondelle.date4j.DateTime
 import nl.mpcjanssen.simpletask.task.Task
 import org.slf4j.LoggerFactory
 
@@ -37,6 +40,18 @@ object Io {
 object Folders {
   def create(folder: File): Boolean = {
     folder.mkdirs()
+  }
+}
+
+object DateTools {
+  def fromString(dateString: String) = {
+    if (dateString != null && DateTime.isParseable(dateString)) {
+      new DateTime(dateString);
+    } else if (dateString == null) {
+      DateTime.today(TimeZone.getDefault());
+    } else {
+      null;
+    }
   }
 }
 
