@@ -24,6 +24,8 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 public class LogScreen extends ThemedActivity {
 
@@ -43,7 +45,8 @@ public class LogScreen extends ThemedActivity {
         myDataset = new ArrayList<>();
         File logFile = getLogFile();
         try {
-            myDataset.addAll(Io.loadFromFile(logFile));
+            Collection<String> lines = Io.loadFromFile(logFile);
+            myDataset.addAll(lines);
         } catch (IOException e) {
             log.error("Failed to load logfile", e);
         }

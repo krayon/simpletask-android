@@ -417,6 +417,10 @@ public class TodoList {
         }
     }
 
+    public void clearSelection() {
+        mSelectedTask.clear();
+    }
+
     public interface TodoListChanged {
         void todoListChanged();
     }

@@ -475,7 +475,7 @@ public class TodoApplication extends Application implements
         return fs.isAuthenticated();
     }
 
-    public void startLogin(LoginScreen loginScreen, int i) {
+    public void startLogin(LoginActivity loginScreen, int i) {
         getFileStore().startLogin(loginScreen,i);
     }
 

@@ -17,6 +17,7 @@ import nl.mpcjanssen.simpletask.TodoApplication;
 import nl.mpcjanssen.simpletask.task.Task;
 import nl.mpcjanssen.simpletask.util.ListenerList;
 import nl.mpcjanssen.simpletask.util.Io;
+import nl.mpcjanssen.simpletask.util.Mappings;
 import nl.mpcjanssen.simpletask.util.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -87,6 +88,7 @@ public class FileStore implements FileStoreInterface {
             if (backup != null) {
                 backup.backup(path, readFile);
             }
+            result.addAll(Mappings.makeTasks(lines));
         } catch (IOException e) {
             e.printStackTrace();
         } finally {

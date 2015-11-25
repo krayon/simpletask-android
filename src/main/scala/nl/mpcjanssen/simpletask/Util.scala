@@ -1,10 +1,11 @@
 package nl.mpcjanssen.simpletask.util
 
+import android.util._
 import java.io._
 import java.util
-import android.util._
 
 import android.support.annotation.NonNull
+import nl.mpcjanssen.simpletask.task.Task
 import org.slf4j.LoggerFactory
 
 import scala.collection.{JavaConversions, JavaConverters}
@@ -12,11 +13,13 @@ import scala.io.{Codec, Source}
 
 object Io {
 
+  val TAG = Io.getClass.getName
+
   @throws(classOf[IOException])
   def loadFromFile(file: File) : util.Collection[String] = {
-    Log.d("XXXXXXXXXXXXXX", s"Reading file ${file.getAbsolutePath}")
+    Log.d(TAG, s"Reading file ${file.getAbsolutePath}")
     val lines = Source.fromFile(file)(Codec.UTF8).getLines().toList
-    Log.d("XXXXXXXXXXXXXX", s"Read ${lines.size} lines")
+    Log.d(TAG, s"Read ${lines.size} lines")
     JavaConversions.asJavaCollection[String](lines)
   }
 
@@ -33,7 +36,7 @@ object Io {
 
 object Folders {
   def create(folder: File): Boolean = {
-    folder.mkdirs();
+    folder.mkdirs()
   }
 }
 
@@ -43,6 +46,13 @@ object Mappings {
     val scalaItems = JavaConversions.collectionAsScalaIterable(items)
     val result = new util.ArrayList[String]()
     result.addAll(JavaConversions.asJavaCollection[String](scalaItems.map(prefix + _)))
+    result
+  }
+
+  def makeTasks(items: util.Collection[String]): util.Collection[Task] = {
+    val scalaItems = JavaConversions.collectionAsScalaIterable(items)
+    val result = new util.ArrayList[Task]()
+    result.addAll(JavaConversions.asJavaCollection[Task](scalaItems.map(new Task(_))))
     result
   }
 }
