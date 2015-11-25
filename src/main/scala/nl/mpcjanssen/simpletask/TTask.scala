@@ -1,11 +1,20 @@
 package nl.mpcjanssen.simpletask
 
+import hirondelle.date4j.DateTime
+
 
 case class TTask(text: String) {
   val tokens = TTask.fromString(text)
 
   def completed:Boolean = {
     tokens.head.asInstanceOf[Completed].value
+  }
+
+  def completedDate:DateTime = {
+    tokens.find(_.ttype == Token.completedDate) match {
+      case Some(d: CompletedDate) => d.value
+      case _ => null
+    }
   }
 
   def asText = {
