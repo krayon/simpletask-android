@@ -28,7 +28,6 @@ import android.content.IntentFilter
 import android.os.Bundle
 import android.support.v4.content.LocalBroadcastManager
 import android.view.View
-import android.view.View.OnClickListener
 import android.widget.Button
 
 
@@ -50,7 +49,7 @@ class LoginActivity extends ThemedActivity {
       def onReceive(context: Context, intent: Intent) {
         val i: Intent = new Intent(context, classOf[Simpletask])
         startActivity(i)
-        finish
+        finish()
       }
     }
     localBroadcastManager.registerReceiver(m_broadcastReceiver, intentFilter)
@@ -58,45 +57,45 @@ class LoginActivity extends ThemedActivity {
     m_LoginButton.setOnClickListener(new View.OnClickListener() {
       def onClick(v: View) {
         m_app.setFullDropboxAccess(true)
-        startLogin
+        startLogin()
       }
     })
     m_LoginButton = findViewById(R.id.login_folder).asInstanceOf[Button]
     m_LoginButton.setOnClickListener(new View.OnClickListener() {
       def onClick(v: View) {
         m_app.setFullDropboxAccess(false)
-        startLogin
+        startLogin()
       }
     })
     if (m_app.isAuthenticated) {
-      switchToTodolist
+      switchToTodolist()
     }
   }
 
-  private def switchToTodolist {
+  private def switchToTodolist () {
     val intent: Intent = new Intent(this, classOf[Simpletask])
     startActivity(intent)
-    finish
+    finish()
   }
 
-  protected override def onResume {
-    super.onResume
-    finishLogin
+  protected override def onResume() {
+    super.onResume()
+    finishLogin()
   }
 
-  private def finishLogin {
+  private def finishLogin () {
     if (m_app.isAuthenticated) {
       m_app.fileChanged(null)
-      switchToTodolist
+      switchToTodolist()
     }
   }
 
-  protected override def onDestroy {
-    super.onDestroy
+  protected override def onDestroy () {
+    super.onDestroy()
     localBroadcastManager.unregisterReceiver(m_broadcastReceiver)
   }
 
-  private[simpletask] def startLogin {
+  private[simpletask] def startLogin () {
     m_app.startLogin(this, 0)
   }
 }

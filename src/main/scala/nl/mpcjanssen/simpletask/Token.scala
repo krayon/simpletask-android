@@ -10,6 +10,7 @@ object Token {
   val completed = "completed"
   val completedDate = "completedDate"
   val ttext = "text"
+  val hidden = "hidden"
 }
 
 abstract class Token {
@@ -39,6 +40,11 @@ case class CreatedDate(text: String, dateText: String) extends Token {
   }
 
   override def ttype: String = Token.completedDate
+}
+
+case class Hidden(text: String) extends Token {
+  override def ttype: String = Token.hidden
+  override def value: Boolean = true
 }
 
 case class TText(text: String) extends Token {

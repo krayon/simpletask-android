@@ -8,6 +8,9 @@
 -keep class org.luaj.** {
     *;
 }
+-keep class org.** {
+    *;
+}
 -keep class com.typesafe.**
 -keep class akka.**
 -keep class scala.collection.immutable.StringLike {

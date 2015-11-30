@@ -27,7 +27,6 @@ package nl.mpcjanssen.simpletask;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.app.Application;
 import android.app.Dialog;
 import android.appwidget.AppWidgetManager;
 import android.content.*;
@@ -35,7 +34,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-//import android.support.multidex.MultiDexApplication;
+import android.support.multidex.MultiDexApplication;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
 import android.widget.EditText;
@@ -55,7 +54,7 @@ import java.util.List;
 import java.util.TimeZone;
 
 
-public class TodoApplication extends Application implements
+public class TodoApplication extends MultiDexApplication implements
 
         SharedPreferences.OnSharedPreferenceChangeListener, TodoList.TodoListChanged, FileStoreInterface.FileChangeListener, BackupInterface {
 

@@ -41,7 +41,9 @@ object TTask {
   }
 
   def tokenize(tokens: Seq[Token], s: String):Seq[Token] = {
+    val rhidden = "(h:1)".r
     s match {
+      case rhidden(h) => tokens :+ Hidden(h)
       case _  => tokens :+ TText(s)
     }
   }
