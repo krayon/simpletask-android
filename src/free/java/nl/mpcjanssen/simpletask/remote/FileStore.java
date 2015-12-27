@@ -647,8 +647,12 @@ import nl.mpcjanssen.simpletask.util.Strings;
  */
 public class FileStore implements FileStoreInterface {
 
+<<<<<<< HEAD
     private final String TAG = getClass().getName();
     private final SharedPreferences mPrefs;
+=======
+    private final String TAG = getClass().getSimpleName();
+>>>>>>> origin/issue130
     private String mEol;
     private DropboxAPI<AndroidAuthSession> mDBApi;
 
@@ -784,6 +788,33 @@ public class FileStore implements FileStoreInterface {
                                 LocalBroadcastManager.getInstance(mCtx).sendBroadcast(new Intent(Constants.BROADCAST_FILE_CHANGED));
                                 return null;
                             }
+<<<<<<< HEAD
+=======
+                        } catch (DbxException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                };
+                mDbxFs.addSyncStatusListener(m_syncstatus);
+            }
+            if (m_observer==null) {
+                m_observer = new DbxFile.Listener() {
+                    @Override
+                    public void onFileChange(@NotNull DbxFile dbxFile) {
+                        DbxFileStatus status;
+                        String  name;
+                        try {
+                            name = dbxFile.getInfo().path.getName();
+                            if (!name.equals(new DbxPath(activePath).getName())) {
+                                Log.v(TAG, "Sync conflict detected. New filename: " + name);
+                            }
+                            status = dbxFile.getSyncStatus();
+                            Log.v(TAG, "Synchronizing path change: " + dbxFile.getPath().getName() + " latest: " + status.isLatest +
+                                       status.bytesTransferred + "/" + status.bytesTotal);
+                            mReloadFile = !status.isLatest;
+                        } catch (DbxException e) {
+                            e.printStackTrace();
+>>>>>>> origin/issue130
                         }
                     }
                 } catch (DropboxException e) {
