@@ -724,6 +724,34 @@ public class Simpletask extends ThemedActivity implements
         Util.shareText(this, text.toString());
     }
 
+<<<<<<< HEAD
+=======
+    private void shareText(String text) {
+        Intent shareIntent = new Intent(android.content.Intent.ACTION_SEND_MULTIPLE);
+        shareIntent.setType("text/plain");
+        shareIntent.putExtra(android.content.Intent.EXTRA_SUBJECT,
+                "Simpletask list");
+
+        // If text is small enough also SEND it directly
+        if (text.length()<10000) {
+            shareIntent.putExtra(android.content.Intent.EXTRA_TEXT,text);
+        }
+
+        // Create a cache file to pass in EXTRA_STREAM
+        try {
+            ArrayList<Uri> uris = new ArrayList<Uri>();
+            Util.createCachedFile(this,
+                            Constants.SHARE_FILE_NAME, text);
+            Uri fileUri  = Uri.parse("content://" + CachedFileProvider.AUTHORITY + "/"
+                        + Constants.SHARE_FILE_NAME);
+            uris.add(fileUri);
+            shareIntent.putExtra(android.content.Intent.EXTRA_STREAM, uris);
+        } catch (Exception e) {
+            Log.w(TAG, "Failed to create file for sharing");
+        }
+        startActivity(Intent.createChooser(shareIntent, "Share"));
+    }
+>>>>>>> origin/issue118
 
     private void prioritizeTasks(@NonNull final List<Task> tasks) {
         List<String> strings = Priority.rangeInCode(Priority.NONE, Priority.Z);
