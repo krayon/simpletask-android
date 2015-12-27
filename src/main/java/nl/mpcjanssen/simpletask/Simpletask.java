@@ -92,7 +92,7 @@ import nl.mpcjanssen.simpletask.util.Util;
 
 
 public class Simpletask extends ThemedActivity implements
-        AbsListView.OnScrollListener, AdapterView.OnItemLongClickListener {
+        AbsListView.OnScrollListener, AdapterView.OnItemLongClickListener, ActionMode.Callback {
 
     private final static int REQUEST_SHARE_PARTS = 1;
     private final static int REQUEST_PREFERENCES = 2;
@@ -151,7 +151,7 @@ public class Simpletask extends ThemedActivity implements
                 } else if (intent.getAction().equals(Constants.BROADCAST_ACTION_LOGOUT)) {
                     log.info("Logging out from Dropbox");
                     getFileStore().logout();
-                    Intent i = new Intent(context, LoginScreen.class);
+                    Intent i = new Intent(context, LoginActivity.class);
                     startActivity(i);
                     finish();
                 } else if (intent.getAction().equals(Constants.BROADCAST_UPDATE_UI)) {
@@ -253,8 +253,13 @@ public class Simpletask extends ThemedActivity implements
             // Only check tasks that are not checked yet
             // and skip headers
             // This prevents double counting in the CAB title
+<<<<<<< HEAD
             if (!vline.getHeader()) {
                 selectedTasks.add(vline.getTask());
+=======
+            if (!vline.header()) {
+                selectedTasks.add(vline.task());
+>>>>>>> origin/refactor
             }
         }
         getTodoList().setSelectedTasks(selectedTasks);
@@ -485,7 +490,13 @@ public class Simpletask extends ThemedActivity implements
         });
         if(getTodoList().getSelectedTasks().size()==0) {
             closeSelectionMode();
+<<<<<<< HEAD
         } 
+=======
+        } else {
+            openSelectionMode();
+        }
+>>>>>>> origin/refactor
         updateDrawers();
         mOverlayDialog = Util.showLoadingOverlay(this, mOverlayDialog, m_app.isLoading());
     }
@@ -536,7 +547,7 @@ public class Simpletask extends ThemedActivity implements
     }
 
     private void startLogin() {
-        Intent intent = new Intent(this, LoginScreen.class);
+        Intent intent = new Intent(this, LoginActivity.class);
         startActivity(intent);
         finish();
     }
@@ -929,6 +940,7 @@ public class Simpletask extends ThemedActivity implements
             }
         }
         if (getTodoList().getSelectedTasks().size() > 0) {
+            getTodoList().clearSelection();
             closeSelectionMode();
             return;
         }
@@ -944,12 +956,14 @@ public class Simpletask extends ThemedActivity implements
     private void closeSelectionMode() {
         //getTodoList().clearSelectedTasks();
         getListView().clearChoices();
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setVisibility(View.VISIBLE);
-        toolbar.setVisibility(View.GONE);
+        if (actionMode!=null) {
+            actionMode.finish();
+        }
+        m_adapter.setFilteredTasks();
+
+
         //getTodoList().clearSelectedTasks();
-        populateMainMenu(options_menu);
+        //populateMainMenu(options_menu);
         //updateDrawers();
 
     }
@@ -1210,13 +1224,16 @@ public class Simpletask extends ThemedActivity implements
         int numSelected = getTodoList().getSelectedTasks().size();
         if (numSelected == 0) {
             closeSelectionMode();
-        } else {
+        } else if (numSelected == 1 && actionMode == null) {
             openSelectionMode();
         }
         return true;
     }
 
     private void openSelectionMode() {
+        actionMode = startActionMode(this);
+        return ; 
+        /**
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         if (options_menu==null) {
             return;
@@ -1306,6 +1323,7 @@ public class Simpletask extends ThemedActivity implements
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setVisibility(View.GONE);
         toolbar.setVisibility(View.VISIBLE);
+        */
     }
 
 
@@ -1399,10 +1417,17 @@ public class Simpletask extends ThemedActivity implements
         @Override
         public Task getItem(int position) {
             VisibleLine line = visibleLines.get(position);
+<<<<<<< HEAD
             if (line.getHeader()) {
                 return null;
             }
             return line.getTask();
+=======
+            if (line.header()) {
+                return null;
+            }
+            return line.task();
+>>>>>>> origin/refactor
         }
 
         @Override
@@ -1426,13 +1451,21 @@ public class Simpletask extends ThemedActivity implements
                 return convertView;
             }
             VisibleLine line = visibleLines.get(position);
+<<<<<<< HEAD
             if (line.getHeader()) {
+=======
+            if (line.header()) {
+>>>>>>> origin/refactor
                 if (convertView == null) {
                     convertView = m_inflater.inflate(R.layout.list_header, parent, false);
                 }
                 TextView t = (TextView) convertView
                         .findViewById(R.id.list_header_title);
+<<<<<<< HEAD
                 t.setText(line.getTitle());
+=======
+                t.setText(line.title());
+>>>>>>> origin/refactor
 
             } else {
                 final ViewHolder holder;
@@ -1453,7 +1486,11 @@ public class Simpletask extends ThemedActivity implements
                 } else {
                     holder = (ViewHolder) convertView.getTag();
                 }
+<<<<<<< HEAD
                 final Task task = line.getTask();
+=======
+                final Task task = line.task();
+>>>>>>> origin/refactor
                 if (m_app.showCompleteCheckbox()) {
                     holder.cbCompleted.setVisibility(View.VISIBLE);
                 } else {
@@ -1580,7 +1617,11 @@ public class Simpletask extends ThemedActivity implements
                 return 2;
             }
             VisibleLine line = visibleLines.get(position);
+<<<<<<< HEAD
             if (line.getHeader()) {
+=======
+            if (line.header()) {
+>>>>>>> origin/refactor
                 return 0;
             } else {
                 return 1;
@@ -1608,7 +1649,11 @@ public class Simpletask extends ThemedActivity implements
                 return false;
             }
             VisibleLine line = visibleLines.get(position);
+<<<<<<< HEAD
             return !line.getHeader();
+=======
+            return !line.header();
+>>>>>>> origin/refactor
         }
     }
 
@@ -1813,4 +1858,99 @@ public class Simpletask extends ThemedActivity implements
             m_adapter.setFilteredTasks();
         }
     }
+
+
+    public boolean onCreateActionMode(ActionMode am, Menu m) { 
+        //once on initial creation
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.task_context, m);
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        fab.setVisibility(View.GONE);
+        am.setTitleOptionalHint(true );
+        return true;
+    }
+    public boolean onPrepareActionMode(ActionMode am, Menu m) {
+       // after creation and any time the ActionMode is invalidated
+       return false;
+    }
+    public boolean onActionItemClicked(ActionMode am, MenuItem mi) {
+       // any time a contextual action button is clicked
+        List<Task> checkedTasks = getTodoList().getSelectedTasks();
+        int menuid = mi.getItemId();
+        Intent intent;
+        switch (menuid) {
+            case R.id.complete:
+                completeTasks(checkedTasks);
+                break;
+            case R.id.select_all:
+                selectAllTasks();
+                break;
+            case R.id.uncomplete:
+                undoCompleteTasks(checkedTasks);
+                break;
+            case R.id.update:
+                startAddTaskActivity(checkedTasks);
+                break;
+            case R.id.delete:
+                deleteTasks(checkedTasks);
+                break;
+            case R.id.archive:
+                archiveTasks(checkedTasks);
+                break;
+            case R.id.defer_due:
+                deferTasks(checkedTasks, Task.DUE_DATE);
+                break;
+            case R.id.defer_threshold:
+                deferTasks(checkedTasks, Task.THRESHOLD_DATE);
+                break;
+            case R.id.priority:
+                prioritizeTasks(checkedTasks);
+                break;
+            case R.id.share:
+                String shareText = selectedTasksAsString();
+                Util.shareText(Simpletask.this, shareText);
+                break;
+            case R.id.calendar:
+                String calendarTitle = getString(R.string.calendar_title);
+                String calendarDescription = "";
+                if (checkedTasks.size() == 1) {
+                    // Set the task as title
+                    calendarTitle = checkedTasks.get(0).getText();
+                } else {
+                    // Set the tasks as description
+                    calendarDescription = selectedTasksAsString();
+
+                }
+                intent = new Intent(Intent.ACTION_EDIT)
+                    .setType(Constants.ANDROID_EVENT)
+                    .putExtra(Events.TITLE, calendarTitle)
+                    .putExtra(Events.DESCRIPTION, calendarDescription);
+                // Explicitly set start and end date/time.
+                // Some calendar providers need this.
+                GregorianCalendar calDate = new GregorianCalendar();
+                intent.putExtra(CalendarContract.EXTRA_EVENT_BEGIN_TIME,
+                        calDate.getTimeInMillis());
+                intent.putExtra(CalendarContract.EXTRA_EVENT_END_TIME,
+                        calDate.getTimeInMillis() + 60 * 60 * 1000);
+                startActivity(intent);
+                break;
+            case R.id.update_lists:
+                updateLists(checkedTasks);
+                break;
+            case R.id.update_tags:
+                updateTags(checkedTasks);
+                break;
+                }
+        am.finish();
+        return true;
+    }
+    public void onDestroyActionMode(ActionMode am) {
+       // when the action mode is closed
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        fab.setVisibility(View.VISIBLE);
+        actionMode = null;
+        closeSelectionMode();
+    }
+
+
 }

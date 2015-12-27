@@ -13,7 +13,13 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+<<<<<<< HEAD
 import nl.mpcjanssen.simpletask.util.TaskIo;
+=======
+import com.google.common.io.LineProcessor;
+
+import nl.mpcjanssen.simpletask.util.Io;
+>>>>>>> origin/refactor
 import nl.mpcjanssen.simpletask.util.Util;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -22,6 +28,8 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 public class LogScreen extends ThemedActivity {
 
@@ -41,6 +49,7 @@ public class LogScreen extends ThemedActivity {
         myDataset = new ArrayList<>();
         File logFile = getLogFile();
         try {
+<<<<<<< HEAD
             for (String line : TaskIo.loadFromFile(logFile)) {
 
                 if (!line.trim().isEmpty()) {
@@ -49,6 +58,10 @@ public class LogScreen extends ThemedActivity {
             }
 
 
+=======
+            Collection<String> lines = Io.loadFromFile(logFile);
+            myDataset.addAll(lines);
+>>>>>>> origin/refactor
         } catch (IOException e) {
             log.error("Failed to load logfile", e);
         }

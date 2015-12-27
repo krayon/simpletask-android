@@ -99,7 +99,7 @@ public class DrawerAdapter extends BaseAdapter implements ListAdapter {
 
     @Override
     public boolean isEmpty() {
-        return items.size() == 0;
+        return items.isEmpty();
     }
 
     @Override

@@ -36,17 +36,24 @@ import nl.mpcjanssen.simpletask.TodoApplication;
 import nl.mpcjanssen.simpletask.remote.BackupInterface;
 import nl.mpcjanssen.simpletask.remote.FileStoreInterface;
 import nl.mpcjanssen.simpletask.sort.MultiComparator;
+import nl.mpcjanssen.simpletask.util.Mappings;
 import nl.mpcjanssen.simpletask.util.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+<<<<<<< HEAD
 import java.util.List;
 import java.util.ArrayList;
 import java.util.TimeZone;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.Collections;
+=======
+import java.util.*;
+import java.util.Collections.*;
+
+>>>>>>> origin/refactor
 
 
 /**
@@ -61,7 +68,8 @@ public class TodoList {
     private final boolean startLooper;
 
     @NonNull
-    private List<Task> mTasks = new ArrayList<>();
+    private List<Task> mInternalTasks = new ArrayList<>();
+    private List<Task> mTasks = Collections.synchronizedList(mInternalTasks);
     @NonNull
     private List<Task> mSelectedTask = new ArrayList<>();
     @Nullable
@@ -84,24 +92,21 @@ public class TodoList {
         this.startLooper = startLooper;
         // Set up the message queue
         if (startLooper) {
-            Thread t = new Thread(new Runnable() {
+            new Thread(new Runnable() {
                 @Override
                 public void run() {
                     Looper.prepare();
                     todolistQueue = new Handler();
                     Looper.loop();
                 }
-            });
-            t.start();
+            }).start();
         }
         log = LoggerFactory.getLogger(this.getClass());
         this.mTodoListChanged = todoListChanged;
-
-
     }
 
 
-    public void queueRunnable(final String description, Runnable r) {
+    synchronized public void queueRunnable(final String description, Runnable r) {
         log.info("Handler: Queue " + description);
         while (todolistQueue==null && startLooper ) {
             try {
@@ -203,11 +208,11 @@ public class TodoList {
 
 
     public ArrayList<String> getDecoratedContexts() {
-        return Util.prefixItems("@", getContexts());
+        return Mappings.prefixItems("@", getContexts());
     }
 
     public ArrayList<String> getDecoratedProjects() {
-        return Util.prefixItems("+", getProjects());
+        return Mappings.prefixItems("+", getProjects());
     }
 
 
@@ -425,6 +430,10 @@ public class TodoList {
         } else {
             mTasks.add(updated);
         }
+    }
+
+    public void clearSelection() {
+        mSelectedTask.clear();
     }
 
     public interface TodoListChanged {

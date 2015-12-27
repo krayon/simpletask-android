@@ -16,7 +16,8 @@ import nl.mpcjanssen.simpletask.Constants;
 import nl.mpcjanssen.simpletask.TodoApplication;
 import nl.mpcjanssen.simpletask.task.Task;
 import nl.mpcjanssen.simpletask.util.ListenerList;
-import nl.mpcjanssen.simpletask.util.TaskIo;
+import nl.mpcjanssen.simpletask.util.Io;
+import nl.mpcjanssen.simpletask.util.Mappings;
 import nl.mpcjanssen.simpletask.util.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -81,6 +82,7 @@ public class FileStore implements FileStoreInterface {
         final List<Task> result= new ArrayList<>();
         mIsLoading = true;
         try {
+<<<<<<< HEAD
             for (String line : TaskIo.loadFromFile(new File(path))) {
                 ArrayList<String> completeFile = new ArrayList<>();
 
@@ -90,7 +92,15 @@ public class FileStore implements FileStoreInterface {
                 if (backup != null) {
                     backup.backup(path, Util.join(completeFile, "\n"));
                 }
+=======
+            List<String> lines = new ArrayList<>();
+            lines.addAll(Io.loadFromFile(new File(path)));
+            String readFile = Util.join(lines, "\n");
+            if (backup != null) {
+                backup.backup(path, readFile);
+>>>>>>> origin/refactor
             }
+            result.addAll(Mappings.makeTasks(lines));
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
@@ -111,7 +121,11 @@ public class FileStore implements FileStoreInterface {
         mIsLoading = true;
         String contents = "";
         try {
+<<<<<<< HEAD
             contents = Util.join(TaskIo.loadFromFile(new File(file)), "\n");
+=======
+            contents = Util.join(Io.loadFromFile(new File(file)), "\n");
+>>>>>>> origin/refactor
         } catch (IOException e) {
             e.printStackTrace();
             return "";
@@ -185,7 +199,7 @@ public class FileStore implements FileStoreInterface {
             @Override
             public void run() {
                 try {
-                    TaskIo.writeToFile(Util.join(output, eol) + eol, new File(path), false);
+                    Io.writeToFile(Util.join(output, eol) + eol, new File(path), false);
                 } catch (IOException e) {
                     e.printStackTrace();
                     bm.sendBroadcast(new Intent(Constants.BROADCAST_FILE_WRITE_FAILED));
@@ -208,7 +222,7 @@ public class FileStore implements FileStoreInterface {
             public void run() {
                 log.info("Appending " + size + " tasks to " + path);
                 try {
-                    TaskIo.writeToFile(Util.joinTasks(tasks, eol) + eol, new File(path), true);
+                    Io.writeToFile(Util.joinTasks(tasks, eol) + eol, new File(path), true);
                 } catch (IOException e) {
                     e.printStackTrace();
                     bm.sendBroadcast(new Intent(Constants.BROADCAST_FILE_WRITE_FAILED));

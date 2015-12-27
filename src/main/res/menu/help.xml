@@ -43,4 +43,9 @@
         android:orderInCategory="100"
         app:showAsAction="never"
         android:title="Donate"/>
+    <item
+        android:id="@+id/menu_licenses"
+        android:orderInCategory="100"
+        app:showAsAction="never"
+        android:title="Licenses"/>
 </menu>
