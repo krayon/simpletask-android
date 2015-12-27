@@ -8,6 +8,13 @@ import android.support.annotation.Nullable;
 import nl.mpcjanssen.simpletask.task.*;
 import nl.mpcjanssen.simpletask.util.Strings;
 import nl.mpcjanssen.simpletask.util.Util;
+import tcl.lang.Interp;
+import tcl.lang.TCL;
+import tcl.lang.TclBoolean;
+import tcl.lang.TclException;
+import tcl.lang.TclObject;
+import tcl.lang.TclString;
+
 import org.luaj.vm2.*;
 import org.luaj.vm2.compiler.LuaC;
 import org.luaj.vm2.lib.jse.JsePlatform;
@@ -355,14 +362,11 @@ public class ActiveFilter {
     public ArrayList<Task> apply(@NonNull List<Task> tasks) {
         AndFilter filter = new AndFilter();
         ArrayList<Task> matched = new ArrayList<>();
+        TclObject script = TclString.newInstance(getScript());
+        Interp interp = new Interp();
+        script.preserve();
 
         try {
-            String script = getScript();
-            if (script == null) script = "";
-            InputStream input = new ByteArrayInputStream(script.getBytes());
-            Prototype prototype = LuaC.instance.compile(input, "script");
-            Globals globals = JsePlatform.standardGlobals();
-
             for (Task t : tasks) {
                 if ("".equals(t.inFileFormat().trim())) {
                     continue;
@@ -377,20 +381,20 @@ public class ActiveFilter {
                     continue;
                 }
                 if  (m_script!=null && !m_script.trim().isEmpty()) {
-                    Util.initGlobals(globals,t);
-                    LuaClosure closure = new LuaClosure(prototype, globals);
-                    LuaValue result = closure.call(); 
-                    if (!result.toboolean()) {
+                    Util.initGlobals(interp, t);
+                    interp.eval(script, TCL.EVAL_GLOBAL);
+                    TclObject result = interp.getResult();
+                    if (!TclBoolean.get(interp, result)) {
                         continue;
                     }
+
                 }
                 matched.add(t);
             }
-        } catch (LuaError e) {
+        } catch (TclException e) {
             log.debug("Lua execution failed " + e.getMessage());
-        } catch (IOException e) {
-            log.debug("Execution failed " + e.getMessage());
         }
+        script.release();
         return matched;
     }
 

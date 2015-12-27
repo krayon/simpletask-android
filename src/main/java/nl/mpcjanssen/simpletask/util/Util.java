@@ -825,6 +825,14 @@ import nl.mpcjanssen.simpletask.R;
 import nl.mpcjanssen.simpletask.SimpletaskException;
 import nl.mpcjanssen.simpletask.sort.AlphabeticalStringComparator;
 import nl.mpcjanssen.simpletask.task.Task;
+import tcl.lang.Interp;
+import tcl.lang.TCL;
+import tcl.lang.TclBoolean;
+import tcl.lang.TclException;
+import tcl.lang.TclList;
+import tcl.lang.TclObject;
+import tcl.lang.TclString;
+
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.luaj.vm2.*;
@@ -892,7 +900,44 @@ public class Util {
         }
     }
 
+<<<<<<< HEAD
     @NotNull
+=======
+    public static List<VisibleLine> addHeaderLines(List<Task> visibleTasks, String firstSort, String no_header, boolean showHidden, boolean showEmptyLists) {
+        String header = "" ;
+        String newHeader;
+        ArrayList<VisibleLine> result = new ArrayList<>();
+        for (Task t : visibleTasks) {
+            newHeader = t.getHeader(firstSort, no_header);
+            if (!header.equals(newHeader)) {
+                VisibleLine headerLine = new VisibleLine(newHeader);
+                int last = result.size() - 1;
+                if (last != -1 && result.get(last).header && !showEmptyLists) {
+                    // replace empty preceding header
+                    result.set(last, headerLine);
+                } else {
+                    result.add(headerLine);
+                }
+                header = newHeader;
+            }
+
+            if (t.isVisible() || showHidden) {
+                // enduring tasks should not be displayed
+                VisibleLine taskLine = new VisibleLine(t);
+                result.add(taskLine);
+            }
+        }
+
+        // Clean up possible last empty list header that should be hidden
+        int i = result.size();
+        if (i > 0 && result.get(i-1).header && !showEmptyLists) {
+            result.remove(i - 1);
+        }
+        return result;
+    }
+
+    @NonNull
+>>>>>>> origin/tclscript
     public static String joinTasks(@Nullable Collection<Task> s, String delimiter) {
         StringBuilder builder = new StringBuilder();
         if (s==null) {
@@ -1039,41 +1084,47 @@ public class Util {
     }
 
 
-    public static void initGlobals(Globals globals, Task t) {
-        globals.set("task", t.inFileFormat());
+
+    public static void initGlobals(Interp interp, Task t) throws TclException {
+        interp.setVar("task", null, t.inFileFormat(), TCL.GLOBAL_ONLY);
 
         if (t.getDueDate()!=null) {
-            globals.set( "due", t.getDueDate().getMilliseconds(TimeZone.getDefault())/1000);
+            interp.setVar("due", null, t.getDueDate().getMilliseconds(TimeZone.getDefault()) / 1000, TCL.GLOBAL_ONLY);
         } else {
-            globals.set("due",LuaValue.NIL);
+            interp.setVar("due", null,"", TCL.GLOBAL_ONLY);
         }
 
 
         if (t.getThresholdDate()!=null) {
-            globals.set("threshold", t.getThresholdDate().getMilliseconds(TimeZone.getDefault())/1000);
+            interp.setVar("threshold", null, t.getThresholdDate().getMilliseconds(TimeZone.getDefault()) / 1000, TCL.GLOBAL_ONLY);
         } else {
-            globals.set("threshold",LuaValue.NIL);
+            interp.setVar("threshold", null, "", TCL.GLOBAL_ONLY);;
         }
 
 
         if (t.getCreateDate()!=null) {
-            globals.set("createdate", new DateTime(t.getCreateDate()).getMilliseconds(TimeZone.getDefault())/1000);
+            interp.setVar("createdate", null, new DateTime(t.getCreateDate()).getMilliseconds(TimeZone.getDefault()) / 1000, TCL.GLOBAL_ONLY);
         } else {
-            globals.set("createdate",LuaValue.NIL);
+            interp.setVar("createdate", null, "", TCL.GLOBAL_ONLY);
         }
 
 
         if (t.getCompletionDate()!=null) {
-            globals.set("completiondate", new DateTime(t.getCompletionDate()).getMilliseconds(TimeZone.getDefault())/1000);
+            interp.setVar("completiondate", null, new DateTime(t.getCompletionDate()).getMilliseconds(TimeZone.getDefault()) / 1000, TCL.GLOBAL_ONLY);
         } else {
-            globals.set("completiondate",LuaValue.NIL);
+            interp.setVar("completiondate", null, "", TCL.GLOBAL_ONLY);
         }
 
-        globals.set( "completed", LuaBoolean.valueOf(t.isCompleted()));
-        globals.set( "priority", t.getPriority().getCode());
+        interp.setVar("completed", null, TclBoolean.newInstance(t.isCompleted()), TCL.GLOBAL_ONLY);
+        interp.setVar("priority", null, t.getPriority().getCode(), TCL.GLOBAL_ONLY);
 
+<<<<<<< HEAD
         globals.set("tags",javaListToLuaTable(t.getTags()));
         globals.set("lists",javaListToLuaTable(t.getLists()));
+=======
+        interp.setVar("tags", null,  javaListToTclList(interp, t.getTags()), TCL.GLOBAL_ONLY);
+        interp.setVar("lists", null,  javaListToTclList(interp, t.getLists()), TCL.GLOBAL_ONLY);
+>>>>>>> origin/tclscript
     }
 
     private static LuaValue javaListToLuaTable(List<String>javaList) {
@@ -1087,6 +1138,14 @@ public class Util {
         }
         return LuaTable.listOf(luaArray);
     
+    }
+
+    private static TclObject javaListToTclList(Interp interp, List<String>javaList) throws TclException {
+        TclObject result = TclList.newInstance();
+        for (String item : javaList) {
+            TclList.append(interp, result, TclString.newInstance(item));
+        }
+        return result;
     }
 
     public static void createCachedFile(Context context, String fileName,
