@@ -331,6 +331,18 @@ public class Simpletask extends ThemedActivity implements
             startLogin();
             return;
         }
+<<<<<<< HEAD
+=======
+        if (!m_app.initialSyncDone()) {
+            m_sync_dialog = new ProgressDialog(this,m_app.getActiveTheme());
+            m_sync_dialog.setIndeterminate(true);
+            m_sync_dialog.setMessage("Initial Dropbox sync in progress, please wait....");
+            m_sync_dialog.setCancelable(false);
+            // m_sync_dialog.show();
+        } else if (m_sync_dialog!=null) {
+            m_sync_dialog.cancel();
+        }
+>>>>>>> origin/material-design
 
         mFilter = new ActiveFilter();
 
@@ -1901,6 +1913,10 @@ public class Simpletask extends ThemedActivity implements
         }
 
         final EditText ed = (EditText) view.findViewById(R.id.editText);
+<<<<<<< HEAD
+=======
+        m_app.setEditTextHint(ed, R.string.new_tag_name);
+>>>>>>> origin/material-design
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setView(view);

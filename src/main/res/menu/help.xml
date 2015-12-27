@@ -1,8 +1,13 @@
+<<<<<<< HEAD
 <!--suppress ALL -->
 
 
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
       xmlns:app="http://schemas.android.com/apk/res-auto">
+=======
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+>>>>>>> origin/material-design
     <item
         android:id="@+id/menu_simpletask"
         android:orderInCategory="100"
@@ -27,7 +32,11 @@
         android:id="@+id/menu_script"
         android:orderInCategory="100"
         app:showAsAction="never"
+<<<<<<< HEAD
         android:title="Scripting"/>
+=======
+        android:title="Javascript"/>
+>>>>>>> origin/material-design
     <item
         android:id="@+id/menu_myn"
         android:orderInCategory="100"

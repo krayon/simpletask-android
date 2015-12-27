@@ -23,54 +23,33 @@ You should have received a copy of the GNU General Public License along with Tod
 @copyright 2009-2012 Todo.txt contributors (http://todotxt.com)
 -->
 
-<menu xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
-<<<<<<< HEAD
-
-    <item
-            android:title="@string/filter"
-            android:id="@+id/filter"
-            android:orderInCategory="2"
-            android:icon="@drawable/labels"
-            app:showAsAction="always" />
-
-    <item
-            android:title="@string/search"
-            android:id="@+id/search"
-            android:icon="@drawable/action_search"
-            app:showAsAction="ifRoom|collapseActionView"
-            app:actionViewClass="android.widget.SearchView" />
-    <item
-            android:title="@string/share"
-            app:showAsAction="ifRoom"
-            android:icon="@drawable/share"
-            android:id="@+id/share" />
-=======
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
         android:title="@string/search"
         android:id="@+id/search"
         android:orderInCategory="2"
-        android:icon="@drawable/action_search"
+        android:icon="@drawable/action_search_light"
         app:showAsAction="ifRoom|collapseActionView"
         android:actionViewClass="android.widget.SearchView" />
     <item
         android:title="@string/filter"
         android:id="@+id/filter"
         android:orderInCategory="2"
-        android:icon="@drawable/labels"
+        android:icon="@drawable/labels_light"
         app:showAsAction="always" />
     <item
         android:title="@string/addtask"
         android:id="@+id/add_new"
         app:showAsAction="always"
         android:orderInCategory="2"
-        android:icon="@drawable/content_new" />
+        android:icon="@drawable/content_new_light" />
     <item
         android:title="@string/share"
         app:showAsAction="ifRoom"
         android:orderInCategory="1"
-        android:icon="@drawable/share"
+        android:icon="@drawable/share_light"
         android:id="@+id/share" />
->>>>>>> origin/material-design
     <item
         android:title="@string/preferences"
         app:showAsAction="never"
@@ -88,9 +67,4 @@ You should have received a copy of the GNU General Public License along with Tod
         app:showAsAction="never"
         android:orderInCategory="1"
         android:id="@+id/help" />
-    <item
-        android:title="@string/sync"
-        app:showAsAction="never"
-        android:orderInCategory="1"
-        android:id="@+id/sync" />
 </menu>

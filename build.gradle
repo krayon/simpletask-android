@@ -156,8 +156,13 @@ android {
         exclude 'LICENSE.txt'
     }
 
+<<<<<<< HEAD
     buildToolsVersion "23.0.2"
     compileSdkVersion 23
+=======
+    buildToolsVersion "21.0.2"
+    compileSdkVersion 21
+>>>>>>> origin/material-design
 
     defaultConfig {
 <<<<<<< HEAD
@@ -270,6 +275,7 @@ dependencies {
     compile 'com.github.rjeschke:txtmark:0.11'
     compile 'com.darwinsys:hirondelle-date4j:1.5.1'
 <<<<<<< HEAD
+<<<<<<< HEAD
     compile 'org.luaj:luaj-jse:3.0'
     compile 'com.github.tony19:logback-android-core:1.1.1-4'
     compile 'com.github.tony19:logback-android-classic:1.1.1-4'
@@ -286,6 +292,10 @@ dependencies {
       signingConfig signingConfigs.release
     }
   }
+=======
+    compile 'com.google.guava:guava:17.0'
+    compile 'com.android.support:appcompat-v7:21.+'
+>>>>>>> origin/material-design
 }
 
 repositories {

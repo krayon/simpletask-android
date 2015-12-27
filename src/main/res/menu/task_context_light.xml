@@ -22,78 +22,50 @@ You should have received a copy of the GNU General Public License along with Tod
 @license http://www.gnu.org/licenses/gpl.html
 @copyright 2009-2012 Todo.txt contributors (http://todotxt.com)
 -->
-<<<<<<< HEAD
-
-<!--suppress ALL -->
-<menu xmlns:android="http://schemas.android.com/apk/res/android"
-      xmlns:app="http://schemas.android.com/apk/res-auto">
-=======
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
->>>>>>> origin/material-design
-
     <item
         android:title="@string/done"
         android:id="@+id/complete"
-        android:icon="@drawable/complete" 
-<<<<<<< HEAD
-        app:showAsAction="ifRoom"
-=======
+        android:icon="@drawable/complete_light" 
         app:showAsAction="never"
->>>>>>> origin/material-design
         />
-    <item
+    <item    
 	android:title="@string/unComplete"
-        android:icon="@drawable/uncomplete"
+        android:icon="@drawable/uncomplete_light" 
         android:id="@+id/uncomplete"
-<<<<<<< HEAD
-        app:showAsAction="ifRoom"
-=======
         app:showAsAction="never"
->>>>>>> origin/material-design
         />
     <item
         android:title="@string/update"
         app:showAsAction="always"
         android:id="@+id/update"
-        android:icon="@drawable/edit" />
+        android:icon="@drawable/edit_light" />
     <item
         android:title="@string/update_lists"
-<<<<<<< HEAD
-        app:showAsAction="always"
-=======
         app:showAsAction="ifRoom"
->>>>>>> origin/material-design
-        android:icon="@drawable/ic_action_collections_view_as_list"
+        android:icon="@drawable/ic_action_collections_view_as_list_light"
         android:id="@+id/update_lists" />
     <item
         android:title="@string/update_tags"
-<<<<<<< HEAD
-        app:showAsAction="always"
-=======
         app:showAsAction="ifRoom"
->>>>>>> origin/material-design
-        android:icon="@drawable/ic_action_collections_new_label"
+        android:icon="@drawable/ic_action_collections_new_label_light"
         android:id="@+id/update_tags" />
     <item
         android:title="@string/priority"
-<<<<<<< HEAD
-        app:showAsAction="always"
-=======
         app:showAsAction="ifRoom"
->>>>>>> origin/material-design
         android:id="@+id/priority"
-        android:icon="@drawable/prio" />
+        android:icon="@drawable/prio_light" />
     <item
         android:title="@string/select_all"
         android:id="@+id/select_all"
         app:showAsAction="ifRoom"
-        android:icon="@drawable/ic_action_content_select_all" />
+        android:icon="@drawable/ic_action_content_select_all_light" />
     <item
         android:title="@string/share"
         app:showAsAction="ifRoom"
         android:id="@+id/share"
-        android:icon="@drawable/share" />
+        android:icon="@drawable/share_light" />
     <item
         android:title="@string/add_to_calendar"
         app:showAsAction="never"
@@ -110,14 +82,12 @@ You should have received a copy of the GNU General Public License along with Tod
         android:title="@string/delete"
         android:id="@+id/delete"
         app:showAsAction="never"
-        android:icon="@drawable/delete" />
+        android:icon="@drawable/delete_light" />
     <item
         android:title="@string/archive"
         android:id="@+id/archive"
         app:showAsAction="never"
         />
-<<<<<<< HEAD
-=======
     <item
         android:id="@+id/url"
         app:showAsAction="never"
@@ -130,5 +100,4 @@ You should have received a copy of the GNU General Public License along with Tod
         android:id="@+id/phone_number"
         app:showAsAction="never"
         android:visible="false" />
->>>>>>> origin/material-design
 </menu>
