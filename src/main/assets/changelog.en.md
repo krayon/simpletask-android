@@ -1,4 +1,4 @@
-﻿Changelog
+Changelog
 =========
 
 6.2.1
