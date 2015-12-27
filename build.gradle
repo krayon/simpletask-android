@@ -8,6 +8,10 @@ buildscript {
     }
     dependencies {
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+        classpath "jp.leafytree.gradle:gradle-android-scala-plugin:1.4"
+>>>>>>> origin/scaloid
         classpath 'com.android.tools.build:gradle:1.2.3'
 <<<<<<< HEAD
 	classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
@@ -30,6 +34,7 @@ buildscript {
 }
 
 apply plugin: 'com.android.application'
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 apply plugin: 'kotlin-android'
@@ -132,6 +137,9 @@ task deploy(type:Copy, dependsOn: [assembleRelease,buildInfo,checkCleanGit]) {
 >>>>>>> origin/issue118
 }
 >>>>>>> origin/macroid
+=======
+apply plugin: "jp.leafytree.android-scala"
+>>>>>>> origin/scaloid
 
 // Call gradle with -Plint to enable all warnings.
 <<<<<<< HEAD
@@ -180,11 +188,21 @@ android {
         versionName '5.2.15'
         versionCode 1543
 	    minSdkVersion 14
+<<<<<<< HEAD
         targetSdkVersion 21
         buildConfigField "String", "GIT_REV", "\"" + buildInfo.ext.revision + "\""
         // Enabling multidex support.
         multiDexEnabled true
 >>>>>>> origin/macroid
+=======
+        targetSdkVersion 22
+        multiDexEnabled true
+    }
+
+    dexOptions {
+        preDexLibraries true
+        javaMaxHeapSize "2g"
+>>>>>>> origin/scaloid
     }
 
     productFlavors {
@@ -242,6 +260,9 @@ android {
             proguardFile 'proguard-rules.txt'
             // proguardFile getDefaultProguardFile('proguard-android.txt')
         }
+        debug {
+            //noinspection GroovyAssignabilityCheck
+        }
     }
     dexOptions {
         incremental true
@@ -258,6 +279,7 @@ dependencies {
 <<<<<<< HEAD
     dropboxCompile fileTree(dir: 'libs', include: '*.jar')
 <<<<<<< HEAD
+<<<<<<< HEAD
     compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
 =======
     compile 'org.scala-lang:scala-library:2.11.7'
@@ -267,6 +289,9 @@ dependencies {
     compile "org.scala-lang:scala-library:2.11.5"
     compile "org.macroid:macroid_2.11:2.0.0-M3@aar"
 >>>>>>> origin/macroid
+=======
+    compile "org.scala-lang:scala-library:2.11.6"
+>>>>>>> origin/scaloid
     compile 'com.intellij:annotations:12.0'
 >>>>>>> origin/refactor
     compile 'com.android.support:support-v4:23.1.1'
@@ -280,6 +305,7 @@ dependencies {
     compile 'com.github.tony19:logback-android-core:1.1.1-4'
     compile 'com.github.tony19:logback-android-classic:1.1.1-4'
     compile 'org.slf4j:slf4j-api:1.7.6'
+    compile 'com.android.support:multidex:1.0.0'
     testCompile 'junit:junit:4.12'
 =======
     compile 'com.google.guava:guava:18.0'
