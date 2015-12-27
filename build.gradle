@@ -1,4 +1,5 @@
 buildscript {
+<<<<<<< HEAD
 
     ext.kotlin_version = '1.0.0-beta-4584'
 
@@ -18,6 +19,14 @@ buildscript {
         classpath "jp.leafytree.gradle:gradle-android-scala-plugin:1.3.2"
 >>>>>>> origin/macroid
     }
+=======
+  repositories {
+    mavenCentral()
+  }
+  dependencies {
+    classpath 'com.android.tools.build:gradle:0.12.+'
+  }
+>>>>>>> origin/issue160
 }
 
 apply plugin: 'com.android.application'
@@ -31,61 +40,71 @@ apply plugin: "jp.leafytree.android-scala"
 apply plugin: "jp.leafytree.android-scala"
 
 sourceSets {
-        unitTest {
-                java.srcDir file('src/test/java')
-                resources.srcDir file('src/test/resources')
-        }
+  unitTest {
+    java.srcDir file('src/test/java')
+    resources.srcDir file('src/test/resources')
+  }
 }
 
 dependencies {
+<<<<<<< HEAD
         unitTestCompile files("$project.buildDir/intermediates/classes/cloudless/debug")
         unitTestCompile fileTree(dir: 'libskeep', include: '*.jar')
         unitTestCompile 'com.darwinsys:hirondelle-date4j:1.5.1'
         unitTestCompile 'com.google.guava:guava:18.0'
         unitTestCompile 'com.google.android:android:4.+'
         unitTestCompile 'junit:junit:4.11'
+=======
+  unitTestCompile files("$project.buildDir/intermediates/classes/cloudless/debug")
+  unitTestCompile fileTree(dir: 'libskeep', include: '*.jar')
+  unitTestCompile 'com.darwinsys:hirondelle-date4j:1.5.1'
+  unitTestCompile 'com.google.guava:guava:17.0'
+  unitTestCompile 'com.google.android:android:4.+'
+  unitTestCompile 'junit:junit:4.11'
+  unitTestCompile 'org.mozilla:rhino:1.7R4'
+>>>>>>> origin/issue160
 }
 
 configurations {
-        unitTestCompile.extendsFrom runtime
-        unitTestRuntime.extendsFrom unitTestCompile
+  unitTestCompile.extendsFrom runtime
+  unitTestRuntime.extendsFrom unitTestCompile
 }
 
 task unitTest(type:Test, dependsOn: assemble) {
-        description = "run unit tests"
-        testClassesDir = project.sourceSets.unitTest.output.classesDir
-        classpath = project.sourceSets.unitTest.runtimeClasspath + files("$project.buildDir/intermediates/classes/cloudless/debug")
+  description = "run unit tests"
+  testClassesDir = project.sourceSets.unitTest.output.classesDir
+  classpath = project.sourceSets.unitTest.runtimeClasspath + files("$project.buildDir/intermediates/classes/cloudless/debug")
 }
 
 // Generate some build info. Used for the revision in the application settings and for generating the deployed file names.
  
 task buildInfo {
-    def revcmd = "git rev-parse --short HEAD"
-    def revproc = revcmd.execute()
-    ext.revision = revproc.text.trim()
-    def datecmd = "git log -1 --date=short --pretty=format:%cd"
-    def dateproc = datecmd.execute()
-    ext.date = dateproc.text.trim()
-    def branchcmd = 'git rev-parse --abbrev-ref HEAD'
-    def branchproc = branchcmd.execute()
-    ext.branch = branchproc.text.trim()
+  def revcmd = "git rev-parse --short HEAD"
+  def revproc = revcmd.execute()
+  ext.revision = revproc.text.trim()
+  def datecmd = "git log -1 --date=short --pretty=format:%cd"
+  def dateproc = datecmd.execute()
+  ext.date = dateproc.text.trim()
+  def branchcmd = 'git rev-parse --abbrev-ref HEAD'
+  def branchproc = branchcmd.execute()
+  ext.branch = branchproc.text.trim()
 }
 
 task checkCleanGit {
-    def cmd = "git diff-files"
-    def proc = cmd.execute()
-    ext.status = proc.text.trim()
-    doLast {
-       if (!(ext.status == ""))
-          throw new GradleException("Git not clean, commit changes before running serve:\n" + ext.status)
-    }
+  def cmd = "git diff-files"
+  def proc = cmd.execute()
+  ext.status = proc.text.trim()
+  doLast {
+    if (!(ext.status == ""))
+      throw new GradleException("Git not clean, commit changes before running serve:\n" + ext.status)
+  }
 }
 
 def checkDeployPath() {
-    if (hasProperty("deployPath"))
-        return deployPath
+  if (hasProperty("deployPath"))
+    return deployPath
     else
-        return null
+    return null
 }
 
 <<<<<<< HEAD
@@ -115,14 +134,22 @@ task deploy(type:Copy, dependsOn: [assembleRelease,buildInfo,checkCleanGit]) {
 >>>>>>> origin/macroid
 
 // Call gradle with -Plint to enable all warnings.
+<<<<<<< HEAD
 if (hasProperty("lint")) {
     //noinspection GroovyAssignabilityCheck
     tasks.withType(Compile) {
       options.compilerArgs << "-Xlint:all" 
    } 
+=======
+if (hasProperty("lint")) { 
+  tasks.withType(Compile) { 
+    options.compilerArgs << "-Xlint:all" 
+  } 
+>>>>>>> origin/issue160
 }
 
 android {
+<<<<<<< HEAD
     packagingOptions {
         exclude 'META-INF/LICENSE.txt'
         exclude 'META-INF/NOTICE.txt'
@@ -162,14 +189,43 @@ android {
         cloudless {
             applicationId 'nl.mpcjanssen.simpletask'
         }
-    }
+=======
 
-    signingConfigs {
-        release {
-            keyAlias = "mpcjanssen.nl"
-        }
-    }
 
+  packagingOptions {
+    exclude 'META-INF/LICENSE.txt'
+    exclude 'META-INF/NOTICE.txt'
+    exclude 'LICENSE.txt'
+  }
+
+  buildToolsVersion "20.0.0"
+  compileSdkVersion 20
+
+  defaultConfig {
+    versionName '5.2.11'
+    versionCode 1539
+    minSdkVersion 14
+    targetSdkVersion 20
+    buildConfigField "String", "GIT_REV", "\"" + buildInfo.ext.revision + "\""
+  }
+
+  productFlavors {
+    free {
+      applicationId 'nl.mpcjanssen.todotxtholo'
+    }
+    cloudless {
+      applicationId 'nl.mpcjanssen.simpletask'
+>>>>>>> origin/issue160
+    }
+  }
+
+  signingConfigs {
+    release {
+      keyAlias = "mpcjanssen.nl"
+    }
+  }
+
+<<<<<<< HEAD
     buildTypes {
         debug {
             signingConfig signingConfigs.release
@@ -224,15 +280,37 @@ dependencies {
     // Needed for multidex support on smaller than 5.0 devices
     compile 'com.android.support:multidex:1.0.0'
 >>>>>>> origin/macroid
+=======
+  buildTypes {
+    release {
+      signingConfig signingConfigs.release
+    }
+  }
+}
+
+repositories {
+  mavenCentral()
+}
+
+dependencies {
+  freeCompile fileTree(dir: 'libs', include: '*.jar')
+  compile fileTree(dir: 'libskeep', include: '*.jar')
+  compile 'com.intellij:annotations:+@jar'
+  compile 'com.android.support:support-v4:20.0.0'
+  compile 'org.commonjava.googlecode.markdown4j:markdown4j:2.2-cj-1.0'
+  compile 'com.darwinsys:hirondelle-date4j:1.5.1'
+  compile 'com.google.guava:guava:17.0'
+  compile 'org.mozilla:rhino:1.7R4'
+>>>>>>> origin/issue160
 }
 
 // Only sign if we have keystore properties in the gradle.properties in ~/.gradle
 if (project.hasProperty('storeFile') &&
-        project.hasProperty('storePassword') &&
-        project.hasProperty('keyPassword')) {
-    android.signingConfigs.release.storeFile = file(storeFile)
-    android.signingConfigs.release.storePassword = storePassword
-    android.signingConfigs.release.keyPassword = keyPassword
+    project.hasProperty('storePassword') &&
+    project.hasProperty('keyPassword')) {
+  android.signingConfigs.release.storeFile = file(storeFile)
+  android.signingConfigs.release.storePassword = storePassword
+  android.signingConfigs.release.keyPassword = keyPassword
 } else {
-    android.buildTypes.release.signingConfig = null
+  android.buildTypes.release.signingConfig = null
 }

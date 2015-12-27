@@ -46,6 +46,7 @@ public class FilterActivity extends ThemedActivity {
     public static final String FILTER_ITEMS = "items";
     public static final String INITIAL_SELECTED_ITEMS = "initialSelectedItems";
     public static final String INITIAL_NOT = "initialNot";
+    public static final String INITIAL_OR = "initialOr";
 
 
     boolean asWidgetConfigure = false;
@@ -122,11 +123,19 @@ public class FilterActivity extends ThemedActivity {
 >>>>>>> origin/issue129
         arguments.putStringArrayList(INITIAL_SELECTED_ITEMS, mFilter.getContexts());
         arguments.putBoolean(INITIAL_NOT, mFilter.getContextsNot());
+<<<<<<< HEAD
         arguments.putString(TAB_TYPE, CONTEXT_TAB);
         Fragment contextTab = new FilterListFragment();
         contextTab.setArguments(arguments);
         pagerAdapter.add(contextTab);
 
+=======
+        arguments.putBoolean(INITIAL_OR, mFilter.getContextsIsOr());
+        actionbar.addTab(actionbar.newTab()
+                .setText(getString(R.string.context_prompt))
+                .setTabListener(new MyTabsListener(this, CONTEXT_TAB, FilterListFragment.class.getName(), arguments))
+                .setTag(CONTEXT_TAB));
+>>>>>>> origin/issue160
 
         // Fill arguments for fragment
         arguments = new Bundle();
@@ -270,6 +279,7 @@ public class FilterActivity extends ThemedActivity {
         return target;
     }
 
+<<<<<<< HEAD
     private void updateFilterFromFragments() {
         for (Fragment f : pagerAdapter.getFragments()) {
             switch (f.getArguments().getString(TAB_TYPE,"")) {
@@ -307,6 +317,53 @@ public class FilterActivity extends ThemedActivity {
                     mFilter.setScript(scrf.getScript());
                     mFilter.setScriptTestTask(scrf.getTestTask());
                     break;
+=======
+    private void updateFilterFromFragments () {
+        ArrayList<String> items;
+        items = getFragmentFilter(CONTEXT_TAB);
+        if (items!=null) {
+            mFilter.setContexts(items);
+        }
+        mFilter.setContextsNot(getNot(CONTEXT_TAB,mFilter.getContextsNot()));
+        mFilter.setContextsIsOr(getOr(CONTEXT_TAB,mFilter.getContextsIsOr()));
+
+        items = getFragmentFilter(PROJECT_TAB);
+        if (items!=null) {
+            mFilter.setProjects(items);
+        }
+        mFilter.setProjectsNot(getNot(PROJECT_TAB,mFilter.getProjectsNot()));
+
+        items = getFragmentFilter(PRIO_TAB);
+        if (items!=null) {
+            mFilter.setPriorities(items);
+        }
+        mFilter.setPrioritiesNot(getNot(PRIO_TAB,mFilter.getPrioritiesNot()));
+
+        mFilter.setHideCompleted(getHideCompleted());
+        mFilter.setHideFuture(getHideFuture());
+        mFilter.setHideLists(getHideLists());
+        mFilter.setHideTags(getHideTags());
+        mFilter.setJavascript(getJavascript());
+        mFilter.setJavascriptTestTask(getJavascriptTestTask());
+
+        items = getSelectedSort();
+        if (items!=null) {
+            mFilter.setSort(items);
+        }
+    }
+
+    @Nullable
+    private ArrayList<String> getFragmentFilter(String tag) {
+        FilterListFragment fr;
+        fr = (FilterListFragment) this.getFragmentManager().findFragmentByTag(tag);
+        if (fr == null) {
+            // fragment was not initialized so no update
+            return null;
+        } else {
+            return fr.getSelectedItems();
+        }
+    }
+>>>>>>> origin/issue160
 
             }
         }
@@ -324,6 +381,53 @@ public class FilterActivity extends ThemedActivity {
 
 
 
+<<<<<<< HEAD
+=======
+    private String getJavascript() {
+        FilterScriptFragment fr;
+        fr = (FilterScriptFragment) this.getFragmentManager().findFragmentByTag(SCRIPT_TAB);
+        if (fr == null) {
+            // fragment was never intialized
+            return mFilter.getJavascript();
+        } else {
+            return fr.getJavascript();
+        }
+    }
+
+    private String getJavascriptTestTask() {
+        FilterScriptFragment fr;
+        fr = (FilterScriptFragment) this.getFragmentManager().findFragmentByTag(SCRIPT_TAB);
+        if (fr == null) {
+            // fragment was never intialized
+            return mFilter.getJavascriptTestTask();
+        } else {
+            return fr.getTestTask();
+        }
+    }
+
+    private boolean getNot(String tag, boolean current) {
+        FilterListFragment fr;
+        fr = (FilterListFragment) this.getFragmentManager().findFragmentByTag(tag);
+        if (fr == null) {
+            // fragment was never intialized
+            return current;
+        } else {
+            return fr.getNot();
+        }
+    }
+
+    private boolean getOr(String tag, boolean current) {
+        FilterListFragment fr;
+        fr = (FilterListFragment) this.getFragmentManager().findFragmentByTag(tag);
+        if (fr == null) {
+            // fragment was never intialized
+            return current;
+        } else {
+            return fr.getOr();
+        }
+    }
+    
+>>>>>>> origin/issue160
     private void createWidget(String name) {
         int mAppWidgetId;
 

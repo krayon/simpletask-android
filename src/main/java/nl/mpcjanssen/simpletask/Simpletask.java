@@ -1314,6 +1314,7 @@ public class Simpletask extends ThemedActivity implements
                 m_leftDrawerList.setItemChecked(position, true);
             }
         }
+        m_leftDrawerList.setItemChecked(drawerAdapter.getContextHeaderPosition()+1, mFilter.getContextsNot());
         m_leftDrawerList.setItemChecked(drawerAdapter.getContextHeaderPosition(), mFilter.getContextsNot());
         m_leftDrawerList.setItemChecked(drawerAdapter.getProjectsHeaderPosition(), mFilter.getProjectsNot());
     }
@@ -1953,7 +1954,7 @@ public class Simpletask extends ThemedActivity implements
                 mFilter.setProjectsNot(!mFilter.getProjectsNot());
                 updateDrawers();
             }
-            if (adapter.getContextHeaderPosition() == position) {
+            if (adapter.getContextHeaderPosition()+1 == position) {
                 mFilter.setContextsNot(!mFilter.getContextsNot());
                 updateDrawers();
             } else {

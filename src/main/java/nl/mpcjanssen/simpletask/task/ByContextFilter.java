@@ -37,12 +37,14 @@ public class ByContextFilter implements TaskFilter {
     @NonNull
     private ArrayList<String> contexts = new ArrayList<>();
     private boolean not;
+    private boolean isOr;
 
-    public ByContextFilter(@Nullable List<String> contexts, boolean not) {
+    public ByContextFilter(@Nullable List<String> contexts, boolean not, boolean isOr) {
         if (contexts != null) {
             this.contexts.addAll(contexts);
         }
         this.not = not;
+	this.isOr = isOr;
     }
 
     @Override
@@ -59,15 +61,27 @@ public class ByContextFilter implements TaskFilter {
             return true;
         }
 
-        for (String c : input.getLists()) {
-            if (contexts.contains(c)) {
-                return true;
-            }
-        }        /*
-         * Match tasks without context if filter contains "-"
-		 */
-        return input.getLists().size() == 0 && contexts.contains("-");
-
+	if (isOr) {
+	    for (String c : input.getLists()) {
+		if (contexts.contains(c)) {
+		    return true;
+		}
+	    }
+	    /*
+	     * Match tasks without context if filter contains "-"
+	     */
+	    return input.getLists().size() == 0 && contexts.contains("-");
+	} else {
+	    if(input.getLists().size() == 0 && contexts.contains("-") && contexts.size()==1) return true;
+	    for (String c : contexts) {
+		
+		if (!input.getLists().contains(c)) {
+		    return false;
+		}
+	    }
+	    return true;
+	}
+	
     }
 
     /* FOR TESTING ONLY, DO NOT USE IN APPLICATION */
