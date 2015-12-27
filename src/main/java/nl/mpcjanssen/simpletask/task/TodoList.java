@@ -22,12 +22,23 @@
  */
 package nl.mpcjanssen.simpletask.task;
 
+<<<<<<< HEAD
+=======
+import android.content.ContentProvider;
+import android.content.ContentResolver;
+import android.content.Context;
+>>>>>>> origin/extsdwrite
 import android.content.Intent;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
+<<<<<<< HEAD
+=======
+import android.support.v4.provider.DocumentFile;
+import com.google.common.collect.Ordering;
+>>>>>>> origin/extsdwrite
 import hirondelle.date4j.DateTime;
 import nl.mpcjanssen.simpletask.ActiveFilter;
 import nl.mpcjanssen.simpletask.Constants;
@@ -291,11 +302,17 @@ public class TodoList {
         todolistQueue.post(new Runnable() {
             @Override
             public void run() {
+<<<<<<< HEAD
                 if (save) {
                     log.info("Handler: Handle notifychanged");
                     log.info("Saving todo list, size {}", mTasks.size());
                     save(filestore, todoname, backup, eol);
                 }
+=======
+                log.info("Handler: Handle notifychanged");
+                log.info("Saving todo list, size {}", mTasks.size());
+                save(mApp.getTodoFile(), mApp);
+>>>>>>> origin/extsdwrite
                 clearSelectedTasks();
                 if (mTodoListChanged != null) {
                     log.info("TodoList changed, notifying listener and invalidating cached values");
@@ -347,7 +364,11 @@ public class TodoList {
         selectTask(mTasks.get(index));
     }
 
+<<<<<<< HEAD
     public void reload(final FileStoreInterface fileStore, final String filename, final BackupInterface backup, final LocalBroadcastManager lbm, final boolean background, final String eol) {
+=======
+    public void reload(final DocumentFile file, final BackupInterface backup, final LocalBroadcastManager lbm, boolean background) {
+>>>>>>> origin/extsdwrite
         if (TodoList.this.loadQueued()) {
             log.info("Todolist reload is already queued waiting");
             return;
@@ -359,10 +380,18 @@ public class TodoList {
             public void run() {
                 clearSelectedTasks();
                 try {
+<<<<<<< HEAD
                     mTasks = fileStore.loadTasksFromFile(filename, backup, eol);
                 } catch (IOException e) {
                     log.error("Todolist load failed: {}", filename, e);
                     Util.showToastShort(TodoApplication.getAppContext(), "Loading of todo file failed");
+=======
+                    List<Task> tasks = mFileStore.loadTasksFromDocument(file, backup);
+                    mTasks = tasks;
+                } catch (IOException e) {
+                    log.error("Todolist load failed: {}", file.getUri().toString(), e);
+                    Util.showToastShort(mApp, "Loading of todo file failed");
+>>>>>>> origin/extsdwrite
                 }
                 loadQueued = false;
                 log.info("Todolist loaded, refresh UI");
@@ -378,12 +407,33 @@ public class TodoList {
         }
     }
 
+<<<<<<< HEAD
     public void save(final FileStoreInterface filestore, final String todoFileName, final BackupInterface backup, final String eol) {
+=======
+    public void setEol(String eol) {
+        this.mFileStore.setEol(eol);
+    }
+
+    public FileStoreInterface getFileStore() {
+        return mFileStore;
+    }
+
+    public boolean fileStoreCanSync() {
+        return mFileStore != null && mFileStore.supportsSync();
+    }
+
+    public void save(DocumentFile file, final BackupInterface backup) {
+>>>>>>> origin/extsdwrite
         queueRunnable("Save", new Runnable() {
             @Override
             public void run() {
                 try {
+<<<<<<< HEAD
                     filestore.saveTasksToFile(todoFileName, mTasks, backup, eol);
+=======
+
+                    mFileStore.saveTasksToDocument(mApp.getTodoFile(), mTasks, backup);
+>>>>>>> origin/extsdwrite
                 } catch (IOException e) {
                     e.printStackTrace();
                     Util.showToastLong(TodoApplication.getAppContext(), R.string.write_failed);

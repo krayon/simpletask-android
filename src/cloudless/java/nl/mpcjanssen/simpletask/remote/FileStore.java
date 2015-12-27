@@ -6,14 +6,22 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.os.Environment;
-import android.os.FileObserver;
-import android.os.Handler;
-import android.os.Looper;
+import android.os.*;
+import android.provider.DocumentsContract;
 import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
+<<<<<<< HEAD
 import nl.mpcjanssen.simpletask.Constants;
 import nl.mpcjanssen.simpletask.TodoApplication;
+=======
+import android.support.v4.provider.DocumentFile;
+import com.google.common.base.Charsets;
+import com.google.common.io.Files;
+import com.google.common.io.LineProcessor;
+import nl.mpcjanssen.simpletask.Constants;
+import nl.mpcjanssen.simpletask.R;
+import nl.mpcjanssen.simpletask.Simpletask;
+>>>>>>> origin/extsdwrite
 import nl.mpcjanssen.simpletask.task.Task;
 import nl.mpcjanssen.simpletask.util.ListenerList;
 import nl.mpcjanssen.simpletask.util.Io;
@@ -45,15 +53,22 @@ public class FileStore implements FileStoreInterface {
     private final LocalBroadcastManager bm;
     private final FileChangeListener m_fileChangedListener;
     private final Logger log;
+<<<<<<< HEAD
+=======
+    private final Context mCtx;
+    private String mEol;
+>>>>>>> origin/extsdwrite
     private TodoObserver m_observer;
     private boolean mIsLoading;
     private Handler fileOperationsQueue;
 
     public FileStore(Context ctx, FileChangeListener fileChangedListener) {
         log = LoggerFactory.getLogger(this.getClass());
+
         log.info("onCreate");
         m_fileChangedListener = fileChangedListener;
         m_observer = null;
+        this.mCtx = ctx;
         this.bm = LocalBroadcastManager.getInstance(ctx);
 
         // Set up the message queue
@@ -86,7 +101,11 @@ public class FileStore implements FileStoreInterface {
     }
 
     @Override
+<<<<<<< HEAD
     synchronized public List<Task> loadTasksFromFile(final String path,  @Nullable BackupInterface backup, String eol) {
+=======
+    public List<Task> loadTasksFromDocument(DocumentFile in, @Nullable BackupInterface backup) throws IOException {
+>>>>>>> origin/extsdwrite
         log.info("Loading tasks from file: {}" , path);
         final List<Task> result= new ArrayList<>();
         mIsLoading = true;
@@ -190,25 +209,47 @@ public class FileStore implements FileStoreInterface {
     @Override
     public void browseForNewFile(Activity act, String path, FileSelectedListener listener, boolean showTxt) {
         FileDialog dialog = new FileDialog(act, path, showTxt);
-        dialog.addFileListener(listener);
-        dialog.createFileDialog(act, this);
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT) {
+            dialog.addFileListener(listener);
+            dialog.createFileDialog(act, this);
+        } else {
+            Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+            if (showTxt) {
+                intent.setType("text/*");
+            } else {
+                intent.setType("text/*");
+            }
+            // Filter to only show results that can be "opened", such as a
+            // file (as opposed to a list of contacts or timezones)
+            intent.addCategory(Intent.CATEGORY_OPENABLE);
+            act.startActivityForResult(intent, Simpletask.REQUEST_FILE_URI);
+        }
     }
 
     @Override
+<<<<<<< HEAD
     synchronized public void saveTasksToFile(final String path, List<Task> tasks, @Nullable final BackupInterface backup, final String eol) {
         log.info("Saving tasks to file: {}" ,path);
+=======
+    synchronized public void saveTasksToDocument(final DocumentFile out, List<Task> tasks, final BackupInterface backup) {
+        log.info("Saving tasks to file: {}" ,out.getUri());
+>>>>>>> origin/extsdwrite
         final List<String> output = Util.tasksToString(tasks);
         if (backup != null) {
-            backup.backup(path, Util.join(output, "\n"));
+            backup.backup(out.getUri().toString(), Util.join(output, "\n"));
         }
         final TodoObserver obs = getObserver();
         obs.ignoreEvents(true);
 
-        queueRunnable("Save to file " + path, new Runnable() {
+        queueRunnable("Save to URI " + out.getUri(), new Runnable() {
             @Override
             public void run() {
                 try {
+<<<<<<< HEAD
                     Io.writeToFile(Util.join(output, eol) + eol, new File(path), false);
+=======
+                    TaskIo.writeToFile(Util.join(output, mEol) + mEol,mCtx, out, false);
+>>>>>>> origin/extsdwrite
                 } catch (IOException e) {
                     e.printStackTrace();
                     bm.sendBroadcast(new Intent(Constants.BROADCAST_FILE_WRITE_FAILED));
@@ -223,15 +264,24 @@ public class FileStore implements FileStoreInterface {
     }
 
     @Override
+<<<<<<< HEAD
     public void appendTaskToFile(final String path, final List<Task> tasks, final String eol) {
         log.info(TAG, "Appending tasks to file: " + path);
+=======
+    public void appendTaskToFile(final DocumentFile out, final List<Task> tasks) {
+        log.info(TAG, "Appending tasks to file: " + out);
+>>>>>>> origin/extsdwrite
         final int size = tasks.size();
-        queueRunnable("Appending " + size + " tasks to " + path, new Runnable() {
+        queueRunnable("Appending " + size + " tasks to " + out, new Runnable() {
             @Override
             public void run() {
-                log.info("Appending " + size + " tasks to " + path);
+                log.info("Appending " + size + " tasks to " + out);
                 try {
+<<<<<<< HEAD
                     Io.writeToFile(Util.joinTasks(tasks, eol) + eol, new File(path), true);
+=======
+                    TaskIo.writeToFile(Util.joinTasks(tasks, mEol) + mEol, mCtx,  out, true);
+>>>>>>> origin/extsdwrite
                 } catch (IOException e) {
                     e.printStackTrace();
                     bm.sendBroadcast(new Intent(Constants.BROADCAST_FILE_WRITE_FAILED));
@@ -252,6 +302,7 @@ public class FileStore implements FileStoreInterface {
 
     public static class FileDialog {
         private static final String PARENT_DIR = "..";
+        private final Logger log;
         private String[] fileList;
         private File currentPath;
 
@@ -264,6 +315,8 @@ public class FileStore implements FileStoreInterface {
          * @param pathName
          */
         public FileDialog(Activity activity, String pathName, boolean txtOnly) {
+            log = LoggerFactory.getLogger(this.getClass());
+            log.info("constructor");
             this.activity = activity;
             this.txtOnly = txtOnly;
             File path = new File(pathName);

@@ -26,17 +26,24 @@
 package nl.mpcjanssen.simpletask;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.Application;
-import android.app.Dialog;
 import android.appwidget.AppWidgetManager;
 import android.content.*;
+<<<<<<< HEAD
 import android.content.pm.ActivityInfo;
 import android.os.AsyncTask;
+=======
+import android.database.sqlite.SQLiteDatabase;
+import android.net.Uri;
+>>>>>>> origin/extsdwrite
 import android.preference.PreferenceManager;
 import android.support.v4.content.LocalBroadcastManager;
+<<<<<<< HEAD
 import android.util.Log;
 import android.view.Window;
+=======
+import android.support.v4.provider.DocumentFile;
+>>>>>>> origin/extsdwrite
 import android.widget.EditText;
 import nl.mpcjanssen.simpletask.remote.FileStore;
 import nl.mpcjanssen.simpletask.remote.FileStoreInterface;
@@ -46,6 +53,11 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.IOException;
+<<<<<<< HEAD
+=======
+import java.net.URI;
+import java.util.TimeZone;
+>>>>>>> origin/extsdwrite
 
 
 public class TodoApplication extends Application implements SharedPreferences.OnSharedPreferenceChangeListener {
@@ -85,6 +97,7 @@ public class TodoApplication extends Application implements SharedPreferences.On
         intentFilter.addAction(Constants.BROADCAST_TASKCACHE_CHANGED);
         m_broadcastReceiver = new BroadcastReceiver() {
             @Override
+<<<<<<< HEAD
             public void onReceive(Context context, @NotNull Intent intent) {
                 if (intent.getAction().equals(Constants.BROADCAST_FILE_CHANGED)) {
                     // File change reload task cache
@@ -96,6 +109,10 @@ public class TodoApplication extends Application implements SharedPreferences.On
                 } else if (intent.getAction().equals(Constants.BROADCAST_TASKCACHE_CHANGED)) {
                     getFileStore().saveTasksToFile(getTodoFileName(),getTaskCache(null));
                 } else if (intent.getAction().equals(Constants.BROADCAST_UPDATE_UI)) {
+=======
+            public void onReceive(Context context, @NonNull Intent intent) {
+                if (intent.getAction().equals(Constants.BROADCAST_UPDATE_UI)) {
+>>>>>>> origin/extsdwrite
                     m_calSync.syncLater();
                     updateWidgets();
                 }
@@ -143,14 +160,14 @@ public class TodoApplication extends Application implements SharedPreferences.On
     public void onTerminate() {
         Log.v(TAG, "Deregistered receiver");
         m_prefs.unregisterOnSharedPreferenceChangeListener(this);
-        if (m_broadcastReceiver!=null) {
+        if (m_broadcastReceiver != null) {
             localBroadcastManager.unregisterReceiver(m_broadcastReceiver);
         }
         super.onTerminate();
     }
 
 
-    public String[] getDefaultSorts () {
+    public String[] getDefaultSorts() {
         return getResources().getStringArray(R.array.sortKeys);
     }
 
@@ -190,16 +207,43 @@ public class TodoApplication extends Application implements SharedPreferences.On
         return m_prefs.getInt(getString(R.string.calendar_reminder_time), 720);
     }
 
+<<<<<<< HEAD
     public String getTodoFileName() {
+        return m_prefs.getString(getString(R.string.todo_file_key), FileStore.getDefaultPath());
+=======
+    private String getTodoFileString() {
         return m_prefs.getString(getString(R.string.todo_file_key), FileStore.getDefaultPath());
     }
 
-    public File getTodoFile() {
-        return new File(getTodoFileName());
+    private boolean getTodoIsUri() {
+        return m_prefs.getBoolean(getString(R.string.todo_file_uri_key), false);
+>>>>>>> origin/extsdwrite
     }
 
+    public String getTodoDisplayName() {
+        return getTodoFileString();
+    }
+
+    public DocumentFile getTodoFile() {
+        String fileStr = getTodoFileString();
+        if (getTodoIsUri()) {
+            Uri uri = Uri.parse(fileStr);
+            return DocumentFile.fromSingleUri(this, uri);
+        } else {
+            return DocumentFile.fromFile(new File(fileStr));
+        }
+    }
+
+<<<<<<< HEAD
     public void setTodoFile(String todo) {
         m_prefs.edit().putString(getString(R.string.todo_file_key), todo).apply();
+=======
+
+    @SuppressLint("CommitPrefEdits")
+    public void setTodoFile(String todo, boolean isUri) {
+        m_prefs.edit().putString(getString(R.string.todo_file_key), todo).commit();
+        m_prefs.edit().putBoolean(getString(R.string.todo_file_uri_key), isUri).commit();
+>>>>>>> origin/extsdwrite
     }
 
     public boolean isAutoArchive() {
@@ -294,11 +338,24 @@ public class TodoApplication extends Application implements SharedPreferences.On
                 .apply();
     }
 
+<<<<<<< HEAD
     @NotNull
     public TaskCache getTaskCache(final Activity act) {
         if (this.m_taskCache!=null) {
             return m_taskCache;
         }
+=======
+    @NonNull
+    public TodoList getTodoList() {
+        return m_todoList;
+    }
+
+    public void loadTodoList(boolean background) {
+        log.info("Load todolist");
+        m_todoList.reload(getTodoFile(), TodoApplication.this, localBroadcastManager, background);
+
+    }
+>>>>>>> origin/extsdwrite
 
         this.m_taskCache = new TaskCache(this);
         final FileStoreInterface store = getFileStore();
@@ -318,6 +375,12 @@ public class TodoApplication extends Application implements SharedPreferences.On
                 m_taskCache = new TaskCache(this);
             }
 
+<<<<<<< HEAD
+=======
+    public void fileChanged(@Nullable String newName, boolean isUri) {
+        if (newName!=null) {
+            setTodoFile(newName, isUri);
+>>>>>>> origin/extsdwrite
         }
         return this.m_taskCache;
     }
@@ -409,6 +472,24 @@ public class TodoApplication extends Application implements SharedPreferences.On
         }
     }
 
+<<<<<<< HEAD
+=======
+    public void switchTodoFile(String newTodo, boolean isUri, boolean background) {
+        setTodoFile(newTodo, isUri);
+        loadTodoList(background);
+
+    }
+
+
+    public void todoListChanged() {
+        log.info("Tasks have changed, update UI");
+        localBroadcastManager.sendBroadcast(new Intent(Constants.BROADCAST_SYNC_DONE));
+        localBroadcastManager.sendBroadcast(new Intent(Constants.BROADCAST_UPDATE_UI));
+
+
+    }
+
+>>>>>>> origin/extsdwrite
     public int getActiveFont() {
         String fontsize =  getPrefs().getString("fontsize", "medium");
         switch (fontsize) {
@@ -429,27 +510,21 @@ public class TodoApplication extends Application implements SharedPreferences.On
         return mFileStore;
     }
 
+<<<<<<< HEAD
     public void showConfirmationDialog(@NotNull Context cxt, int msgid,
                                               @NotNull DialogInterface.OnClickListener oklistener, int titleid) {
         boolean show = getPrefs().getBoolean(getString(R.string.ui_show_confirmation_dialogs), true);
+=======
+>>>>>>> origin/extsdwrite
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(cxt);
-        builder.setTitle(titleid);
-        builder.setMessage(msgid);
-        builder.setPositiveButton(android.R.string.ok, oklistener);
-        builder.setNegativeButton(android.R.string.cancel, null);
-        builder.setCancelable(true);
-        Dialog dialog = builder.create();
-        if (show) {
-           dialog.show();
-        } else {
-            oklistener.onClick(dialog , DialogInterface.BUTTON_POSITIVE);
-        }
-    }
 
     public boolean isAuthenticated() {
         FileStoreInterface fs = getFileStore();
         return fs.isAuthenticated();
+    }
+
+    public boolean showConfirmation() {
+        return getPrefs().getBoolean(getString(R.string.ui_show_confirmation_dialogs), true);
     }
 
     public void startLogin(LoginScreen loginScreen, int i) {

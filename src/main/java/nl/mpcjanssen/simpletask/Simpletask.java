@@ -37,8 +37,12 @@ import android.support.multidex.MultiDexApplication;
 import android.support.v4.app.ActionBarDrawerToggle;
 >>>>>>> origin/macroid
 import android.support.v4.content.LocalBroadcastManager;
+<<<<<<< HEAD
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.view.MenuItemCompat.OnActionExpandListener;
+=======
+import android.support.v4.provider.DocumentFile;
+>>>>>>> origin/extsdwrite
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -94,6 +98,13 @@ import nl.mpcjanssen.simpletask.task.TodoList;
 import nl.mpcjanssen.simpletask.task.token.Token;
 import nl.mpcjanssen.simpletask.util.Strings;
 import nl.mpcjanssen.simpletask.util.Util;
+<<<<<<< HEAD
+=======
+import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.util.*;
+>>>>>>> origin/extsdwrite
 
 
 public class Simpletask extends ThemedActivity implements
@@ -101,6 +112,7 @@ public class Simpletask extends ThemedActivity implements
 
     private final static int REQUEST_SHARE_PARTS = 1;
     private final static int REQUEST_PREFERENCES = 2;
+    public final static int REQUEST_FILE_URI = 4;
 
     private final static String ACTION_LINK = "link";
     private final static String ACTION_SMS = "sms";
@@ -216,6 +228,15 @@ public class Simpletask extends ThemedActivity implements
                     finish();
                     m_app.reloadTheme();
                     m_app.startActivity(i);
+                }
+                break;
+            case REQUEST_FILE_URI:
+                if (resultCode == RESULT_OK) {
+                    Uri fileUri = data.getData();
+                    DocumentFile pickedFile  = DocumentFile.fromSingleUri(this, fileUri);
+                    log.info("Picked file as URI {} {}" ,pickedFile.toString(), pickedFile.getName());
+                    m_app.switchTodoFile(pickedFile, true);
+
                 }
                 break;
         }
@@ -806,6 +827,7 @@ public class Simpletask extends ThemedActivity implements
     }
 
     private void deleteTasks(final List<Task> tasks) {
+<<<<<<< HEAD
         m_app.showConfirmationDialog(this, R.string.delete_task_message, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
@@ -817,6 +839,20 @@ public class Simpletask extends ThemedActivity implements
 
             }
         }, R.string.delete_task_title);
+=======
+        Util.showConfirmationDialog(this, m_app.showConfirmation(),
+                R.string.delete_task_message, R.string.delete_task_title,
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        for (Task t : tasks) {
+                            m_app.getTodoList().remove(t);
+                        }
+                        closeSelectionMode();
+                        getTodoList().notifyChanged(true);
+                    }
+                });
+>>>>>>> origin/extsdwrite
     }
 
     private void archiveTasks(List<Task> tasksToArchive) {
@@ -853,12 +889,14 @@ public class Simpletask extends ThemedActivity implements
                 getFileStore().sync();
                 break;
             case R.id.archive:
-                m_app.showConfirmationDialog(this, R.string.delete_task_message, new DialogInterface.OnClickListener() {
+                Util.showConfirmationDialog(this, m_app.showConfirmation(),
+                        R.string.delete_task_message, R.string.archive_task_title,
+                        new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         archiveTasks(null);
                     }
-                }, R.string.archive_task_title);
+                });
                 break;
             case R.id.open_file:
                 m_app.browseForNewFile(this);

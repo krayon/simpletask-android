@@ -798,6 +798,19 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+<<<<<<< HEAD
+=======
+import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
+import android.net.Uri;
+import android.os.Handler;
+import android.os.Looper;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.v4.provider.DocumentFile;
+import android.support.v7.app.AlertDialog;
+>>>>>>> origin/extsdwrite
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.style.ForegroundColorSpan;
@@ -853,13 +866,19 @@ public class Util {
         void onClick(String input);
     }
 
+<<<<<<< HEAD
     public static void createParentDirectory(@Nullable File dest) throws SimpletaskException {
+=======
+    public static void createParentDirectory(@Nullable DocumentFile dest) throws TodoException {
+        Logger log = LoggerFactory.getLogger(Util.class);
+>>>>>>> origin/extsdwrite
         if (dest == null) {
             throw new SimpletaskException("createParentDirectory: dest is null");
         }
-        File dir = dest.getParentFile();
+        DocumentFile dir = dest.getParentFile();
         if (dir != null && !dir.exists()) {
             createParentDirectory(dir);
+<<<<<<< HEAD
             if (!dir.exists()) {
                 if (!dir.mkdirs()) {
                     Log.e(TAG, "Could not create dirs: " + dir.getAbsolutePath());
@@ -867,6 +886,9 @@ public class Util {
                             + dir.getAbsolutePath());
                 }
             }
+=======
+            dir.getParentFile().createDirectory(dir.getName());
+>>>>>>> origin/extsdwrite
         }
     }
 
@@ -1096,5 +1118,68 @@ public class Util {
         temp.addAll(items);
         return sortWithPrefix(temp, caseSensitive, prefix);
     }
+<<<<<<< HEAD
+=======
+
+    public static void shareText(Activity act, String text) {
+        Logger log = LoggerFactory.getLogger(Util.class);
+        Intent shareIntent = new Intent(android.content.Intent.ACTION_SEND);
+        shareIntent.setType("text/plain");
+        shareIntent.putExtra(android.content.Intent.EXTRA_SUBJECT,
+                "Simpletask list");
+
+        // If text is small enough SEND it directly
+        if (text.length() < 50000) {
+            shareIntent.putExtra(android.content.Intent.EXTRA_TEXT, text);
+        } else {
+
+            // Create a cache file to pass in EXTRA_STREAM
+            try {
+                Util.createCachedFile(act,
+                        Constants.SHARE_FILE_NAME, text);
+                Uri fileUri = Uri.parse("content://" + CachedFileProvider.AUTHORITY + "/"
+                        + Constants.SHARE_FILE_NAME);
+                shareIntent.putExtra(android.content.Intent.EXTRA_STREAM, fileUri);
+            } catch (Exception e) {
+                log.warn("Failed to create file for sharing");
+            }
+        }
+        act.startActivity(Intent.createChooser(shareIntent, "Share"));
+    }
+
+    public static Dialog showLoadingOverlay(@NonNull Activity act, @Nullable Dialog visibleDialog, boolean show) {
+        if (show) {
+            Dialog newDialog = new Dialog(act);
+            newDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+            newDialog.setContentView(R.layout.loading);
+            ProgressBar pr = (ProgressBar) newDialog.findViewById(R.id.progress);
+            pr.getIndeterminateDrawable().setColorFilter(0xFF0099CC, android.graphics.PorterDuff.Mode.MULTIPLY);
+            newDialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
+            newDialog.setCancelable(false);
+            newDialog.show();
+            return newDialog;
+        } else if (visibleDialog!=null && visibleDialog.isShowing()) {
+            visibleDialog.dismiss();
+        }
+        return null;
+    }
+
+    public static void showConfirmationDialog(@NonNull Context cxt, boolean show, int msgid, int titleid,
+                                              @NonNull DialogInterface.OnClickListener oklistener) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(cxt);
+        builder.setTitle(titleid);
+        builder.setMessage(msgid);
+        builder.setPositiveButton(android.R.string.ok, oklistener);
+        builder.setNegativeButton(android.R.string.cancel, null);
+        builder.setCancelable(true);
+        Dialog dialog = builder.create();
+        dialog.show();
+        if (show) {
+            dialog.show();
+        } else {
+            oklistener.onClick(dialog , DialogInterface.BUTTON_POSITIVE);
+        }
+    }
+>>>>>>> origin/extsdwrite
 }
 >>>>>>> origin/dropbox-change

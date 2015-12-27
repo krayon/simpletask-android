@@ -394,7 +394,10 @@ You should have received a copy of the GNU General Public License along with Tod
 
     <string name="name">Name</string>
     <string name="date">Date</string>
-
+    <string name="cant_write_title">Can\'t write to file</string>
+    <string name="cant_write_summary">Can\'t write to this file. Please give access to the directory (or a parent) in
+        the next dialog.
+    </string>
 
 
 </resources>
