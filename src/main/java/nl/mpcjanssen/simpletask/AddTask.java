@@ -81,7 +81,14 @@ import nl.mpcjanssen.simpletask.util.Util;
 
 public class AddTask extends ThemedActivity {
 
+<<<<<<< HEAD
     private TodoApplication m_app;
+=======
+    private final static String TAG = AddTask.class.getSimpleName();
+
+    private List<Task> m_backup;
+    private SimpletaskApplication m_app;
+>>>>>>> origin/macroid
 
     private String share_text;
 
@@ -111,6 +118,13 @@ public class AddTask extends ThemedActivity {
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
 
+<<<<<<< HEAD
+=======
+        m_app = (SimpletaskApplication) getApplication();
+        m_app.setActionBarStyle(getWindow());
+        requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
+        super.onCreate(savedInstanceState);
+>>>>>>> origin/macroid
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(Constants.BROADCAST_UPDATE_UI);
         intentFilter.addAction(Constants.BROADCAST_SYNC_START);

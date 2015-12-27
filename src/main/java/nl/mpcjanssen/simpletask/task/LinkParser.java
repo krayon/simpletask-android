@@ -31,6 +31,11 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+<<<<<<< HEAD
+=======
+import nl.mpcjanssen.simpletask.SimpletaskException;
+
+>>>>>>> origin/macroid
 public class LinkParser {
     private static final Pattern LINK_PATTERN = Pattern
             .compile("(http|https|todo)://[\\w\\-_./]+(\\.[\\w\\-_]+)+([\\w\\-\\.,@?^=%&amp;:/~\\+#]*[\\w\\-@?^=%&amp;/~\\+#])?");
@@ -53,9 +58,19 @@ public class LinkParser {
         Matcher m = LINK_PATTERN.matcher(inputText);
         List<String> links = new ArrayList<>();
         while (m.find()) {
+<<<<<<< HEAD
             String link;
             link = m.group();
             links.add(link);
+=======
+            URL link;
+            try {
+                link = new URL(m.group());
+                links.add(link);
+            } catch (MalformedURLException e) {
+                throw new SimpletaskException("Malformed URL matched the regex", e);
+            }
+>>>>>>> origin/macroid
         }
         return links;
     }

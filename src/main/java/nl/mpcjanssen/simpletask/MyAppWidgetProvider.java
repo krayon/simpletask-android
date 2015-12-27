@@ -32,7 +32,7 @@ public class MyAppWidgetProvider extends AppWidgetProvider {
 	public static RemoteViews updateView(int widgetId, @NonNull Context context) {
         SharedPreferences preferences = context.getSharedPreferences("" + widgetId, 0);
         RemoteViews view ;
-        SharedPreferences appPreferences = TodoApplication.getPrefs();
+        SharedPreferences appPreferences = SimpletaskApplication.getPrefs();
         ColorDrawable listColor;
         ColorDrawable headerColor;
         String theme = appPreferences.getString("widget_theme", "");

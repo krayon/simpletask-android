@@ -27,10 +27,15 @@ import android.graphics.Paint;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.CalendarContract.Events;
+<<<<<<< HEAD
 import android.provider.CalendarContract;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
+=======
+import android.support.multidex.MultiDexApplication;
+import android.support.v4.app.ActionBarDrawerToggle;
+>>>>>>> origin/macroid
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.view.MenuItemCompat.OnActionExpandListener;
@@ -107,7 +112,7 @@ public class Simpletask extends ThemedActivity implements
 
     @Nullable
     Menu options_menu;
-    TodoApplication m_app;
+    SimpletaskApplication m_app;
     ActiveFilter mFilter;
     TaskAdapter m_adapter;
     private BroadcastReceiver m_broadcastReceiver;
@@ -128,10 +133,16 @@ public class Simpletask extends ThemedActivity implements
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
+<<<<<<< HEAD
         super.onCreate(savedInstanceState);
         log = LoggerFactory.getLogger(this.getClass());
         log.info("onCreate");
         m_app = (TodoApplication) getApplication();
+=======
+        Log.v(TAG, "onCreate");
+        m_app = (SimpletaskApplication) getApplicationContext();
+        m_app.setActionBarStyle(getWindow());
+>>>>>>> origin/macroid
         m_savedInstanceState = savedInstanceState;
         final IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(Constants.BROADCAST_ACTION_ARCHIVE);
@@ -328,6 +339,7 @@ public class Simpletask extends ThemedActivity implements
         Intent intent = getIntent();
         if (Constants.INTENT_START_FILTER.equals(intent.getAction())) {
             mFilter.initFromIntent(intent);
+<<<<<<< HEAD
             log.info("handleIntent: launched with filter" + mFilter);
             Bundle extras = intent.getExtras();
             if (extras != null) {
@@ -349,6 +361,15 @@ public class Simpletask extends ThemedActivity implements
             // Set previous filters and sort
             log.info("handleIntent: from m_prefs state");
             mFilter.initFromPrefs(TodoApplication.getPrefs());
+=======
+            Log.v(TAG, "handleIntent: launched with filter" + mFilter);
+            Log.v(TAG, "handleIntent: saving filter in prefs");
+            mFilter.saveInPrefs(SimpletaskApplication.getPrefs());
+        } else {
+            // Set previous filters and sort
+            Log.v(TAG, "handleIntent: from m_prefs state");
+            mFilter.initFromPrefs(SimpletaskApplication.getPrefs());
+>>>>>>> origin/macroid
         }
 
         // Initialize Adapter
@@ -648,8 +669,13 @@ public class Simpletask extends ThemedActivity implements
                         mFilter = new ActiveFilter();
                     }
                     mFilter.setSearch(newText);
+<<<<<<< HEAD
                     mFilter.saveInPrefs(TodoApplication.getPrefs());
                     if (m_adapter != null) {
+=======
+                    mFilter.saveInPrefs(SimpletaskApplication.getPrefs());
+                    if (m_adapter!=null) {
+>>>>>>> origin/macroid
                         m_adapter.setFilteredTasks();
                     }
                 }
@@ -997,7 +1023,7 @@ public class Simpletask extends ThemedActivity implements
         Intent intent = new Intent();
         mFilter.clear();
         mFilter.saveInIntent(intent);
-        mFilter.saveInPrefs(TodoApplication.getPrefs());
+        mFilter.saveInPrefs(SimpletaskApplication.getPrefs());
         setIntent(intent);
         closeSelectionMode();
         updateDrawers();
@@ -1030,7 +1056,7 @@ public class Simpletask extends ThemedActivity implements
                 Intent intent = getIntent();
                 mFilter.saveInIntent(intent);
                 setIntent(intent);
-                mFilter.saveInPrefs(TodoApplication.getPrefs());
+                mFilter.saveInPrefs(SimpletaskApplication.getPrefs());
                 m_adapter.setFilteredTasks();
                 if (m_drawerLayout != null) {
                     m_drawerLayout.closeDrawer(Gravity.RIGHT);
@@ -1579,7 +1605,7 @@ public class Simpletask extends ThemedActivity implements
                     });
                 }
 
-                Context mContext = TodoApplication.getAppContext();
+                Context mContext = SimpletaskApplication.getAppContext();
 
                 String relAge = task.getRelativeAge(mContext);
                 SpannableString relDue = task.getRelativeDueDate(mContext, res.getColor(android.R.color.holo_green_light),
@@ -1852,7 +1878,7 @@ public class Simpletask extends ThemedActivity implements
             }
             Intent intent = getIntent();
             mFilter.saveInIntent(intent);
-            mFilter.saveInPrefs(TodoApplication.getPrefs());
+            mFilter.saveInPrefs(SimpletaskApplication.getPrefs());
             setIntent(intent);
             closeSelectionMode();
             m_adapter.setFilteredTasks();

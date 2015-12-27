@@ -282,4 +282,9 @@
                 android:summary="View and share the application log for debugging purposes.">
         </Preference>
     </PreferenceCategory>
+
+    <Preference
+        android:title="Scala!!!"
+        android:summary="Scala based activity" android:key="scala">
+    </Preference>
 </PreferenceScreen>

@@ -30,6 +30,15 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
+<<<<<<< HEAD
+=======
+import nl.mpcjanssen.simpletask.Constants;
+import nl.mpcjanssen.simpletask.SimpletaskApplication;
+import nl.mpcjanssen.simpletask.util.ListenerList;
+import nl.mpcjanssen.simpletask.util.TaskIo;
+import nl.mpcjanssen.simpletask.util.Util;
+
+>>>>>>> origin/macroid
 public class FileStore implements FileStoreInterface {
 
     private final String TAG = getClass().getSimpleName();

@@ -1,5 +1,10 @@
+<<<<<<< HEAD
 dropbox.xml*
 dropbox-folder.xml*
+=======
+dropbox.xml
+google-key
+>>>>>>> origin/macroid
 build/
 google-key
 local.properties

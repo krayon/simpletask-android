@@ -37,11 +37,21 @@ You should have received a copy of the GNU General Public License along with Sim
         android:xlargeScreens="true" />
 
     <application
+<<<<<<< HEAD
         android:name=".TodoApplication"
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_label"
         android:theme="@style/AppTheme.Light.DarkActionBar" >
+=======
+            android:name="nl.mpcjanssen.simpletask.SimpletaskApplication"
+            android:allowBackup="true"
+            android:icon="@drawable/ic_launcher"
+            android:label="@string/app_label"
+            android:theme="@android:style/Theme.NoTitleBar">
+            
+
+>>>>>>> origin/macroid
         <activity
             android:name=".LoginActivity"
             android:label="@string/app_label" >

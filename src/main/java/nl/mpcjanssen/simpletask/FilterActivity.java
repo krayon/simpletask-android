@@ -51,7 +51,11 @@ public class FilterActivity extends ThemedActivity {
     boolean asWidgetConfigure = false;
     ActiveFilter mFilter;
 
+<<<<<<< HEAD
     TodoApplication m_app;
+=======
+    SimpletaskApplication  m_app;
+>>>>>>> origin/macroid
     SharedPreferences prefs;
 
     @Nullable
@@ -70,7 +74,15 @@ public class FilterActivity extends ThemedActivity {
     }
 
     @Override
+<<<<<<< HEAD
     public void onCreate(Bundle savedInstanceState) {
+=======
+    public void onCreate(Bundle savedInstanceState) {    	
+    	Log.v(TAG, "Called with intent: " + getIntent().toString());
+        m_app = (SimpletaskApplication) getApplication();
+        prefs = getPreferences(MODE_PRIVATE);
+        m_app.setActionBarStyle(getWindow());
+>>>>>>> origin/macroid
         super.onCreate(savedInstanceState);
         log = LoggerFactory.getLogger(this.getClass());
         log.info("Called with intent: " + getIntent().toString());
@@ -313,7 +325,7 @@ public class FilterActivity extends ThemedActivity {
                     AppWidgetManager.EXTRA_APPWIDGET_ID,
                     AppWidgetManager.INVALID_APPWIDGET_ID);
 
-            Context context = TodoApplication.getAppContext();
+            Context context = SimpletaskApplication.getAppContext();
 
             // Store widget filter
             SharedPreferences preferences = context.getSharedPreferences("" + mAppWidgetId, MODE_PRIVATE);

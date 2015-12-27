@@ -109,6 +109,26 @@ public class FilterScriptFragment extends Fragment {
             txtScript.setText(arguments.getString(ActiveFilter.INTENT_SCRIPT_FILTER,""));
             txtTestTask.setText(arguments.getString(ActiveFilter.INTENT_SCRIPT_TEST_TASK_FILTER,""));
         }
+<<<<<<< HEAD
+=======
+
+        gestureDetector = new GestureDetector(SimpletaskApplication.getAppContext(),
+                new FilterGestureDetector());
+        OnTouchListener gestureListener = new OnTouchListener() {
+            @Override
+            public boolean onTouch(@NotNull View v, @NotNull MotionEvent event) {
+                if (gestureDetector.onTouchEvent(event)) {
+                    MotionEvent cancelEvent = MotionEvent.obtain(event);
+                    cancelEvent.setAction(MotionEvent.ACTION_CANCEL);
+                    v.onTouchEvent(cancelEvent);
+                    return true;
+                }
+                return false;
+            }
+        };
+
+        layout.setOnTouchListener(gestureListener);
+>>>>>>> origin/macroid
         return layout;
     }
 

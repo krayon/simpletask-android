@@ -56,8 +56,12 @@ public class HelpScreen extends ThemedActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+<<<<<<< HEAD
         log = LoggerFactory.getLogger(this.getClass());
         TodoApplication m_app = (TodoApplication) getApplication();
+=======
+        SimpletaskApplication m_app = (SimpletaskApplication) getApplication();
+>>>>>>> origin/macroid
         setTheme(m_app.getActiveTheme());
         String page = "index." + getText(R.string.help_locale).toString() + ".md";
         Intent i = getIntent();

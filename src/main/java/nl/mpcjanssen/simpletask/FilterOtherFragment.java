@@ -79,6 +79,25 @@ public class FilterOtherFragment extends Fragment {
             cbHideCreateDate.setChecked(!arguments.getBoolean(ActiveFilter.INTENT_HIDE_CREATE_DATE_FILTER, false));
         }
 
+<<<<<<< HEAD
+=======
+        gestureDetector = new GestureDetector(SimpletaskApplication.getAppContext(),
+                new FilterGestureDetector());
+        OnTouchListener gestureListener = new OnTouchListener() {
+            @Override
+            public boolean onTouch(@NotNull View v, @NotNull MotionEvent event) {
+                if (gestureDetector.onTouchEvent(event)) {
+                    MotionEvent cancelEvent = MotionEvent.obtain(event);
+                    cancelEvent.setAction(MotionEvent.ACTION_CANCEL);
+                    v.onTouchEvent(cancelEvent);
+                    return true;
+                }
+                return false;
+            }
+        };
+
+        layout.setOnTouchListener(gestureListener);
+>>>>>>> origin/macroid
         return layout;
     }
 

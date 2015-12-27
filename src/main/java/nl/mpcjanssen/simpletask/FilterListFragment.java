@@ -83,6 +83,27 @@ public class FilterListFragment extends Fragment {
         }
 
         cb.setChecked(not);
+<<<<<<< HEAD
+=======
+
+        gestureDetector = new GestureDetector(SimpletaskApplication.getAppContext(),
+                new FilterGestureDetector());
+        OnTouchListener gestureListener = new OnTouchListener() {
+            @Override
+            public boolean onTouch(@NotNull View v, @NotNull MotionEvent event) {
+                if (gestureDetector.onTouchEvent(event)) {
+                    MotionEvent cancelEvent = MotionEvent.obtain(event);
+                    cancelEvent.setAction(MotionEvent.ACTION_CANCEL);
+                    v.onTouchEvent(cancelEvent);
+                    cancelEvent.recycle();
+                    return true;
+                }
+                return false;
+            }
+        };
+
+        lv.setOnTouchListener(gestureListener);
+>>>>>>> origin/macroid
         return layout;
     }
 

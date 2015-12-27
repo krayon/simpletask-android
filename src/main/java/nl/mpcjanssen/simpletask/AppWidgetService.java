@@ -32,7 +32,7 @@ public class AppWidgetService extends RemoteViewsService {
     
     @Override
     public RemoteViewsFactory onGetViewFactory( Intent intent) {
-	    return new AppWidgetRemoteViewsFactory((TodoApplication)getApplication(), intent);
+	    return new AppWidgetRemoteViewsFactory((SimpletaskApplication)getApplication(), intent);
     }
 }
 
@@ -43,15 +43,22 @@ class AppWidgetRemoteViewsFactory implements RemoteViewsService.RemoteViewsFacto
     private ActiveFilter mFilter;
 
     private Context mContext;
-    private TodoApplication application;
+    private SimpletaskApplication application;
     
     ArrayList<Task> visibleTasks = new ArrayList<>();
 
+<<<<<<< HEAD
     public AppWidgetRemoteViewsFactory(TodoApplication application,  Intent intent) {
         log = LoggerFactory.getLogger(this.getClass());
         int widgetId = intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, -1);
         log.debug("Creating view for widget: " + widgetId);
         mContext = TodoApplication.getAppContext();
+=======
+    public AppWidgetRemoteViewsFactory(SimpletaskApplication application,  Intent intent) {
+        int widgetId = intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, -1);
+        Log.v(TAG, "Creating view for widget: " + widgetId);
+        mContext = SimpletaskApplication.getAppContext();
+>>>>>>> origin/macroid
         SharedPreferences preferences = mContext.getSharedPreferences("" + widgetId, 0);
         mFilter = new ActiveFilter();
         mFilter.initFromPrefs(preferences);
@@ -130,8 +137,13 @@ class AppWidgetRemoteViewsFactory implements RemoteViewsService.RemoteViewsFacto
             SpannableString ss = new SpannableString(
                     task.showParts(tokensToShow).trim());
 
+<<<<<<< HEAD
             if (application.isDarkWidgetTheme()) {
                 itemForDarkTheme(rv);
+=======
+            if (SimpletaskApplication.getPrefs().getString("widget_theme", "").equals("android.R.style.Theme_Holo")) {
+                rv.setTextColor(R.id.tasktext, application.getResources().getColor(android.R.color.white));
+>>>>>>> origin/macroid
             } else {
                 itemForLightTheme(rv);
             }
@@ -211,11 +223,35 @@ class AppWidgetRemoteViewsFactory implements RemoteViewsService.RemoteViewsFacto
         return rv;
     }
 
+<<<<<<< HEAD
     private void itemForLightTheme(RemoteViews rv) {
         rv.setTextColor(R.id.tasktext, application.getResources().getColor(android.R.color.black));
         rv.setTextColor(R.id.taskage, application.getResources().getColor(android.R.color.darker_gray));
         rv.setTextColor(R.id.taskdue, application.getResources().getColor(android.R.color.darker_gray));
         rv.setTextColor(R.id.taskthreshold, application.getResources().getColor(android.R.color.darker_gray));
+=======
+    private RemoteViews getSimpleView(int position) {
+        RemoteViews rv;
+        rv = new RemoteViews(mContext.getPackageName(), R.layout.widget_simple_list_item);
+        Task task = visibleTasks.get(position);
+        int tokensToShow = Token.SHOW_ALL;
+        tokensToShow = tokensToShow & ~Token.CREATION_DATE;
+        tokensToShow = tokensToShow & ~Token.COMPLETED;
+        tokensToShow = tokensToShow & ~Token.COMPLETED_DATE;
+        SpannableString ss = new SpannableString(
+                task.showParts(tokensToShow).trim());
+        if (task.isCompleted()) {
+            ss.setSpan(new StrikethroughSpan(), 0, ss.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        }
+        rv.setTextViewText(R.id.widget_item_text, ss);
+        if (SimpletaskApplication.getPrefs().getString("widget_theme", "").equals("android.R.style.Theme_Holo")) {
+            rv.setTextColor(R.id.widget_item_text, application.getResources().getColor(android.R.color.white));
+        } else {
+            rv.setTextColor(R.id.widget_item_text, application.getResources().getColor(android.R.color.black));
+        }
+        rv.setOnClickFillInIntent(R.id.widget_item_text, createFilterIntent(visibleTasks.get(position)));
+        return rv;
+>>>>>>> origin/macroid
     }
 
     private void itemForDarkTheme(RemoteViews rv) {
@@ -235,6 +271,7 @@ class AppWidgetRemoteViewsFactory implements RemoteViewsService.RemoteViewsFacto
             return null;
         }
 
+<<<<<<< HEAD
         // find index in the todolist of the clicked task
         Task task = visibleTasks.get(position);
         TodoList tl = application.getTodoList();
@@ -242,6 +279,16 @@ class AppWidgetRemoteViewsFactory implements RemoteViewsService.RemoteViewsFacto
 
 
         return getExtendedView(taskIndex,task);
+=======
+        RemoteViews rv;
+        boolean extended_widget = SimpletaskApplication.getPrefs().getBoolean("widget_extended", true);
+        if (extended_widget) {
+            rv = getExtendedView(position);
+        } else {
+            rv = getSimpleView(position);
+        }
+        return rv;
+>>>>>>> origin/macroid
     }
 
 

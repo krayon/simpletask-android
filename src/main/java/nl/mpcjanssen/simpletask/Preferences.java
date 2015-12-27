@@ -36,7 +36,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class Preferences extends ThemedActivity {
-    static TodoApplication m_app ;
+    static SimpletaskApplication m_app ;
     final static String TAG = Preferences.class.getSimpleName();
 	public static final int RESULT_LOGOUT = RESULT_FIRST_USER + 1;
 	public static final int RESULT_ARCHIVE = RESULT_FIRST_USER + 2;
@@ -69,6 +69,7 @@ public class Preferences extends ThemedActivity {
 
 	public static class TodoTxtPrefFragment extends PreferenceFragment implements
     SharedPreferences.OnSharedPreferenceChangeListener {
+<<<<<<< HEAD
         private Logger log;
 
         @Override
@@ -86,6 +87,22 @@ public class Preferences extends ThemedActivity {
                 e.printStackTrace();
             }
             m_app = (TodoApplication) getActivity().getApplication();
+=======
+		@Override
+		public void onCreate(final Bundle savedInstanceState) {
+			super.onCreate(savedInstanceState);
+			addPreferencesFromResource(R.xml.preferences);
+			PackageInfo packageInfo;
+			final Preference versionPref = findPreference("app_version");
+			try {
+				packageInfo = getActivity().getPackageManager().getPackageInfo(
+						getActivity().getPackageName(), 0);
+				versionPref.setSummary("v" + packageInfo.versionName + " (" + BuildConfig.GIT_REV + ")");
+			} catch (NameNotFoundException e) {
+				e.printStackTrace();
+			}
+            m_app = (SimpletaskApplication)getActivity().getApplication();
+>>>>>>> origin/macroid
             if (m_app.storeType() != Constants.STORE_DROPBOX) {
                 PreferenceCategory dropboxCategory = (PreferenceCategory) findPreference(getString(R.string.dropbox_cat_key));
                 getPreferenceScreen().removePreference(dropboxCategory);
