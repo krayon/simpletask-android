@@ -34,6 +34,7 @@ You should have received a copy of the GNU General Public License along with Sim
                 <data android:scheme="@string/dropbox_consumer_key" />
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.BROWSABLE"/>
+<<<<<<< HEAD:src/dropbox/AndroidManifest.xml
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
             <intent-filter>
@@ -49,6 +50,11 @@ You should have received a copy of the GNU General Public License along with Sim
                 <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
             </intent-filter>
         </receiver>
+=======
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+>>>>>>> origin/dropbox-change:src/free/AndroidManifest.xml
         <provider 
             android:exported="true"
             android:name="nl.mpcjanssen.simpletask.CachedFileProvider" 

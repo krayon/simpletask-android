@@ -16,11 +16,19 @@ public interface FileStoreInterface {
     boolean isAuthenticated();
     List<Task> loadTasksFromFile(String path, @Nullable BackupInterface backup, String eol)  throws IOException;
     void startLogin(Activity caller, int i);
+<<<<<<< HEAD
     void logout();
     void browseForNewFile(Activity act, String path, FileSelectedListener listener, boolean txtOnly);
     void saveTasksToFile(String path, List<Task> tasks, @Nullable BackupInterface backup, String eol) throws IOException;
     void appendTaskToFile(String path, List<Task> tasks, String eol) throws IOException;
 
+=======
+    void finishLogin();
+    void deauthenticate();
+    void browseForNewFile(Activity act, String path, FileSelectedListener listener, boolean txtOnly);
+    void saveTasksToFile(String path, TaskCache taskCache);
+    void appendTaskToFile(String path, List<Task> tasks) throws IOException;
+>>>>>>> origin/dropbox-change
     int getType();
     void sync();
     String readFile(String file, FileReadListener fileRead) throws IOException;

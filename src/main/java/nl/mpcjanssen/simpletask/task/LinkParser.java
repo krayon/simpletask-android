@@ -32,7 +32,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> origin/dropbox-change
 import nl.mpcjanssen.simpletask.SimpletaskException;
 
 >>>>>>> origin/macroid
