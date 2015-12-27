@@ -75,12 +75,15 @@ public class MyAppWidgetProvider extends AppWidgetProvider {
         Intent appIntent;
 
         appIntent = new Intent(context,Simpletask.class);
-        appIntent.setAction(Constants.INTENT_START_FILTER);
         PendingIntent pendingIntent = PendingIntent.getActivity(context, FROM_LISTVIEW, appIntent, PendingIntent.FLAG_UPDATE_CURRENT);
         view.setPendingIntentTemplate(R.id.widgetlv, pendingIntent);
 
         appIntent = new Intent(context,Simpletask.class);
+<<<<<<< HEAD
         appIntent.setAction(Constants.INTENT_START_FILTER);
+=======
+        appIntent.putExtra(Constants.INTENT_SELECTED_TASK,"");
+>>>>>>> origin/issue129
         putFilterExtras(appIntent, preferences, widgetId);
         pendingIntent = PendingIntent.getActivity(context, FROM_WIDGETS_START+widgetId, appIntent, PendingIntent.FLAG_UPDATE_CURRENT);
         view.setOnClickPendingIntent(R.id.title,pendingIntent);

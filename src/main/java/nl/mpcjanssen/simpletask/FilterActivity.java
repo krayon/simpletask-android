@@ -111,9 +111,15 @@ public class FilterActivity extends ThemedActivity {
         pagerAdapter = new ScreenSlidePagerAdapter(getSupportFragmentManager());
 
         // Fill arguments for fragment
+<<<<<<< HEAD
         arguments = new Bundle();
         arguments.putStringArrayList(FILTER_ITEMS,
                 Util.sortWithPrefix(m_app.getTodoList().getContexts(), m_app.sortCaseSensitive(), "-"));
+=======
+        arguments = new Bundle();        
+        arguments.putStringArrayList(FILTER_ITEMS, 
+                Util.sortWithPrefix(m_app.getTaskCache().getContexts(), m_app.sortCaseSensitive(), "-"));
+>>>>>>> origin/issue129
         arguments.putStringArrayList(INITIAL_SELECTED_ITEMS, mFilter.getContexts());
         arguments.putBoolean(INITIAL_NOT, mFilter.getContextsNot());
         arguments.putString(TAB_TYPE, CONTEXT_TAB);
@@ -124,8 +130,13 @@ public class FilterActivity extends ThemedActivity {
 
         // Fill arguments for fragment
         arguments = new Bundle();
+<<<<<<< HEAD
         arguments.putStringArrayList(FILTER_ITEMS,
                 Util.sortWithPrefix(m_app.getTodoList().getProjects(), m_app.sortCaseSensitive(), "-"));
+=======
+        arguments.putStringArrayList(FILTER_ITEMS, 
+                Util.sortWithPrefix(m_app.getTaskCache().getProjects(), m_app.sortCaseSensitive(), "-"));
+>>>>>>> origin/issue129
         arguments.putStringArrayList(INITIAL_SELECTED_ITEMS, mFilter.getProjects());
         arguments.putBoolean(INITIAL_NOT, mFilter.getProjectsNot());
         arguments.putString(TAB_TYPE, PROJECT_TAB);
@@ -251,7 +262,6 @@ public class FilterActivity extends ThemedActivity {
     @NonNull
     private Intent createFilterIntent() {
         Intent target = new Intent(this, Simpletask.class);
-        target.setAction(Constants.INTENT_START_FILTER);
         updateFilterFromFragments();
         mFilter.setName(mFilter.getProposedName());
         mFilter.saveInIntent(target);

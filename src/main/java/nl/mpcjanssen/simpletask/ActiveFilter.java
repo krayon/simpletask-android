@@ -94,16 +94,23 @@ public class ActiveFilter {
         log = LoggerFactory.getLogger(this.getClass());
     }
 
+<<<<<<< HEAD
     public void initFromIntent(@NonNull Intent intent) {
+=======
+    public boolean initFromIntent(@NotNull Intent intent) {
+>>>>>>> origin/issue129
         String prios;
         String projects;
         String contexts;
         String sorts;
 
+        sorts = intent.getStringExtra(INTENT_SORT_ORDER);
+        if (sorts == null) {
+            return false;
+        }
         prios = intent.getStringExtra(INTENT_PRIORITIES_FILTER);
         projects = intent.getStringExtra(INTENT_PROJECTS_FILTER);
         contexts = intent.getStringExtra(INTENT_CONTEXTS_FILTER);
-        sorts = intent.getStringExtra(INTENT_SORT_ORDER);
 
         m_script = intent.getStringExtra(INTENT_SCRIPT_FILTER);
         m_script_test_task = intent.getStringExtra(INTENT_SCRIPT_TEST_TASK_FILTER);
@@ -140,6 +147,7 @@ public class ActiveFilter {
             m_contexts = new ArrayList<>(Arrays.asList(contexts
                     .split(INTENT_EXTRA_DELIMITERS)));
         }
+        return true;
     }
 
     public void initFromPrefs(@NonNull SharedPreferences prefs) {
