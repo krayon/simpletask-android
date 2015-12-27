@@ -25,6 +25,7 @@ You should have received a copy of the GNU General Public License along with Tod
 
 <!--suppress ALL -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<<<<<<< HEAD
                 android:layout_height="64dp"
                 android:layout_width="match_parent"
                 android:orientation="horizontal"
@@ -33,4 +34,13 @@ You should have received a copy of the GNU General Public License along with Tod
         >
 
 
+=======
+                android:layout_height="60dp"
+                android:layout_width="match_parent"
+                android:orientation="horizontal"
+                android:background="?android:attr/activatedBackgroundIndicator"
+                
+        >
+
+>>>>>>> origin/recyclerview
 </LinearLayout>

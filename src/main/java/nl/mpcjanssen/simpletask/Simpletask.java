@@ -32,10 +32,13 @@ import android.provider.CalendarContract;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
+<<<<<<< HEAD
 =======
 import android.support.multidex.MultiDexApplication;
 import android.support.v4.app.ActionBarDrawerToggle;
 >>>>>>> origin/macroid
+=======
+>>>>>>> origin/recyclerview
 import android.support.v4.content.LocalBroadcastManager;
 <<<<<<< HEAD
 import android.support.v4.view.MenuItemCompat;
@@ -47,6 +50,12 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AlertDialog;
+<<<<<<< HEAD
+=======
+
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+>>>>>>> origin/recyclerview
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.SpannableString;
@@ -89,6 +98,11 @@ import java.util.List;
 import java.util.Set;
 import java.util.TimeZone;
 
+<<<<<<< HEAD
+=======
+import android.view.*;
+import android.widget.*;
+>>>>>>> origin/recyclerview
 import hirondelle.date4j.DateTime;
 import nl.mpcjanssen.simpletask.adapters.DrawerAdapter;
 import nl.mpcjanssen.simpletask.remote.FileStoreInterface;
@@ -102,13 +116,18 @@ import nl.mpcjanssen.simpletask.util.Util;
 =======
 import org.slf4j.LoggerFactory;
 
+
 import java.io.File;
 import java.util.*;
 >>>>>>> origin/extsdwrite
 
 
 public class Simpletask extends ThemedActivity implements
+<<<<<<< HEAD
         AbsListView.OnScrollListener, AdapterView.OnItemLongClickListener, ActionMode.Callback {
+=======
+        AbsListView.OnScrollListener {
+>>>>>>> origin/recyclerview
 
     private final static int REQUEST_SHARE_PARTS = 1;
     private final static int REQUEST_PREFERENCES = 2;
@@ -130,7 +149,7 @@ public class Simpletask extends ThemedActivity implements
     private BroadcastReceiver m_broadcastReceiver;
     private LocalBroadcastManager localBroadcastManager;
     @Nullable
-    private ActionMode actionMode;
+
     // Drawer vars
     private ListView m_leftDrawerList;
     private ListView m_rightDrawerList;
@@ -141,7 +160,6 @@ public class Simpletask extends ThemedActivity implements
     private Dialog mOverlayDialog;
     private boolean mIgnoreScrollEvents = false;
     private org.slf4j.Logger log;
-    private ListView listView;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -297,6 +315,7 @@ public class Simpletask extends ThemedActivity implements
 
     private void selectAllTasks() {
         ArrayList<Task> selectedTasks = new ArrayList<>();
+<<<<<<< HEAD
         ListView lv = getListView();
         int itemCount = m_adapter.visibleLines.size();
         for (VisibleLine vline : m_adapter.visibleLines ) {
@@ -310,6 +329,22 @@ public class Simpletask extends ThemedActivity implements
             if (!vline.header()) {
                 selectedTasks.add(vline.task());
 >>>>>>> origin/refactor
+=======
+        RecyclerView recyclerView = getTaskListView();
+        int itemCount = recyclerView.getChildCount();
+        for (int i = 0; i < itemCount; i++) {
+            // Only check tasks that are not checked yet
+            // and skip headers
+            // This prevents double counting in the CAB title
+            Task t = getTaskAt(i);
+            if (t == null) {
+                continue;
+            }
+            selectedTasks.add(t);
+            View v = recyclerView.getChildAt(i);
+            if (!v.isSelected()) {
+                v.setSelected(true);
+>>>>>>> origin/recyclerview
             }
         }
         getTodoList().setSelectedTasks(selectedTasks);
@@ -434,16 +469,17 @@ public class Simpletask extends ThemedActivity implements
         }
         m_adapter.setFilteredTasks();
 
-        getListView().setAdapter(this.m_adapter);
+        RecyclerView mRecyclerView = (RecyclerView) findViewById(R.id.recycler_view);
 
-        ListView lv = getListView();
-        lv.setTextFilterEnabled(true);
-        lv.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
-        lv.setClickable(true);
-        lv.setLongClickable(true);
-        lv.setOnItemLongClickListener(this);
+        // use this setting to improve performance if you know that changes
+        // in content do not change the layout size of the RecyclerView
+        mRecyclerView.setHasFixedSize(false);
 
+        // use a linear layout manager
+        LinearLayoutManager mLayoutManager = new LinearLayoutManager(this);
+        mRecyclerView.setLayoutManager(mLayoutManager);
 
+<<<<<<< HEAD
         lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -523,22 +559,13 @@ public class Simpletask extends ThemedActivity implements
                                             new String[]{url});
                                     intent.setType("text/plain");
                                     startActivity(intent);
+=======
+>>>>>>> origin/recyclerview
 
-                            }
-                        }
-                    });
-                    build.create().show();
-                }
-            }
-        });
+        mRecyclerView.setAdapter(m_adapter);
 
-        mIgnoreScrollEvents = true;
-        // Setting a scroll listener reset the scroll
-        lv.setOnScrollListener(this);
-        mIgnoreScrollEvents = false;
-        if (m_savedInstanceState != null) {
-            m_scrollPosition = m_savedInstanceState.getInt("position");
-        }
+        RecyclerView rv = getTaskListView();
+
 
         lv.setFastScrollEnabled(m_app.useFastScroll());
 
@@ -558,7 +585,12 @@ public class Simpletask extends ThemedActivity implements
         }
         setSelectedTasks(selection);
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+<<<<<<< HEAD
         lv.setSelectionFromTop(m_scrollPosition, 0);
+=======
+        //lv.setSelectionFromTop(m_scrollPosition, 0);
+        //fab.attachToListView(lv);
+>>>>>>> origin/recyclerview
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -583,22 +615,15 @@ public class Simpletask extends ThemedActivity implements
         for (Task t : tasks) {
             int position = m_adapter.getPosition(t);
             if (position != -1) {
-                ListView lv = getListView();
-                lv.setItemChecked(position, true);
-                lv.setSelection(position);
+                //ListView lv = getListView();
+                //lv.setItemChecked(position, true);
+                //lv.setSelection(position);
             }
         }
     }
 
     private void updateFilterBar() {
-        ListView lv = getListView();
-        if (lv == null) {
-            return;
-        }
-        int index = lv.getFirstVisiblePosition();
-        View v = lv.getChildAt(0);
-        int top = (v == null) ? 0 : v.getTop();
-        lv.setSelectionFromTop(index, top);
+
 
         final LinearLayout actionbar = (LinearLayout) findViewById(R.id.actionbar);
         final TextView filterText = (TextView) findViewById(R.id.filter_text);
@@ -639,7 +664,7 @@ public class Simpletask extends ThemedActivity implements
     @Override
     protected void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putInt("position", getListView().getFirstVisiblePosition());
+        //outState.putInt("position", getListView().getFirstVisiblePosition());
     }
 
     @Override
@@ -743,16 +768,25 @@ public class Simpletask extends ThemedActivity implements
 
     @Nullable
     private Task getTaskAt(final int pos) {
+<<<<<<< HEAD
         if (pos < m_adapter.getCount()) {
             return m_adapter.getItem(pos);
         }
         return null;
+=======
+        return m_adapter.visibleLines.get(pos).task;
+>>>>>>> origin/recyclerview
     }
 
     private void shareTodoList(int format) {
         StringBuilder text = new StringBuilder();
+<<<<<<< HEAD
         for (int i = 0; i < m_adapter.getCount()-1; i++) {
             Task task = m_adapter.getItem(i);
+=======
+        for (int i = 0; i < m_adapter.getCountVisbleTasks(); i++) {
+            Task task = getTaskAt(i);
+>>>>>>> origin/recyclerview
             if (task != null) {
                 text.append(task.showParts(format)).append("\n");
             }
@@ -1082,6 +1116,7 @@ public class Simpletask extends ThemedActivity implements
     }
 
     private void closeSelectionMode() {
+<<<<<<< HEAD
         //getTodoList().clearSelectedTasks();
         getListView().clearChoices();
         if (actionMode!=null) {
@@ -1090,6 +1125,12 @@ public class Simpletask extends ThemedActivity implements
         m_adapter.setFilteredTasks();
 
 
+=======
+        getTodoList().clearSelectedTasks();
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        toolbar.setVisibility(View.GONE);
+>>>>>>> origin/recyclerview
         //getTodoList().clearSelectedTasks();
         //populateMainMenu(options_menu);
         //updateDrawers();
@@ -1345,6 +1386,7 @@ public class Simpletask extends ThemedActivity implements
         startActivity(i);
     }
 
+<<<<<<< HEAD
     @Override
     public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
         Task t = getTaskAt(position);
@@ -1363,6 +1405,8 @@ public class Simpletask extends ThemedActivity implements
         }
         return true;
     }
+=======
+>>>>>>> origin/recyclerview
 
     private void openSelectionMode() {
         actionMode = startActionMode(this);
@@ -1472,18 +1516,18 @@ public class Simpletask extends ThemedActivity implements
         }
     }
 
-    public ListView getListView() {
-        View lv = findViewById(android.R.id.list);
-        return (ListView) lv;
+    public RecyclerView getTaskListView() {
+        View lv = findViewById(R.id.recycler_view);
+        return (RecyclerView) lv;
     }
 
-
-    private static class ViewHolder {
+    private class LineHolder extends RecyclerView.ViewHolder {
         private TextView tasktext;
         private TextView taskage;
         private TextView taskdue;
         private TextView taskthreshold;
         private CheckBox cbCompleted;
+<<<<<<< HEAD
     }
 
     public class TaskAdapter extends BaseAdapter implements ListAdapter {
@@ -1594,6 +1638,18 @@ public class Simpletask extends ThemedActivity implements
                     convertView = m_inflater.inflate(R.layout.list_header, parent, false);
                 }
                 TextView t = (TextView) convertView
+=======
+
+        public LineHolder(View itemView) {
+            super(itemView);
+        }
+
+        public void bindLine(TaskAdapter.VisibleLine line) {
+
+
+            if (line.header) {
+                TextView t = (TextView) itemView
+>>>>>>> origin/recyclerview
                         .findViewById(R.id.list_header_title);
 <<<<<<< HEAD
                 t.setText(line.getTitle());
@@ -1602,20 +1658,89 @@ public class Simpletask extends ThemedActivity implements
 >>>>>>> origin/refactor
 
             } else {
-                final ViewHolder holder;
-                if (convertView == null) {
-                    convertView = m_inflater.inflate(R.layout.list_item, parent, false);
-                    holder = new ViewHolder();
-                    holder.tasktext = (TextView) convertView
+                final int position = getAdapterPosition();
+                itemView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        final ArrayList<String> links = new ArrayList<>();
+                        final ArrayList<String> actions = new ArrayList<>();
+                        itemView.setSelected(!itemView.isSelected());
+                        m_adapter.notifyItemChanged(position);
+                        if (getTodoList().getSelectedTasks().size() > 0) {
+                            //onItemLongClick(parent, view, position, id);
+                            return;
+                        }
+                        int position = getTaskListView().getChildAdapterPosition(view);
+                        Task t = getTaskAt(position);
+                        if (t != null) {
+                            for (String link : t.getLinks()) {
+                                actions.add(ACTION_LINK);
+                                links.add(link);
+                            }
+                            for (String number : t.getPhoneNumbers()) {
+                                actions.add(ACTION_PHONE);
+                                links.add(number);
+                            }
+                            for (String mail : t.getMailAddresses()) {
+                                actions.add(ACTION_MAIL);
+                                links.add(mail);
+                            }
+                        }
+                        final String[] linksArray = links.toArray(new String[links.size()]);
+                        if (linksArray.length == 0) {
+                            //onItemLongClick(parent, view, position, id);
+                        } else {
+                            AlertDialog.Builder build = new AlertDialog.Builder(Simpletask.this);
+                            build.setTitle(R.string.task_action);
+                            build.setItems(linksArray, new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    Intent intent;
+                                    String url = links.get(which);
+                                    log.info("" + actions.get(which) + ": " + url);
+                                    switch (actions.get(which)) {
+                                        case ACTION_LINK:
+                                            if (url.startsWith("todo://")) {
+                                                File todoFolder = m_app.getTodoFile().getParentFile();
+                                                File newName = new File(todoFolder, url.substring(7));
+                                                m_app.switchTodoFile(newName.getAbsolutePath(), true);
+                                            } else {
+                                                intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+                                                startActivity(intent);
+                                            }
+                                            break;
+                                        case ACTION_PHONE:
+                                            String encodedNumber = Uri.encode(url);
+                                            intent = new Intent(Intent.ACTION_DIAL, Uri.parse("tel:"
+                                                    + encodedNumber));
+                                            startActivity(intent);
+                                            break;
+                                        case ACTION_MAIL:
+                                            intent = new Intent(Intent.ACTION_SEND, Uri.parse(url));
+                                            intent.putExtra(android.content.Intent.EXTRA_EMAIL,
+                                                    new String[]{url});
+                                            intent.setType("text/plain");
+                                            startActivity(intent);
+
+                                    }
+                                }
+                            });
+                            build.create().show();
+                        }
+                    }
+                });
+
+                this.tasktext = (TextView) itemView
                             .findViewById(R.id.tasktext);
-                    holder.taskage = (TextView) convertView
+                    this.taskage = (TextView) itemView
                             .findViewById(R.id.taskage);
-                    holder.taskdue = (TextView) convertView
+                    this.taskdue = (TextView) itemView
                             .findViewById(R.id.taskdue);
-                    holder.taskthreshold = (TextView) convertView
+                    this.taskthreshold = (TextView) itemView
                             .findViewById(R.id.taskthreshold);
-                    holder.cbCompleted = (CheckBox) convertView
+                    this.cbCompleted = (CheckBox) itemView
                             .findViewById(R.id.checkBox);
+<<<<<<< HEAD
                     convertView.setTag(holder);
                 } else {
                     holder = (ViewHolder) convertView.getTag();
@@ -1625,10 +1750,13 @@ public class Simpletask extends ThemedActivity implements
 =======
                 final Task task = line.task();
 >>>>>>> origin/refactor
+=======
+                final Task task = line.task;
+>>>>>>> origin/recyclerview
                 if (m_app.showCompleteCheckbox()) {
-                    holder.cbCompleted.setVisibility(View.VISIBLE);
+                   cbCompleted.setVisibility(View.VISIBLE);
                 } else {
-                    holder.cbCompleted.setVisibility(View.GONE);
+                   cbCompleted.setVisibility(View.GONE);
                 }
                 int tokensToShow = Token.SHOW_ALL;
                 tokensToShow = tokensToShow & ~Token.CREATION_DATE;
@@ -1675,18 +1803,18 @@ public class Simpletask extends ThemedActivity implements
                 }
                 Util.setColor(ss, prioColor, task.getPriority()
                         .inFileFormat());
-                holder.tasktext.setText(ss);
+                tasktext.setText(ss);
 
                 handleEllipsizing(holder.tasktext);
 
                 if (task.isCompleted()) {
                     // log.info( "Striking through " + task.getText());
-                    holder.tasktext.setPaintFlags(holder.tasktext
+                    tasktext.setPaintFlags(tasktext
                             .getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
-                    holder.taskage.setPaintFlags(holder.taskage
+                    taskage.setPaintFlags(taskage
                             .getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
-                    holder.cbCompleted.setChecked(true);
-                    holder.cbCompleted.setOnClickListener(new View.OnClickListener() {
+                    cbCompleted.setChecked(true);
+                    cbCompleted.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
                             undoCompleteTasks(task);
@@ -1696,14 +1824,14 @@ public class Simpletask extends ThemedActivity implements
                         }
                     });
                 } else {
-                    holder.tasktext
-                            .setPaintFlags(holder.tasktext.getPaintFlags()
+                    tasktext
+                            .setPaintFlags(tasktext.getPaintFlags()
                                     & ~Paint.STRIKE_THRU_TEXT_FLAG);
-                    holder.taskage
-                            .setPaintFlags(holder.taskage.getPaintFlags()
+                    taskage
+                            .setPaintFlags(taskage.getPaintFlags()
                                     & ~Paint.STRIKE_THRU_TEXT_FLAG);
-                    holder.cbCompleted.setChecked(false);
-                    holder.cbCompleted.setOnClickListener(new View.OnClickListener() {
+                    cbCompleted.setChecked(false);
+                    cbCompleted.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
                             completeTasks(task);
@@ -1721,30 +1849,31 @@ public class Simpletask extends ThemedActivity implements
                         m_app.hasColorDueDates());
                 String relThres = task.getRelativeThresholdDate(mContext);
                 if (!Strings.isEmptyOrNull(relAge) && !mFilter.getHideCreateDate()) {
-                    holder.taskage.setText(relAge);
-                    holder.taskage.setVisibility(View.VISIBLE);
+                    taskage.setText(relAge);
+                    taskage.setVisibility(View.VISIBLE);
                 } else {
-                    holder.taskage.setText("");
-                    holder.taskage.setVisibility(View.GONE);
+                    taskage.setText("");
+                    taskage.setVisibility(View.GONE);
                 }
                 if (relDue != null) {
-                    holder.taskdue.setText(relDue);
-                    holder.taskdue.setVisibility(View.VISIBLE);
+                    taskdue.setText(relDue);
+                    taskdue.setVisibility(View.VISIBLE);
                 } else {
-                    holder.taskdue.setText("");
-                    holder.taskdue.setVisibility(View.GONE);
+                    taskdue.setText("");
+                    taskdue.setVisibility(View.GONE);
                 }
                 if (!Strings.isEmptyOrNull(relThres)) {
-                    holder.taskthreshold.setText(relThres);
-                    holder.taskthreshold.setVisibility(View.VISIBLE);
+                    taskthreshold.setText(relThres);
+                    taskthreshold.setVisibility(View.VISIBLE);
                 } else {
-                    holder.taskthreshold.setText("");
-                    holder.taskthreshold.setVisibility(View.GONE);
+                    taskthreshold.setText("");
+                    taskthreshold.setVisibility(View.GONE);
                 }
             }
-            return convertView;
         }
+    }
 
+<<<<<<< HEAD
         @Override
         public int getItemViewType(int position) {
             if (position == visibleLines.size()) {
@@ -1757,27 +1886,169 @@ public class Simpletask extends ThemedActivity implements
             if (line.header()) {
 >>>>>>> origin/refactor
                 return 0;
+=======
+
+    public class TaskAdapter extends  RecyclerView.Adapter<LineHolder> {
+        public class VisibleLine {
+            Task task;
+            String title = "";
+            boolean header = false;
+
+            public VisibleLine(@NonNull String title) {
+                this.title = title;
+                this.header = true;
+            }
+
+            public VisibleLine(@NonNull Task task) {
+                this.task = task;
+                this.header = false;
+            }
+
+            @Override
+            public boolean equals(@Nullable Object obj) {
+                if (this == obj)
+                    return true;
+                if (obj == null)
+                    return false;
+                if (getClass() != obj.getClass())
+                    return false;
+
+                VisibleLine other = (VisibleLine) obj;
+                return other.header == this.header && this.task.equals(other.task);
+            }
+
+            @Override
+            public int hashCode() {
+                final int prime = 31;
+                int result = 1;
+                int headerHash = header ? 1231 : 1237;
+                result = prime * result + headerHash;
+                result = prime * result + task.hashCode();
+                return result;
+            }
+        }
+
+        @NonNull
+        ArrayList<VisibleLine> visibleLines = new ArrayList<>();
+        @NonNull
+        private LayoutInflater m_inflater;
+        private int countVisbleTasks;
+
+        public TaskAdapter(@NonNull LayoutInflater inflater) {
+            this.m_inflater = inflater;
+        }
+
+        void setFilteredTasks() {
+            if (m_app.showTodoPath()) {
+                setTitle(m_app.getTodoFileName().replaceAll("([^/])[^/]*/", "$1/"));
+>>>>>>> origin/recyclerview
             } else {
-                return 1;
+                setTitle(R.string.app_label);
+            }
+            List<Task> visibleTasks;
+            countVisbleTasks = 0;
+            log.info("setFilteredTasks called: " + getTodoList());
+            ArrayList<String> sorts = mFilter.getSort(m_app.getDefaultSorts());
+            visibleTasks = getTodoList().getSortedTasksCopy(mFilter, sorts, m_app.sortCaseSensitive());
+
+
+            ArrayList<VisibleLine> newVisibleLines = new ArrayList<>();
+
+            String header = "";
+            String newHeader;
+            int firstGroupSortIndex = 0;
+
+            if (sorts.size() > 1 && sorts.get(0).contains("completed")
+                    || sorts.get(0).contains("future")) {
+                firstGroupSortIndex++;
+                if (sorts.size() > 2 && sorts.get(1).contains("completed")
+                        || sorts.get(1).contains("future")) {
+                    firstGroupSortIndex++;
+                }
+            }
+            String firstSort = sorts.get(firstGroupSortIndex);
+            for (Task t : visibleTasks) {
+                newHeader = t.getHeader(firstSort, getString(R.string.no_header));
+                if (!header.equals(newHeader)) {
+                    VisibleLine headerLine = new VisibleLine(newHeader);
+                    int last = newVisibleLines.size() - 1;
+                    if (last != -1 && newVisibleLines.get(last).header && !m_app.showEmptyLists()) {
+                        newVisibleLines.set(last, headerLine);
+                    } else {
+                        newVisibleLines.add(headerLine);
+                    }
+                    header = newHeader;
+                }
+
+                if (t.isVisible() || m_app.showHidden()) {
+                    // enduring tasks should not be displayed
+                    VisibleLine taskLine = new VisibleLine(t);
+                    newVisibleLines.add(taskLine);
+                    countVisbleTasks++;
+                }
+            }
+            visibleLines = newVisibleLines;
+            getTaskListView().setAdapter(this);
+            m_adapter.notifyDataSetChanged();
+            notifyDataSetChanged();
+            updateFilterBar();
+        }
+
+<<<<<<< HEAD
+        @Override
+        public int getViewTypeCount() {
+            return 3;
+=======
+        public int getCountVisbleTasks() {
+            return visibleLines.size();
+        }
+
+        /*
+        ** Get the adapter position for task
+        */
+        public int getPosition(Task task) {
+            VisibleLine line = new VisibleLine(task);
+            return visibleLines.indexOf(line);
+>>>>>>> origin/recyclerview
+        }
+
+        @Override
+        public int getItemViewType(int position) {
+            // Last empty task under fab?
+            if (position==visibleLines.size()){
+                return 2;
+            }
+            return visibleLines.get(position).header ? 0 : 1;
+        }
+
+        @Override
+        public LineHolder onCreateViewHolder(ViewGroup parent, int type) {
+                View view;
+                if (type==0) {
+                    view = LayoutInflater.from(parent.getContext())
+                            .inflate(R.layout.list_header, parent, false);
+                } else if (type == 1 ){
+                    view = LayoutInflater.from(parent.getContext())
+                            .inflate(R.layout.list_item, parent, false);view = LayoutInflater.from(parent.getContext())
+                            .inflate(R.layout.list_item, parent, false);
+                } else {
+                    view = LayoutInflater.from(parent.getContext())
+                            .inflate(R.layout.empty_list_item, parent, false);
+                }
+                return new LineHolder(view);
+
+            }
+
+        @Override
+        public void onBindViewHolder(LineHolder lineHolder, int i) {
+            if (i != getCountVisbleTasks()) {
+                TaskAdapter.VisibleLine line = m_adapter.visibleLines.get(i);
+                lineHolder.bindLine(line);
             }
         }
 
         @Override
-        public int getViewTypeCount() {
-            return 3;
-        }
-
-        @Override
-        public boolean isEmpty() {
-            return visibleLines.size() == 0;
-        }
-
-        @Override
-        public boolean areAllItemsEnabled() {
-            return false;
-        }
-
-        @Override
+<<<<<<< HEAD
         public boolean isEnabled(int position) {
             if (position == visibleLines.size()) {
                 return false;
@@ -1823,6 +2094,10 @@ public class Simpletask extends ThemedActivity implements
             } else {
                 log.warn("Unrecognized preference value for task text ellipsizing: {} !", ellipsizingPref);
             }
+=======
+        public int getItemCount() {
+            return visibleLines.size()+1;
+>>>>>>> origin/recyclerview
         }
     }
 
