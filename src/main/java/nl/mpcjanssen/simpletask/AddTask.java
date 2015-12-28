@@ -59,8 +59,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import nl.mpcjanssen.simpletask.util.InputDialogListener;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
 
 import java.util.ArrayList;
 import java.util.Arrays;

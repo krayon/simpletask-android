@@ -28,17 +28,13 @@ import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
+import com.orm.SugarTransactionHelper;
 import hirondelle.date4j.DateTime;
-import nl.mpcjanssen.simpletask.ActiveFilter;
-import nl.mpcjanssen.simpletask.Constants;
-import nl.mpcjanssen.simpletask.R;
-import nl.mpcjanssen.simpletask.TodoApplication;
+import nl.mpcjanssen.simpletask.*;
 import nl.mpcjanssen.simpletask.remote.BackupInterface;
 import nl.mpcjanssen.simpletask.remote.FileStoreInterface;
 import nl.mpcjanssen.simpletask.sort.MultiComparator;
 import nl.mpcjanssen.simpletask.util.Util;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.List;
@@ -56,7 +52,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * @author Mark Janssen
 
  */
-public class TodoList {
+public class TodoList implements TodoListInterface {
     final static String TAG = TodoList.class.getSimpleName();
     private final Logger log;
     private final boolean startLooper;
@@ -123,6 +119,7 @@ public class TodoList {
     }
 
 
+    @Override
     public void add(final Task t, final boolean atEnd) {
         queueRunnable("Add task", new Runnable() {
             @Override
@@ -138,6 +135,7 @@ public class TodoList {
     }
 
 
+    @Override
     public void remove(@NonNull final Task t) {
         queueRunnable("Remove", new Runnable() {
             @Override
@@ -148,21 +146,25 @@ public class TodoList {
     }
 
 
+    @Override
     public int size() {
         return mTasks.size();
     }
 
-    public int find (Task t) {
+    @Override
+    public int find(Task t) {
         if (mTasks == null) {
             return -1;
         }
         return mTasks.indexOf(t);
     }
 
+    @Override
     public Task get(int position) {
         return mTasks.get(position);
     }
 
+    @Override
     @NonNull
     public ArrayList<Priority> getPriorities() {
         Set<Priority> res = new HashSet<>();
@@ -174,6 +176,7 @@ public class TodoList {
         return ret;
     }
 
+    @Override
     @NonNull
     public ArrayList<String> getContexts() {
         if (mLists != null) {
@@ -188,6 +191,7 @@ public class TodoList {
         return mLists;
     }
 
+    @Override
     @NonNull
     public ArrayList<String> getProjects() {
         if (mTags != null) {
@@ -203,15 +207,18 @@ public class TodoList {
     }
 
 
+    @Override
     public ArrayList<String> getDecoratedContexts() {
         return Util.prefixItems("@", getContexts());
     }
 
+    @Override
     public ArrayList<String> getDecoratedProjects() {
         return Util.prefixItems("+", getProjects());
     }
 
 
+    @Override
     public void undoComplete(@NonNull final List<Task> tasks) {
         queueRunnable("Uncomplete", new Runnable() {
             @Override
@@ -223,6 +230,7 @@ public class TodoList {
         });
     }
 
+    @Override
     public void complete(@NonNull final Task task,
                          final boolean keepPrio) {
 
@@ -242,6 +250,7 @@ public class TodoList {
     }
 
 
+    @Override
     public void prioritize(final List<Task> tasks, final Priority prio) {
         queueRunnable("Complete", new Runnable() {
             @Override
@@ -253,6 +262,7 @@ public class TodoList {
         });
     }
 
+    @Override
     public void defer(@NonNull final String deferString, @NonNull final Task tasksToDefer, final int dateType) {
         queueRunnable("Defer", new Runnable() {
             @Override
@@ -269,6 +279,7 @@ public class TodoList {
         });
     }
 
+    @Override
     @NonNull
     public List<Task> getSelectedTasks() {
         if (mSelectedTask==null) {
@@ -277,11 +288,13 @@ public class TodoList {
         return mSelectedTask;
     }
 
+    @Override
     public void setSelectedTasks(List<Task> selectedTasks) {
         this.mSelectedTask = selectedTasks;
     }
 
 
+    @Override
     public void notifyChanged(final FileStoreInterface filestore, final String todoname, final String eol, final BackupInterface backup, final boolean save) {
         log.info("Handler: Queue notifychanged");
         todolistQueue.post(new Runnable() {
@@ -305,10 +318,12 @@ public class TodoList {
         });
     }
 
+    @Override
     public List<Task> getTasks() {
         return mTasks;
     }
 
+    @Override
     public List<Task> getSortedTasksCopy(@NonNull ActiveFilter filter, @NonNull ArrayList<String> sorts, boolean caseSensitive) {
         List<Task> filteredTasks = filter.apply(mTasks);
         List<Task> originalOrder = new ArrayList<>();
@@ -318,20 +333,24 @@ public class TodoList {
         return filteredTasks;
     }
 
+    @Override
     public void selectTask(Task t) {
         if (mSelectedTask.indexOf(t) == -1) {
             mSelectedTask.add(t);
         }
     }
 
+    @Override
     public void unSelectTask(Task t) {
         mSelectedTask.remove(t);
     }
 
+    @Override
     public void clearSelectedTasks() {
         mSelectedTask = new CopyOnWriteArrayList();
     }
 
+    @Override
     public void selectTask(int index) {
         if (index < 0 || index > mTasks.size() - 1) {
             return;
@@ -339,6 +358,7 @@ public class TodoList {
         selectTask(mTasks.get(index));
     }
 
+    @Override
     public void reload(final FileStoreInterface fileStore, final String filename, final BackupInterface backup, final LocalBroadcastManager lbm, final boolean background, final String eol) {
         if (TodoList.this.loadQueued()) {
             log.info("Todolist reload is already queued waiting");
@@ -357,6 +377,19 @@ public class TodoList {
                     Util.showToastShort(TodoApplication.getAppContext(), "Loading of todo file failed");
                 }
                 loadQueued = false;
+                SugarTransactionHelper.doInTransaction(
+                        new SugarTransactionHelper.Callback() {
+                            @Override
+                            public void manipulateInTransaction() {
+                                Entry.deleteAll(Entry.class);
+                                Long line  = 1L;
+                                for (Task t: mTasks) {
+                                    new Entry(line,t).save();
+                                    line++;
+                                }
+                            }
+                        }
+                );
                 log.info("Todolist loaded, refresh UI");
                 notifyChanged(fileStore,filename,eol,backup, false);
             }};
@@ -370,6 +403,7 @@ public class TodoList {
         }
     }
 
+    @Override
     public void save(final FileStoreInterface filestore, final String todoFileName, final BackupInterface backup, final String eol) {
         queueRunnable("Save", new Runnable() {
             @Override
@@ -385,7 +419,8 @@ public class TodoList {
 
     }
 
-    public void archive(final FileStoreInterface filestore, final String todoFilename, final String doneFileName,  final List<Task> tasks, final String eol) {
+    @Override
+    public void archive(final FileStoreInterface filestore, final String todoFilename, final String doneFileName, final List<Task> tasks, final String eol) {
         queueRunnable("Archive", new Runnable() {
             @Override
             public void run() {
@@ -415,6 +450,7 @@ public class TodoList {
         });
     }
 
+    @Override
     public void replace(Task old, Task updated) {
         int index = mTasks.indexOf(old);
         if (index>-1) {

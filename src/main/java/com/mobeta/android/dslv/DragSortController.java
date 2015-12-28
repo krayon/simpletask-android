@@ -4,8 +4,8 @@ import android.graphics.Point;
 import android.support.annotation.NonNull;
 import android.view.*;
 import android.widget.AdapterView;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import nl.mpcjanssen.simpletask.Logger;
+import nl.mpcjanssen.simpletask.LoggerFactory;
 
 
 /**

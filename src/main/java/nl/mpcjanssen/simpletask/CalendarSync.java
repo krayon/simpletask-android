@@ -35,8 +35,7 @@ import hirondelle.date4j.DateTime;
 import nl.mpcjanssen.simpletask.task.Task;
 import nl.mpcjanssen.simpletask.task.TodoList;
 import nl.mpcjanssen.simpletask.util.Util;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
 
 import java.util.Calendar;
 import java.util.List;

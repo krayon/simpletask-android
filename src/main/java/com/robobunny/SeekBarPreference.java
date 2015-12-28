@@ -12,9 +12,10 @@ import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
+import nl.mpcjanssen.simpletask.Logger;
+import nl.mpcjanssen.simpletask.LoggerFactory;
 import nl.mpcjanssen.simpletask.R;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
 
 public class SeekBarPreference extends Preference implements OnSeekBarChangeListener {
 

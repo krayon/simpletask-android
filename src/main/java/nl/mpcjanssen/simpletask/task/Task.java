@@ -28,6 +28,8 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.text.SpannableString;
 
+import com.orm.SugarRecord;
+import com.orm.dsl.Ignore;
 import hirondelle.date4j.DateTime;
 import nl.mpcjanssen.simpletask.ActiveFilter;
 import nl.mpcjanssen.simpletask.Constants;
@@ -36,25 +38,22 @@ import nl.mpcjanssen.simpletask.util.RelativeDate;
 import nl.mpcjanssen.simpletask.util.Strings;
 import nl.mpcjanssen.simpletask.util.Util;
 
-import java.io.Serializable;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-
-@SuppressWarnings("serial")
-public class Task implements Serializable {
-    public static String TAG = Task.class.getName();
-    public final static int DUE_DATE = 0;
-    public final static int THRESHOLD_DATE = 1;
-    private static final long serialVersionUID = 1L;
-    private final static Pattern LIST_PATTERN = Pattern
+public class Task  {
+    @Ignore public static String TAG = Task.class.getName();
+    @Ignore public final static int DUE_DATE = 0;
+    @Ignore public final static int THRESHOLD_DATE = 1;
+    @Ignore private static final long serialVersionUID = 1L;
+    @Ignore private final static Pattern LIST_PATTERN = Pattern
             .compile("^@(\\S*\\w)(.*)");
-    private final static Pattern TAG_PATTERN = Pattern
+    @Ignore private final static Pattern TAG_PATTERN = Pattern
             .compile("^\\+(\\S*\\w)(.*)");
-    private static final Pattern HIDDEN_PATTERN = Pattern
+    @Ignore private static final Pattern HIDDEN_PATTERN = Pattern
             .compile("^[Hh]:([01])(.*)");
-    private static final Pattern DUE_PATTERN = Pattern
+    @Ignore private static final Pattern DUE_PATTERN = Pattern
             .compile("^[Dd][Uu][Ee]:(\\d{4}-\\d{2}-\\d{2})(.*)");
     private static final Pattern THRESHOLD_PATTERN = Pattern
             .compile("^[Tt]:(\\d{4}-\\d{2}-\\d{2})(.*)");
@@ -65,6 +64,7 @@ public class Task implements Serializable {
     private final static Pattern SINGLE_DATE_PATTERN = Pattern
             .compile("^(\\d{4}-\\d{2}-\\d{2} )(.*)");
     private final static String COMPLETED_PREFIX = "x ";
+    private Long line;
 
     @NonNull
     private ArrayList<Token> mTokens = new ArrayList<>();
@@ -83,10 +83,9 @@ public class Task implements Serializable {
     private String mThresholdate;
     @Nullable
     private String mDuedate;
-    private boolean mIsHidden;
+    boolean hidden;
 
-
-    public Task(@NonNull String rawText, DateTime defaultPrependedDate) {
+    public Task( @NonNull String rawText, DateTime defaultPrependedDate) {
         this.init(rawText, defaultPrependedDate);
     }
 
@@ -337,7 +336,7 @@ public class Task implements Serializable {
     }
 
     public boolean isVisible() {
-        return !mIsHidden;
+        return !hidden;
     }
 
     @Nullable
@@ -379,10 +378,6 @@ public class Task implements Serializable {
                 mTokens.remove(0);
             }
         }
-    }
-
-    public void delete() {
-        this.update("");
     }
 
     @NonNull
@@ -582,7 +577,7 @@ public class Task implements Serializable {
         mCompleted = false;
         mCompletionDate = null;
         mCreateDate = null;
-        mIsHidden = false;
+        hidden = false;
         mLists = new ArrayList<>();
         mTags =  new ArrayList<>();
 
@@ -680,7 +675,7 @@ public class Task implements Serializable {
                 remaining = m.group(2);
                 Token tok = new HIDDEN(match);
                 mTokens.add(tok);
-                mIsHidden = match.equals("1");
+                hidden = match.equals("1");
                 continue;
             }
             String leading = "";

@@ -1,10 +1,8 @@
 package nl.mpcjanssen.simpletask.sort
 
 import nl.mpcjanssen.simpletask.ActiveFilter
+import nl.mpcjanssen.simpletask.getLogger
 import nl.mpcjanssen.simpletask.task.Task
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
-
 
 import kotlin.collections.dropLastWhile
 import kotlin.collections.toTypedArray
@@ -17,7 +15,7 @@ class MultiComparator(sorts: ArrayList<String>, caseSensitve: Boolean, taskList:
     var comparators : Comparator<Task>? = null
     val defaultComparator = FileOrderComparator(taskList)
     init {
-        val log = LoggerFactory.getLogger(this.javaClass)
+        val log = getLogger(this.javaClass)
 
         label@ for (sort in sorts) {
             val parts = sort.split(ActiveFilter.SORT_SEPARATOR.toRegex()).dropLastWhile({ it.isEmpty() }).toTypedArray()

@@ -32,8 +32,7 @@ import android.preference.*;
 import android.support.annotation.NonNull;
 import android.support.v4.content.LocalBroadcastManager;
 import nl.mpcjanssen.simpletask.util.Util;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
 
 public class Preferences extends ThemedActivity {
     static TodoApplication m_app ;

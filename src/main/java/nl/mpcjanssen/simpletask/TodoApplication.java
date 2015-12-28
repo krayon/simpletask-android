@@ -27,7 +27,6 @@ package nl.mpcjanssen.simpletask;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.app.Application;
 import android.app.Dialog;
 import android.appwidget.AppWidgetManager;
 import android.content.*;
@@ -44,8 +43,6 @@ import nl.mpcjanssen.simpletask.remote.FileStore;
 import nl.mpcjanssen.simpletask.remote.FileStoreInterface;
 import nl.mpcjanssen.simpletask.task.TodoList;
 import nl.mpcjanssen.simpletask.util.Util;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -54,7 +51,7 @@ import java.util.List;
 import java.util.TimeZone;
 
 
-public class TodoApplication extends Application implements
+public class TodoApplication extends com.orm.SugarApp implements
 
         SharedPreferences.OnSharedPreferenceChangeListener, TodoList.TodoListChanged, FileStoreInterface.FileChangeListener, BackupInterface {
 

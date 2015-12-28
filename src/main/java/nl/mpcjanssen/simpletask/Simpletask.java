@@ -68,7 +68,6 @@ import android.widget.TextView;
 import android.view.inputmethod.InputMethodManager;
 
 import nl.mpcjanssen.simpletask.util.InputDialogListener;
-import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -123,7 +122,7 @@ public class Simpletask extends ThemedActivity implements
     int m_scrollPosition = 0;
     private Dialog mOverlayDialog;
     private boolean mIgnoreScrollEvents = false;
-    private org.slf4j.Logger log;
+    private Logger log;
     private ListView listView;
 
     @Override

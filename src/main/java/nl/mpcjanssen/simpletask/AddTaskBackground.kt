@@ -37,8 +37,7 @@ import nl.mpcjanssen.simpletask.task.Task
 
 
 import nl.mpcjanssen.simpletask.util.showToastShort
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
+
 
 import java.io.*
 import java.util.*
@@ -49,14 +48,13 @@ import kotlin.text.split
 import kotlin.text.toRegex
 import kotlin.text.trim
 
-
 class AddTaskBackground : Activity() {
 
 
     private var log: Logger? = null
 
     public override fun onCreate(instance: Bundle?) {
-        log = LoggerFactory.getLogger(this.javaClass)
+        log = getLogger(this.javaClass)
         log!!.debug("onCreate()")
         super.onCreate(instance)
         val m_app = this.application as TodoApplication

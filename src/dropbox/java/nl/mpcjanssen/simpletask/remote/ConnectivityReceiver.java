@@ -4,8 +4,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import nl.mpcjanssen.simpletask.TodoApplication;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
 
 
 public class ConnectivityReceiver extends BroadcastReceiver {

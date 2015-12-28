@@ -10,8 +10,7 @@ import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.widget.RemoteViews;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
 
 import java.io.File;
 

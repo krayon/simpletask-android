@@ -8,8 +8,7 @@ import android.support.v4.app.Fragment;
 import android.view.*;
 import android.widget.CheckBox;
 import android.widget.LinearLayout;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
 
 
 public class FilterOtherFragment extends Fragment {

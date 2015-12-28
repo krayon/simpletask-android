@@ -11,8 +11,7 @@ import nl.mpcjanssen.simpletask.util.Util;
 import org.luaj.vm2.*;
 import org.luaj.vm2.compiler.LuaC;
 import org.luaj.vm2.lib.jse.JsePlatform;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;

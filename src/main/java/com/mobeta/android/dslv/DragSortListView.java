@@ -40,9 +40,10 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.*;
+import nl.mpcjanssen.simpletask.Logger;
+import nl.mpcjanssen.simpletask.LoggerFactory;
 import nl.mpcjanssen.simpletask.R;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
 
 import java.io.File;
 import java.io.FileWriter;

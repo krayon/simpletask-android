@@ -16,8 +16,7 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 import nl.mpcjanssen.simpletask.util.Util;
 import org.jetbrains.annotations.NotNull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
 
 import java.io.*;
 

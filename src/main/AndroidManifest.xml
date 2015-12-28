@@ -41,7 +41,12 @@ You should have received a copy of the GNU General Public License along with Sim
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_label"
-        android:theme="@style/AppTheme.Light.DarkActionBar" >
+        android:theme="@style/AppTheme.Light.DarkActionBar">
+
+    <meta-data android:name="DATABASE" android:value="todolist.db" />
+    <meta-data android:name="VERSION" android:value="1" />
+    <meta-data android:name="QUERY_LOG" android:value="true" />
+    <meta-data android:name="DOMAIN_PACKAGE_NAME" android:value="nl.mpcjanssen.simpletask.task" />
         <activity
             android:name=".LoginScreen"
             android:label="@string/app_label" >

@@ -51,8 +51,6 @@ import nl.mpcjanssen.simpletask.*
 import nl.mpcjanssen.simpletask.sort.AlphabeticalStringComparator
 import nl.mpcjanssen.simpletask.task.Task
 import org.luaj.vm2.*
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 
 import java.io.*
 import java.nio.channels.FileChannel
@@ -65,7 +63,7 @@ import kotlin.text.indexOf
 import kotlin.text.toLowerCase
 
 
-    val log = LoggerFactory.getLogger("Util")
+    val log = getLogger("Util")
     val todayAsString: String
         get() = DateTime.today(TimeZone.getDefault()).format(Constants.DATE_FORMAT)
 
@@ -106,7 +104,7 @@ import kotlin.text.toLowerCase
 
     @Throws(TodoException::class)
     fun createParentDirectory(dest: File?) {
-        val log = LoggerFactory.getLogger("Util")
+        val log = getLogger("Util")
         if (dest == null) {
             throw TodoException("createParentDirectory: dest is null")
         }

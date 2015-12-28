@@ -24,8 +24,7 @@ import nl.mpcjanssen.simpletask.remote.FileStore;
 import nl.mpcjanssen.simpletask.remote.FileStoreInterface;
 import nl.mpcjanssen.simpletask.task.Priority;
 import nl.mpcjanssen.simpletask.util.Util;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
 
 import java.io.File;
 import java.io.IOException;
