@@ -31,10 +31,12 @@ import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
 
 import android.util.Log;
+import de.greenrobot.dao.query.WhereCondition;
 import hirondelle.date4j.DateTime;
 import nl.mpcjanssen.simpletask.*;
 
 import nl.mpcjanssen.simpletask.dao.Entry;
+import nl.mpcjanssen.simpletask.dao.EntryDao;
 import nl.mpcjanssen.simpletask.remote.BackupInterface;
 import nl.mpcjanssen.simpletask.remote.FileStoreInterface;
 import nl.mpcjanssen.simpletask.util.Util;
@@ -56,7 +58,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * @author Mark Janssen
 
  */
-public class TodoList implements TodoListInterface {
+public class TodoList {
     final static String TAG = TodoList.class.getSimpleName();
     private final Logger log;
     private final boolean startLooper;
@@ -64,8 +66,7 @@ public class TodoList implements TodoListInterface {
 
     @NonNull
     private List<Task> mTasks = new CopyOnWriteArrayList();
-    @NonNull
-    private List<Task> mSelectedTask = new CopyOnWriteArrayList();
+
     @Nullable
     private ArrayList<String> mLists = null;
     @Nullable
@@ -88,7 +89,7 @@ public class TodoList implements TodoListInterface {
         // Set up the message queue
         if (startLooper) {
             Thread t = new Thread(new Runnable() {
-                @Override
+                
                 public void run() {
                     Looper.prepare();
                     todolistQueue = new Handler();
@@ -125,10 +126,10 @@ public class TodoList implements TodoListInterface {
     }
 
 
-    @Override
+    
     public void add(final Task t, final boolean atEnd) {
         queueRunnable("Add task", new Runnable() {
-            @Override
+            
             public void run() {
                 log.debug(TAG, "Adding task of length {} into {} atEnd", t.inFileFormat().length(), TodoList.this, atEnd);
                 if (atEnd) {
@@ -141,10 +142,10 @@ public class TodoList implements TodoListInterface {
     }
 
 
-    @Override
+    
     public void remove(@NonNull final Task t) {
         queueRunnable("Remove", new Runnable() {
-            @Override
+            
             public void run() {
                 mTasks.remove(t);
             }
@@ -152,12 +153,12 @@ public class TodoList implements TodoListInterface {
     }
 
 
-    @Override
+    
     public int size() {
         return mTasks.size();
     }
 
-    @Override
+    
     public int find(Task t) {
         if (mTasks == null) {
             return -1;
@@ -165,12 +166,12 @@ public class TodoList implements TodoListInterface {
         return mTasks.indexOf(t);
     }
 
-    @Override
+    
     public Task get(int position) {
         return mTasks.get(position);
     }
 
-    @Override
+    
     @NonNull
     public ArrayList<Priority> getPriorities() {
         Set<Priority> res = new HashSet<>();
@@ -182,7 +183,7 @@ public class TodoList implements TodoListInterface {
         return ret;
     }
 
-    @Override
+    
     @NonNull
     public ArrayList<String> getTags() {
         ArrayList<String> result = new ArrayList<String>();
@@ -194,7 +195,7 @@ public class TodoList implements TodoListInterface {
         return result;
     }
 
-    @Override
+    
     @NonNull
     public ArrayList<String> getLists() {
         ArrayList<String> result = new ArrayList<String>();
@@ -207,21 +208,21 @@ public class TodoList implements TodoListInterface {
     }
 
 
-    @Override
+    
     public ArrayList<String> getDecoratedLists() {
         return Util.prefixItems("@", getLists());
     }
 
-    @Override
+    
     public ArrayList<String> getDecoratedTags() {
         return Util.prefixItems("+", getTags());
     }
 
 
-    @Override
+    
     public void undoComplete(@NonNull final List<Task> tasks) {
         queueRunnable("Uncomplete", new Runnable() {
-            @Override
+            
             public void run() {
                 for (Task t : tasks) {
                     t.markIncomplete();
@@ -230,12 +231,12 @@ public class TodoList implements TodoListInterface {
         });
     }
 
-    @Override
+    
     public void complete(@NonNull final Task task,
                          final boolean keepPrio) {
 
         queueRunnable("Complete", new Runnable() {
-            @Override
+            
             public void run() {
 
                 Task extra = task.markComplete(DateTime.now(TimeZone.getDefault()));
@@ -250,10 +251,10 @@ public class TodoList implements TodoListInterface {
     }
 
 
-    @Override
+    
     public void prioritize(final List<Task> tasks, final Priority prio) {
         queueRunnable("Complete", new Runnable() {
-            @Override
+            
             public void run() {
                 for (Task t : tasks) {
                     t.setPriority(prio);
@@ -262,10 +263,10 @@ public class TodoList implements TodoListInterface {
         });
     }
 
-    @Override
+    
     public void defer(@NonNull final String deferString, @NonNull final Task tasksToDefer, final int dateType) {
         queueRunnable("Defer", new Runnable() {
-            @Override
+            
             public void run() {
                 switch (dateType) {
                     case Task.DUE_DATE:
@@ -279,26 +280,11 @@ public class TodoList implements TodoListInterface {
         });
     }
 
-    @Override
-    @NonNull
-    public List<Task> getSelectedTasks() {
-        if (mSelectedTask==null) {
-            mSelectedTask = new CopyOnWriteArrayList();
-        }
-        return mSelectedTask;
-    }
-
-    @Override
-    public void setSelectedTasks(List<Task> selectedTasks) {
-        this.mSelectedTask = selectedTasks;
-    }
-
-
-    @Override
+    
     public void notifyChanged(final FileStoreInterface filestore, final String todoname, final String eol, final BackupInterface backup, final boolean save) {
         log.info(TAG, "Handler: Queue notifychanged");
         todolistQueue.post(new Runnable() {
-            @Override
+            
             public void run() {
                 if (save) {
                     log.info(TAG, "Handler: Handle notifychanged");
@@ -320,39 +306,19 @@ public class TodoList implements TodoListInterface {
 
 
 
-    @Override
+    
     public List<Task> getSortedTasksCopy(@NonNull ActiveFilter filter, @NonNull ArrayList<String> sorts, boolean caseSensitive) {
         // Fixme
 
         return getTasks();
     }
 
-    @Override
-    public void selectTask(Task t) {
-        if (mSelectedTask.indexOf(t) == -1) {
-            mSelectedTask.add(t);
-        }
-    }
 
-    @Override
-    public void unSelectTask(Task t) {
-        mSelectedTask.remove(t);
-    }
 
-    @Override
-    public void clearSelectedTasks() {
-        mSelectedTask = new CopyOnWriteArrayList();
-    }
 
-    @Override
-    public void selectTask(int index) {
-        if (index < 0 || index > mTasks.size() - 1) {
-            return;
-        }
-        selectTask(mTasks.get(index));
-    }
 
-    @Override
+
+    
     public void reload(final FileStoreInterface fileStore, final String filename, final BackupInterface backup, final LocalBroadcastManager lbm, final boolean background, final String eol) {
         if (TodoList.this.loadQueued()) {
             log.info(TAG, "Todolist reload is already queued waiting");
@@ -361,18 +327,23 @@ public class TodoList implements TodoListInterface {
         lbm.sendBroadcast(new Intent(Constants.BROADCAST_SYNC_START));
         loadQueued = true;
         Runnable r = new Runnable() {
-            @Override
+            
             public void run() {
                 clearSelectedTasks();
                 Log.i(TAG,"Loading entries into DB");
                 try {
                     app.daoSession.callInTx(new Callable<Object>() {
-                        @Override
+                        
                         public Object call() throws Exception {
                             fileStore.loadTasksFromFile(app.entryDao, app.entryListDao, app.entryTagDao, filename, backup, eol);
                             return null;
                         }
                     });
+                    CopyOnWriteArrayList<Task> newTasks = new CopyOnWriteArrayList<>();
+                    for (Entry ent: app.entryDao.loadAll()) {
+                        newTasks.add(new Task(ent.getText()));
+                    }
+                    mTasks = newTasks;
                 }
                  catch (Exception e) {
                     Log.e(TAG, "Todolist load failed:" +  filename, e);
@@ -400,10 +371,10 @@ public class TodoList implements TodoListInterface {
         }
     }
 
-    @Override
+    
     public void save(final FileStoreInterface filestore, final String todoFileName, final BackupInterface backup, final String eol) {
         queueRunnable("Save", new Runnable() {
-            @Override
+            
             public void run() {
                 try {
                     filestore.saveTasksToFile(todoFileName, mTasks, backup, eol);
@@ -416,10 +387,10 @@ public class TodoList implements TodoListInterface {
 
     }
 
-    @Override
+    
     public void archive(final FileStoreInterface filestore, final String todoFilename, final String doneFileName, final List<Task> tasks, final String eol) {
         queueRunnable("Archive", new Runnable() {
-            @Override
+            
             public void run() {
                 List<Task> tasksToArchive;
                 if (tasks == null) {
@@ -447,7 +418,7 @@ public class TodoList implements TodoListInterface {
         });
     }
 
-    @Override
+    
     public void replace(Task old, Task updated) {
         int index = mTasks.indexOf(old);
         if (index>-1) {
@@ -471,12 +442,12 @@ public class TodoList implements TodoListInterface {
             this.runnable = r;
         }
 
-        @Override
+        
         public String toString() {
             return description;
         }
 
-        @Override
+        
         public void run() {
             log.info(TAG, "Execution action " + description);
             runnable.run();
@@ -484,7 +455,7 @@ public class TodoList implements TodoListInterface {
 
     }
 
-    @Override
+    
     public List<Task> getTasks() {
         Log.i(TAG, "Loading tasks from DB");
         ArrayList<Task> tasks = new ArrayList<>();
@@ -493,5 +464,53 @@ public class TodoList implements TodoListInterface {
         }
         Log.i(TAG, "Got " + tasks.size() + " tasks from DB");
         return tasks;
+    }
+
+    private void setSelectTask(Task t, boolean select) {
+        // Fixme try to remove this and replace with selectEntry
+        List<Entry> items = app.entryDao.queryBuilder().where(EntryDao.Properties.Text.eq(t.inFileFormat())).limit(1).list();
+        if (items.size()>0) {
+            Entry item = items.get(0);
+            item.setSelected(select);
+            app.entryDao.insertOrReplace(item);
+        }
+
+    }
+
+    
+    public void selectTask(Task t) {
+        setSelectTask(t, true);
+    }
+
+    
+    public void unSelectTask(Task t) {
+        setSelectTask(t, false);
+    }
+
+    
+    public void selectAllTasks() {
+        setSelectAllTasks(true);
+    }
+
+    
+    public void clearSelectedTasks() {
+        setSelectAllTasks(false);
+    }
+
+    private void setSelectAllTasks(boolean select) {
+        List<Entry> entries = app.entryDao.loadAll();
+        for (Entry e : entries) {
+            e.setSelected(select);
+        }
+        app.entryDao.updateInTx(entries);
+    }
+
+    @NonNull
+    public List<Task> getSelectedTasks() {
+        ArrayList<Task> selected = new ArrayList<>();
+        for (Entry e : app.entryDao.queryBuilder().where(EntryDao.Properties.Selected.eq(true)).list()) {
+            selected.add(new Task(e.getText()));
+        }
+        return selected;
     }
 }

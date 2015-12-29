@@ -55,6 +55,7 @@ public class TodoTxtTask {
 
         Entry entry = new Entry();
         entry.setLine(line);
+        entry.setSelected(false);
         entry.setText(text);
         Matcher m;
         String remaining = text;

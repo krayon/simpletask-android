@@ -256,7 +256,7 @@ public class Simpletask extends ThemedActivity implements
                 selectedTasks.add(vline.getTask());
             }
         }
-        getTodoList().setSelectedTasks(selectedTasks);
+        getTodoList().selectAllTasks();
         handleIntent();
     }
 
@@ -833,7 +833,6 @@ public class Simpletask extends ThemedActivity implements
 
     private void startAddTaskActivity(List<Task> tasks) {
         log.info(TAG, "Starting addTask activity");
-        getTodoList().setSelectedTasks(tasks);
         Intent intent = new Intent(this, AddTask.class);
         mFilter.saveInIntent(intent);
         startActivity(intent);

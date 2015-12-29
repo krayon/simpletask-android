@@ -11,6 +11,7 @@ import de.greenrobot.dao.DaoException;
 public class Entry {
 
     private long line;
+    private boolean selected;
     private boolean hidden;
     /** Not-null value. */
     private String text;
@@ -39,8 +40,9 @@ public class Entry {
         this.line = line;
     }
 
-    public Entry(long line, boolean hidden, String text, boolean completed, String priority, String completionDate, String createDate, String thresholdDate, String dueDate, int endOfCompPrefix) {
+    public Entry(long line, boolean selected, boolean hidden, String text, boolean completed, String priority, String completionDate, String createDate, String thresholdDate, String dueDate, int endOfCompPrefix) {
         this.line = line;
+        this.selected = selected;
         this.hidden = hidden;
         this.text = text;
         this.completed = completed;
@@ -64,6 +66,14 @@ public class Entry {
 
     public void setLine(long line) {
         this.line = line;
+    }
+
+    public boolean getSelected() {
+        return selected;
+    }
+
+    public void setSelected(boolean selected) {
+        this.selected = selected;
     }
 
     public boolean getHidden() {

@@ -18,7 +18,7 @@ import de.greenrobot.daogenerator.ToMany;
 public class SimpletaskDaoGenerator {
 
     public static void main(String[] args) throws Exception {
-        Schema schema = new Schema(1000, "nl.mpcjanssen.simpletask.dao");
+        Schema schema = new Schema(1001, "nl.mpcjanssen.simpletask.dao");
 
         addEntities(schema);
 
@@ -38,6 +38,7 @@ public class SimpletaskDaoGenerator {
 
         Entity entry = schema.addEntity("Entry");
         entry.addLongProperty("line").notNull().primaryKey();
+        entry.addBooleanProperty("selected").notNull();
         entry.addBooleanProperty("hidden").notNull();
         entry.addStringProperty("text").notNull();
         entry.addBooleanProperty("completed").notNull();
