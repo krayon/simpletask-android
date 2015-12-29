@@ -128,15 +128,40 @@ public class TodoList {
 
     
     public void add(final Task t, final boolean atEnd) {
+
         queueRunnable("Add task", new Runnable() {
             
             public void run() {
                 log.debug(TAG, "Adding task of length {} into {} atEnd", t.inFileFormat().length(), TodoList.this, atEnd);
-                if (atEnd) {
-                    mTasks.add(t);
-                } else {
-                    mTasks.add(0,t);
+                try {
+                    app.daoSession.callInTx(new Callable<Object>() {
+                        @Override
+                        public Object call() throws Exception {
+                            int line;
+                            if (atEnd) {
+                                Cursor c = app.db.rawQuery("SELECT max(line) FROM " + app.entryDao.getTablename(),null);
+                                c.moveToFirst();
+                                line = c.getInt(0);
+                                line++;
+                                c.close();
+
+                            } else {
+                                Cursor c = app.db.rawQuery("SELECT min(line) FROM " + app.entryDao.getTablename(),null);
+                                c.moveToFirst();
+                                line = c.getInt(0);
+                                line--;
+                                c.close();
+
+                            }
+                            TodoTxtTask.addToDatabase(app.entryDao,app.entryListDao,app.entryTagDao,line,t.inFileFormat());
+
+                            return null;
+                        }
+                    });
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
+
             }
         });
     }
