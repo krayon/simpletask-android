@@ -41,7 +41,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.*;
 import nl.mpcjanssen.simpletask.Logger;
-import nl.mpcjanssen.simpletask.LoggerFactory;
 import nl.mpcjanssen.simpletask.R;
 
 
@@ -61,6 +60,7 @@ public class DragSortListView extends ListView {
 
 
     private final Logger log;
+    private final String tag = DragSortListView.class.getSimpleName();
     /**
      * The View that floats above the ListView and represents
      * the dragged item.
@@ -450,7 +450,7 @@ public class DragSortListView extends ListView {
 
     public DragSortListView(@NonNull Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
-        log = LoggerFactory.getLogger(this.getClass());
+        log = Logger.INSTANCE;
 
         int defaultDuration = 150;
         int removeAnimDuration = defaultDuration; // ms
@@ -857,7 +857,7 @@ public class DragSortListView extends ListView {
     }
 
     private void printPosData() {
-        log.debug("mSrcPos=" + mSrcPos + " mFirstExpPos=" + mFirstExpPos + " mSecondExpPos="
+        log.debug(tag, "mSrcPos=" + mSrcPos + " mFirstExpPos=" + mFirstExpPos + " mSecondExpPos="
                 + mSecondExpPos);
     }
 
@@ -2983,10 +2983,10 @@ public class DragSortListView extends ListView {
             if (!mFile.exists()) {
                 try {
                     if (mFile.createNewFile()) {
-                        log.debug("file created");
+                        log.debug(tag, "file created");
                     }
                 } catch (IOException e) {
-                    log.error("Could not create dslv_state.txt",e);
+                    log.error(tag, "Could not create dslv_state.txt",e);
                 }
             }
 

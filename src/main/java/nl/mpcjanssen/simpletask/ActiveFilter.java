@@ -90,7 +90,7 @@ public class ActiveFilter {
     private String mName;
 
     public ActiveFilter() {
-        log = LoggerFactory.getLogger(this.getClass());
+        log = Logger.INSTANCE;
     }
 
     public void initFromIntent(@NonNull Intent intent) {
@@ -363,9 +363,9 @@ public class ActiveFilter {
                 matched.add(t);
             }
         } catch (LuaError e) {
-            log.debug("Lua execution failed " + e.getMessage());
+            log.debug(TAG, "Lua execution failed " + e.getMessage());
         } catch (IOException e) {
-            log.debug("Execution failed " + e.getMessage());
+            log.debug(TAG, "Execution failed " + e.getMessage());
         }
         return matched;
     }

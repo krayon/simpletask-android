@@ -22,6 +22,7 @@ import java.io.*;
 
 public class HistoryScreen extends ThemedActivity {
 
+    private static final String TAG = HistoryScreen.class.getSimpleName();
     private Logger log;
     private SQLiteDatabase db;
     private Cursor cursor;
@@ -33,7 +34,7 @@ public class HistoryScreen extends ThemedActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        log = LoggerFactory.getLogger(this.getClass());
+        log = Logger.INSTANCE;
         m_app = (TodoApplication) getApplication();
         BackupDbHelper backupDbHelper = new BackupDbHelper(this.getApplication().getApplicationContext());
         db = backupDbHelper.getReadableDatabase();
@@ -76,7 +77,7 @@ public class HistoryScreen extends ThemedActivity {
             Uri fileUri = Uri.parse("content://" + CachedFileProvider.AUTHORITY + "/" + dataBase.getName());
             shareIntent.putExtra(Intent.EXTRA_STREAM, fileUri);
         } catch (Exception e) {
-            log.warn("Failed to create file for sharing", e);
+            log.warn(TAG, "Failed to create file for sharing", e);
         }
         startActivity(Intent.createChooser(shareIntent, "Share History Database"));
 
@@ -130,7 +131,7 @@ public class HistoryScreen extends ThemedActivity {
     }
 
     private void clearDatabase() {
-        log.info("Clearing history database");
+        log.info(TAG, "Clearing history database");
         BackupDbHelper backupDbHelper = new BackupDbHelper(this.getApplication().getApplicationContext());
         SQLiteDatabase database = backupDbHelper.getWritableDatabase();
         database.delete(BackupDbHelper.TABLE_NAME, null, null);

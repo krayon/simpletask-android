@@ -80,6 +80,7 @@ import nl.mpcjanssen.simpletask.util.Util;
 
 public class AddTask extends ThemedActivity {
 
+    private static final String TAG = AddTask.class.getSimpleName() ;
     private TodoApplication m_app;
 
     private String share_text;
@@ -93,8 +94,8 @@ public class AddTask extends ThemedActivity {
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        log = LoggerFactory.getLogger(this.getClass());
-        log.debug("onCreate()");
+        log = Logger.INSTANCE;
+        log.debug(TAG, "onCreate()");
         requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
         super.onCreate(savedInstanceState);
         m_app = (TodoApplication) getApplication();
@@ -678,7 +679,7 @@ public class AddTask extends ThemedActivity {
         // save current selection and length
         int start = textInputField.getSelectionStart();
         int end = textInputField.getSelectionEnd();
-        log.debug("Current selection: " + start + "-" + end);
+        log.debug(TAG, "Current selection: " + start + "-" + end);
         int length = textInputField.getText().length();
         int sizeDelta;
         ArrayList<String> lines = new ArrayList<>();
@@ -692,7 +693,7 @@ public class AddTask extends ThemedActivity {
         }
         if (currentLine != -1) {
             Task t = new Task(lines.get(currentLine));
-            log.debug("Changing prio from " + t.getPriority().toString() + " to " + newPrio.toString());
+            log.debug(TAG, "Changing prio from " + t.getPriority().toString() + " to " + newPrio.toString());
             t.setPriority(Priority.toPriority(newPrio.toString()));
             lines.set(currentLine, t.inFileFormat());
             textInputField.setText(Util.join(lines, "\n"));

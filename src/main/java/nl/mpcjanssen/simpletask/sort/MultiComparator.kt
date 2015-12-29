@@ -1,7 +1,7 @@
 package nl.mpcjanssen.simpletask.sort
 
 import nl.mpcjanssen.simpletask.ActiveFilter
-import nl.mpcjanssen.simpletask.getLogger
+import nl.mpcjanssen.simpletask.Logger
 import nl.mpcjanssen.simpletask.task.Task
 
 import kotlin.collections.dropLastWhile
@@ -14,14 +14,15 @@ import java.util.*
 class MultiComparator(sorts: ArrayList<String>, caseSensitve: Boolean, taskList: List<Task>) : Comparator<Task> {
     var comparators : Comparator<Task>? = null
     val defaultComparator = FileOrderComparator(taskList)
+    val tag = this.javaClass.simpleName
     init {
-        val log = getLogger(this.javaClass)
+        val log = Logger
 
         label@ for (sort in sorts) {
             val parts = sort.split(ActiveFilter.SORT_SEPARATOR.toRegex()).dropLastWhile({ it.isEmpty() }).toTypedArray()
             var reverse = false
             val sortType: String
-            if (parts.size() == 1) {
+            if (parts.size == 1) {
                 // support older shortcuts and widgets
                 reverse = false
                 sortType = parts[0]
@@ -44,7 +45,7 @@ class MultiComparator(sorts: ArrayList<String>, caseSensitve: Boolean, taskList:
                 "by_due_date" -> comp = DueDateComparator()
                 "by_threshold_date" -> comp = ThresholdDateComparator()
                 else -> {
-                    log.warn("Unknown sort: " + sort)
+                    log.warn(tag, "Unknown sort: " + sort)
                     continue@label
                 }
             }

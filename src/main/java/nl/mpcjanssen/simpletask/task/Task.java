@@ -1,18 +1,18 @@
 /**
  * This file is part of Todo.txt Touch, an Android app for managing your todo.txt file (http://todotxt.com).
- *
+ * <p/>
  * Copyright (c) 2009-2012 Todo.txt contributors (http://todotxt.com)
- *
+ * <p/>
  * LICENSE:
- *
+ * <p/>
  * Simpletask is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
  * License as published by the Free Software Foundation, either version 2 of the License, or (at your option) any
  * later version.
- *
+ * <p/>
  * Todo.txt Touch is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
  * details.
- *
+ * <p/>
  * You should have received a copy of the GNU General Public License along with Todo.txt Touch.  If not, see
  * <http://www.gnu.org/licenses/>.
  *
@@ -28,8 +28,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.text.SpannableString;
 
-import com.orm.SugarRecord;
-import com.orm.dsl.Ignore;
 import hirondelle.date4j.DateTime;
 import nl.mpcjanssen.simpletask.ActiveFilter;
 import nl.mpcjanssen.simpletask.Constants;
@@ -42,18 +40,18 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class Task  {
-    @Ignore public static String TAG = Task.class.getName();
-    @Ignore public final static int DUE_DATE = 0;
-    @Ignore public final static int THRESHOLD_DATE = 1;
-    @Ignore private static final long serialVersionUID = 1L;
-    @Ignore private final static Pattern LIST_PATTERN = Pattern
+public class Task {
+    public static String TAG = Task.class.getName();
+    public final static int DUE_DATE = 0;
+    public final static int THRESHOLD_DATE = 1;
+    private static final long serialVersionUID = 1L;
+    private final static Pattern LIST_PATTERN = Pattern
             .compile("^@(\\S*\\w)(.*)");
-    @Ignore private final static Pattern TAG_PATTERN = Pattern
+    private final static Pattern TAG_PATTERN = Pattern
             .compile("^\\+(\\S*\\w)(.*)");
-    @Ignore private static final Pattern HIDDEN_PATTERN = Pattern
+    private static final Pattern HIDDEN_PATTERN = Pattern
             .compile("^[Hh]:([01])(.*)");
-    @Ignore private static final Pattern DUE_PATTERN = Pattern
+    private static final Pattern DUE_PATTERN = Pattern
             .compile("^[Dd][Uu][Ee]:(\\d{4}-\\d{2}-\\d{2})(.*)");
     private static final Pattern THRESHOLD_PATTERN = Pattern
             .compile("^[Tt]:(\\d{4}-\\d{2}-\\d{2})(.*)");
@@ -85,7 +83,7 @@ public class Task  {
     private String mDuedate;
     boolean hidden;
 
-    public Task( @NonNull String rawText, DateTime defaultPrependedDate) {
+    public Task(@NonNull String rawText, DateTime defaultPrependedDate) {
         this.init(rawText, defaultPrependedDate);
     }
 
@@ -100,7 +98,7 @@ public class Task  {
     public void init(@NonNull String rawText, @Nullable DateTime defaultCreateDate) {
         parse(rawText);
         if (defaultCreateDate != null
-            && getCreateDate() == null) {
+                && getCreateDate() == null) {
             setCreateDate(defaultCreateDate.format(Constants.DATE_FORMAT));
         }
     }
@@ -112,7 +110,7 @@ public class Task  {
 
     @Nullable
     public DateTime getDueDate() {
-        if (mDuedate==null) {
+        if (mDuedate == null) {
             return null;
         }
         return stringToDateTime(mDuedate);
@@ -126,11 +124,11 @@ public class Task  {
         int currentIdx;
         int size = mTokens.size();
         // Find and remove current threshold token
-        for (currentIdx=0; currentIdx<size; currentIdx++) {
+        for (currentIdx = 0; currentIdx < size; currentIdx++) {
             if (mTokens.get(currentIdx).type == Token.DUE_DATE) {
                 mTokens.remove(currentIdx);
-                if (currentIdx>0 && mTokens.get(currentIdx-1).type==Token.WHITE_SPACE) {
-                    mTokens.remove(currentIdx-1);
+                if (currentIdx > 0 && mTokens.get(currentIdx - 1).type == Token.WHITE_SPACE) {
+                    mTokens.remove(currentIdx - 1);
                 }
                 break;
             }
@@ -141,7 +139,7 @@ public class Task  {
         }
         mDuedate = dueDateString;
         Token newTok = new DUE_DATE(dueDateString);
-        if (currentIdx < size-1) {
+        if (currentIdx < size - 1) {
             mTokens.add(currentIdx, new WHITE_SPACE(" "));
             mTokens.add(currentIdx, newTok);
         } else {
@@ -155,7 +153,7 @@ public class Task  {
         DateTime date;
         if (dateString != null && DateTime.isParseable(dateString)) {
             date = new DateTime(dateString);
-        } else if (dateString==null){
+        } else if (dateString == null) {
             date = DateTime.today(TimeZone.getDefault());
         } else {
             date = null;
@@ -184,11 +182,11 @@ public class Task  {
         int currentIdx;
         int size = mTokens.size();
         // Find and remove current threshold token
-        for (currentIdx=0; currentIdx<size; currentIdx++) {
+        for (currentIdx = 0; currentIdx < size; currentIdx++) {
             if (mTokens.get(currentIdx).type == Token.THRESHOLD_DATE) {
                 mTokens.remove(currentIdx);
-                if (currentIdx>0 && mTokens.get(currentIdx-1).type==Token.WHITE_SPACE) {
-                    mTokens.remove(currentIdx-1);
+                if (currentIdx > 0 && mTokens.get(currentIdx - 1).type == Token.WHITE_SPACE) {
+                    mTokens.remove(currentIdx - 1);
                 }
                 break;
             }
@@ -199,7 +197,7 @@ public class Task  {
         }
         mThresholdate = thresholdDateString;
         Token newTok = new THRESHOLD_DATE(thresholdDateString);
-        if (currentIdx < size-1) {
+        if (currentIdx < size - 1) {
             mTokens.add(currentIdx, new WHITE_SPACE(" "));
             mTokens.add(currentIdx, newTok);
         } else {
@@ -226,11 +224,11 @@ public class Task  {
                 mTokens.remove(0);
             }
         }
-        if (mTokens.size()>0 && mTokens.get(0).type == Token.PRIO) {
+        if (mTokens.size() > 0 && mTokens.get(0).type == Token.PRIO) {
             temp.add(mTokens.get(0));
             mTokens.remove(0);
         }
-        if (mTokens.size()>0 && mTokens.get(0).type == Token.CREATION_DATE) {
+        if (mTokens.size() > 0 && mTokens.get(0).type == Token.CREATION_DATE) {
             mTokens.remove(0);
         }
         temp.add(new CREATION_DATE(newCreateDate));
@@ -249,13 +247,13 @@ public class Task  {
                 temp.add(mTokens.get(0));
                 mTokens.remove(0);
             }
-            while (mTokens.size()>0 && mTokens.get(0).type == Token.WHITE_SPACE) {
+            while (mTokens.size() > 0 && mTokens.get(0).type == Token.WHITE_SPACE) {
                 temp.add(mTokens.get(0));
                 mTokens.remove(0);
             }
         }
 
-        if (mTokens.size()>0 && mTokens.get(0).type == Token.PRIO) {
+        if (mTokens.size() > 0 && mTokens.get(0).type == Token.PRIO) {
             mTokens.remove(0);
         }
         if (!priority.equals(Priority.NONE)) {
@@ -271,9 +269,9 @@ public class Task  {
     public SpannableString getRelativeDueDate(Context ctx, int dueTodayColor, int overDueColor, boolean useColor) {
         DateTime dueDate = getDueDate();
         DateTime today = DateTime.today(TimeZone.getDefault());
-        if (dueDate!=null) {
+        if (dueDate != null) {
             String relativeDate = RelativeDate.getRelativeDate(ctx, dueDate);
-            SpannableString ss = new SpannableString("Due: " +  relativeDate);
+            SpannableString ss = new SpannableString("Due: " + relativeDate);
             if (dueDate.isSameDayAs(today) && useColor) {
                 Util.setColor(ss, dueTodayColor);
             } else if (dueDate.isInThePast(TimeZone.getDefault()) && useColor) {
@@ -288,7 +286,7 @@ public class Task  {
     @Nullable
     public String getRelativeThresholdDate(Context ctx) {
         DateTime thresholdDate = getThresholdDate();
-        if (thresholdDate!=null) {
+        if (thresholdDate != null) {
             return "T: " + RelativeDate.getRelativeDate(ctx, thresholdDate);
         } else {
             return null;
@@ -371,10 +369,10 @@ public class Task  {
 
     public void markIncomplete() {
         this.mCompleted = false;
-        this.mCompletionDate=null;
+        this.mCompletionDate = null;
         if (new COMPLETED().equals(mTokens.get(0))) {
             mTokens.remove(0);
-            if (mTokens.size()>0 && mTokens.get(0).type==Token.COMPLETED_DATE) {
+            if (mTokens.size() > 0 && mTokens.get(0).type == Token.COMPLETED_DATE) {
                 mTokens.remove(0);
             }
         }
@@ -383,8 +381,8 @@ public class Task  {
     @NonNull
     public String showParts(int flags) {
         StringBuilder sb = new StringBuilder();
-        for (Token token: mTokens) {
-            if ((flags & token.type)!=0) {
+        for (Token token : mTokens) {
+            if ((flags & token.type) != 0) {
                 sb.append(token.value);
             }
 
@@ -404,7 +402,7 @@ public class Task  {
 
     @NonNull
     public String inFileFormat() {
-       return showParts(Token.SHOW_ALL);
+        return showParts(Token.SHOW_ALL);
     }
 
     @Override
@@ -412,16 +410,16 @@ public class Task  {
 
         final int prime = 31;
         int result = 1;
-        result = prime * result +  inFileFormat().hashCode();
+        result = prime * result + inFileFormat().hashCode();
         return result;
     }
 
     public void initWithFilter(@NonNull ActiveFilter mFilter) {
-        if (!mFilter.getContextsNot() && mFilter.getContexts().size()==1) {
+        if (!mFilter.getContextsNot() && mFilter.getContexts().size() == 1) {
             addList(mFilter.getContexts().get(0));
         }
 
-        if (!mFilter.getProjectsNot() && mFilter.getProjects().size()==1) {
+        if (!mFilter.getProjectsNot() && mFilter.getProjects().size() == 1) {
             addTag(mFilter.getProjects().get(0));
         }
 
@@ -433,14 +431,14 @@ public class Task  {
      * this makes it possible to distinguish tasks with the same text representation
      */
     @Override
-    public boolean equals (Object another) {
-        if (another==null) {
+    public boolean equals(Object another) {
+        if (another == null) {
             return false;
         }
-        if(this.getClass()!=another.getClass()) {
+        if (this.getClass() != another.getClass()) {
             return false;
         }
-        return (this==another);
+        return (this == another);
     }
 
     public void append(String string) {
@@ -489,7 +487,7 @@ public class Task  {
         } else {
             olddate = new DateTime(deferFromDate);
         }
-        DateTime newDate = Util.addInterval(olddate,deferString);
+        DateTime newDate = Util.addInterval(olddate, deferString);
         setThresholdDate(newDate);
     }
 
@@ -516,7 +514,7 @@ public class Task  {
 
     @NonNull
     public String getThresholdDateString(String empty) {
-        if (mThresholdate==null) {
+        if (mThresholdate == null) {
             if (mCreateDate == null) {
                 return empty;
             } else {
@@ -529,7 +527,7 @@ public class Task  {
 
     @NonNull
     public String getDueDateString(String empty) {
-        if (mDuedate==null) {
+        if (mDuedate == null) {
             return empty;
         } else {
             return mDuedate;
@@ -563,8 +561,8 @@ public class Task  {
     @NonNull
     public String getTextWithoutCompletionInfo() {
         int flags = Token.SHOW_ALL;
-        flags = flags  & ~Token.COMPLETED;
-        flags =  flags & ~Token.COMPLETED_DATE; 
+        flags = flags & ~Token.COMPLETED;
+        flags = flags & ~Token.COMPLETED_DATE;
         flags = flags & ~Token.CREATION_DATE;
         return showParts(flags);
     }
@@ -579,7 +577,7 @@ public class Task  {
         mCreateDate = null;
         hidden = false;
         mLists = new ArrayList<>();
-        mTags =  new ArrayList<>();
+        mTags = new ArrayList<>();
 
         Matcher m;
         String remaining = text;
@@ -622,10 +620,10 @@ public class Task  {
             mTokens.add(new CREATION_DATE(m.group(1)));
         }
 
-        while (remaining.length()>0) {
+        while (remaining.length() > 0) {
             if (remaining.startsWith(" ")) {
                 String leading = "";
-                while (remaining.length()>0 && remaining.startsWith(" ")) {
+                while (remaining.length() > 0 && remaining.startsWith(" ")) {
                     leading = leading + " ";
                     remaining = remaining.substring(1);
                 }
@@ -637,7 +635,7 @@ public class Task  {
             if (m.matches()) {
                 String list = m.group(1);
                 remaining = m.group(2);
-                Token listToken = new LIST("@"+list);
+                Token listToken = new LIST("@" + list);
                 mTokens.add(listToken);
                 mLists.add(list);
                 continue;
@@ -646,7 +644,7 @@ public class Task  {
             if (m.matches()) {
                 String match = m.group(1);
                 remaining = m.group(2);
-                Token listToken = new TTAG("+"+match);
+                Token listToken = new TTAG("+" + match);
                 mTokens.add(listToken);
                 mTags.add(match);
                 continue;
@@ -720,7 +718,7 @@ public class Task  {
 
     @Nullable
     public String getRelativeAge(Context ctx) {
-        if (mCreateDate!=null) {
+        if (mCreateDate != null) {
             return (calculateRelativeAge(ctx, mCreateDate));
         }
         return null;

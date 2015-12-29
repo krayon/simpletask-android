@@ -2,6 +2,7 @@ package nl.mpcjanssen.simpletask.remote;
 
 import android.app.Activity;
 import android.support.annotation.Nullable;
+import nl.mpcjanssen.simpletask.dao.EntryDao;
 import nl.mpcjanssen.simpletask.task.Task;
 
 import java.io.IOException;
@@ -14,7 +15,7 @@ import java.util.List;
  */
 public interface FileStoreInterface {
     boolean isAuthenticated();
-    List<Task> loadTasksFromFile(String path, @Nullable BackupInterface backup, String eol)  throws IOException;
+    void loadTasksFromFile(EntryDao entryDao, String path, @Nullable BackupInterface backup, String eol)  throws IOException;
     void startLogin(Activity caller, int i);
     void logout();
     void browseForNewFile(Activity act, String path, FileSelectedListener listener, boolean txtOnly);

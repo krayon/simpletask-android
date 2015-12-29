@@ -55,7 +55,7 @@ public class Preferences extends ThemedActivity {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-        Logger log = LoggerFactory.getLogger(this.getClass());
+
 
 		// Display the fragment as the main content.
         TodoTxtPrefFragment prefFragment = new TodoTxtPrefFragment();
@@ -73,7 +73,7 @@ public class Preferences extends ThemedActivity {
         @Override
         public void onCreate(final Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
-            log = LoggerFactory.getLogger(this.getClass());
+            log = Logger.INSTANCE;
             addPreferencesFromResource(R.xml.preferences);
             PackageInfo packageInfo;
             final Preference versionPref = findPreference("app_version");
@@ -138,7 +138,7 @@ public class Preferences extends ThemedActivity {
             }
             switch (key) {
                 case "archive_now":
-                    log.info("Archiving completed items from preferences");
+                    log.info(TAG, "Archiving completed items from preferences");
                     m_app.showConfirmationDialog(this.getActivity(), R.string.delete_task_message, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialogInterface, int i) {
@@ -149,7 +149,7 @@ public class Preferences extends ThemedActivity {
                     }, R.string.archive_task_title);
                     break;
                 case "logout_dropbox":
-                    log.info("Logging out from Dropbox");
+                    log.info(TAG, "Logging out from Dropbox");
                     m_app.showConfirmationDialog(this.getActivity(), R.string.logout_message, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialogInterface, int i) {

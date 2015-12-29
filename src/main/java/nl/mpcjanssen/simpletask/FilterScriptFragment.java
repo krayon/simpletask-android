@@ -36,20 +36,20 @@ public class FilterScriptFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        log = LoggerFactory.getLogger(this.getClass());
-        log.debug("onCreate() this:" + this);
+        log = Logger.INSTANCE;
+        log.debug(TAG, "onCreate() this:" + this);
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        log.debug("onDestroy() this:" + this);
+        log.debug(TAG, "onDestroy() this:" + this);
     }
 
     @Override
     public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
-        log.debug("onSaveInstanceState() this:" + this);
+        log.debug(TAG, "onSaveInstanceState() this:" + this);
         outState.putString(ActiveFilter.INTENT_SCRIPT_FILTER,getScript());
         outState.putString(ActiveFilter.INTENT_SCRIPT_TEST_TASK_FILTER,getTestTask());
     }
@@ -57,11 +57,11 @@ public class FilterScriptFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        log.debug("onCreateView() this:" + this);
+        log.debug(TAG, "onCreateView() this:" + this);
 
         Bundle arguments = getArguments();
         actionbar = getActivity().getActionBar();
-        log.debug("Fragment bundle:" + this);
+        log.debug(TAG, "Fragment bundle:" + this);
         LinearLayout layout = (LinearLayout) inflater.inflate(R.layout.script_filter,
                 container, false);
 
@@ -92,11 +92,11 @@ public class FilterScriptFragment extends Fragment {
                         tvBooleanResult.setText("false");
                     }
                 } catch (LuaError e) {
-                    log.debug("Lua execution failed " + e.getMessage());
+                    log.debug(TAG, "Lua execution failed " + e.getMessage());
                     tvBooleanResult.setText("error");
                     tvResult.setText(e.getMessage());
                 } catch (IOException e) {
-                    log.debug("Execution failed " + e.getMessage());
+                    log.debug(TAG, "Execution failed " + e.getMessage());
                 }
             }
 

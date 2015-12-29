@@ -38,10 +38,12 @@ import java.util.*;
 
 public class AddTaskShortcut extends ThemedActivity {
 
+    private static final String TAG = AddTaskShortcut.class.getSimpleName();
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        Logger log = LoggerFactory.getLogger(this.getClass());
-        log.debug("onCreate()");
+        Logger log = Logger.INSTANCE;
+        log.debug(TAG, "onCreate()");
         super.onCreate(savedInstanceState);
         setupShortcut();
         finish();

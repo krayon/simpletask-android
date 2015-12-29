@@ -27,6 +27,7 @@ package nl.mpcjanssen.simpletask;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.Application;
 import android.app.Dialog;
 import android.appwidget.AppWidgetManager;
 import android.content.*;
@@ -38,6 +39,9 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
 import android.widget.EditText;
 import hirondelle.date4j.DateTime;
+import nl.mpcjanssen.simpletask.dao.DaoMaster;
+import nl.mpcjanssen.simpletask.dao.DaoSession;
+import nl.mpcjanssen.simpletask.dao.EntryDao;
 import nl.mpcjanssen.simpletask.remote.BackupInterface;
 import nl.mpcjanssen.simpletask.remote.FileStore;
 import nl.mpcjanssen.simpletask.remote.FileStoreInterface;
@@ -51,10 +55,11 @@ import java.util.List;
 import java.util.TimeZone;
 
 
-public class TodoApplication extends com.orm.SugarApp implements
+public class TodoApplication extends Application implements
 
         SharedPreferences.OnSharedPreferenceChangeListener, TodoList.TodoListChanged, FileStoreInterface.FileChangeListener, BackupInterface {
 
+    private static final String TAG = Simpletask.class.getSimpleName();
     private static Context m_appContext;
     private static SharedPreferences m_prefs;
     private LocalBroadcastManager localBroadcastManager;
@@ -67,6 +72,10 @@ public class TodoApplication extends com.orm.SugarApp implements
     private int m_Theme = -1;
     private Logger log;
     private FileStore mFileStore;
+    private SQLiteDatabase db;
+    private DaoMaster daoMaster;
+    public DaoSession daoSession;
+    public EntryDao entryDao;
 
     public static Context getAppContext() {
         return m_appContext;
@@ -79,9 +88,17 @@ public class TodoApplication extends com.orm.SugarApp implements
     @Override
     public void onCreate() {
         super.onCreate();
-        log = LoggerFactory.getLogger(this.getClass());
-        log.debug("onCreate()");
 
+        log = Logger.INSTANCE;
+        log.debug(TAG, "onCreate()");
+
+        // Initialize the dao
+
+        DaoMaster.DevOpenHelper helper = new DaoMaster.DevOpenHelper(this, "entries-db", null);
+        db = helper.getWritableDatabase();
+        daoMaster = new DaoMaster(db);
+        daoSession = daoMaster.newSession();
+        entryDao = daoSession.getEntryDao();
 
         TodoApplication.m_appContext = getApplicationContext();
         TodoApplication.m_prefs = PreferenceManager.getDefaultSharedPreferences(getAppContext());
@@ -103,9 +120,9 @@ public class TodoApplication extends com.orm.SugarApp implements
         };
         localBroadcastManager.registerReceiver(m_broadcastReceiver, intentFilter);
         prefsChangeListener(this);
-        m_todoList = new TodoList(this);
+        m_todoList = new TodoList(this, this);
         this.mFileStore = new FileStore(this, this);
-        log.info("Created todolist {}", m_todoList);
+        log.info(TAG, "Created todolist {}", m_todoList);
         loadTodoList(true);
         m_calSync = new CalendarSync(this, isSyncDues(), isSyncThresholds());
     }
@@ -120,7 +137,7 @@ public class TodoApplication extends com.orm.SugarApp implements
 
     @Override
     public void onTerminate() {
-        log.info("Deregistered receiver");
+        log.info(TAG, "Deregistered receiver");
         m_prefs.unregisterOnSharedPreferenceChangeListener(this);
         if (m_broadcastReceiver!=null) {
             localBroadcastManager.unregisterReceiver(m_broadcastReceiver);
@@ -317,7 +334,7 @@ public class TodoApplication extends com.orm.SugarApp implements
     }
 
     public void loadTodoList(boolean background) {
-        log.info("Load todolist");
+        log.info(TAG, "Load todolist");
         m_todoList.reload(mFileStore, getTodoFileName(), this, localBroadcastManager, background, getEol());
 
     }
@@ -335,14 +352,14 @@ public class TodoApplication extends com.orm.SugarApp implements
         AppWidgetManager mgr = AppWidgetManager.getInstance(getApplicationContext());
         for (int appWidgetId : mgr.getAppWidgetIds(new ComponentName(getApplicationContext(), MyAppWidgetProvider.class))) {
             mgr.notifyAppWidgetViewDataChanged(appWidgetId, R.id.widgetlv);
-            log.info("Updating widget: " + appWidgetId);
+            log.info(TAG, "Updating widget: " + appWidgetId);
         }
     }
 
     private void redrawWidgets(){
         AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(getApplicationContext());
         int[] appWidgetIds = appWidgetManager.getAppWidgetIds(new ComponentName(this, MyAppWidgetProvider.class));
-        log.info("Redrawing widgets ");
+        log.info(TAG, "Redrawing widgets ");
         if (appWidgetIds.length > 0) {
             new MyAppWidgetProvider().onUpdate(this, appWidgetManager, appWidgetIds);
         }
@@ -422,7 +439,7 @@ public class TodoApplication extends com.orm.SugarApp implements
 
 
     public void todoListChanged() {
-        log.info("Tasks have changed, update UI");
+        log.info(TAG, "Tasks have changed, update UI");
         localBroadcastManager.sendBroadcast(new Intent(Constants.BROADCAST_SYNC_DONE));
         localBroadcastManager.sendBroadcast(new Intent(Constants.BROADCAST_UPDATE_UI));
 

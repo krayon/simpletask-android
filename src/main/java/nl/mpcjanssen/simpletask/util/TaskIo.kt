@@ -30,14 +30,24 @@
 @file:JvmName("TaskIo")
 package nl.mpcjanssen.simpletask.util
 
+import nl.mpcjanssen.simpletask.dao.Entry
+import nl.mpcjanssen.simpletask.dao.EntryDao
 import java.io.*
 
 
 private val TAG = "TaskIo"
 
 @Throws(IOException::class)
-fun loadFromFile(file: File): List<String> {
-    return file.readLines()
+fun loadDaoFromFile(dao: EntryDao, file: File) {
+    var line = 0L
+    file.forEachLine {
+        dao.insert(Entry(line, it))
+        line++;
+    }
+}
+
+fun getFileContents(file: File) : String {
+    return file.readText()
 }
 
 @Throws(IOException::class)

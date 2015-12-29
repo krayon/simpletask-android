@@ -71,8 +71,8 @@ public class FilterActivity extends ThemedActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        log = LoggerFactory.getLogger(this.getClass());
-        log.info("Called with intent: " + getIntent().toString());
+        log = Logger.INSTANCE;
+        log.info(TAG, "Called with intent: " + getIntent().toString());
         m_app = (TodoApplication) getApplication();
         prefs = TodoApplication.getPrefs();
 

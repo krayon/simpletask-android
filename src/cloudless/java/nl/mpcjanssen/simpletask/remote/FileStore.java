@@ -12,10 +12,12 @@ import android.os.Handler;
 import android.os.Looper;
 import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
+import android.util.Log;
 import nl.mpcjanssen.simpletask.Constants;
 import nl.mpcjanssen.simpletask.Logger;
-import nl.mpcjanssen.simpletask.LoggerFactory;
+
 import nl.mpcjanssen.simpletask.TodoApplication;
+import nl.mpcjanssen.simpletask.dao.EntryDao;
 import nl.mpcjanssen.simpletask.task.Task;
 import nl.mpcjanssen.simpletask.util.ListenerList;
 import nl.mpcjanssen.simpletask.util.TaskIo;
@@ -29,7 +31,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 public class FileStore implements FileStoreInterface {
 
@@ -42,8 +43,8 @@ public class FileStore implements FileStoreInterface {
     private Handler fileOperationsQueue;
 
     public FileStore(Context ctx, FileChangeListener fileChangedListener) {
-        log = LoggerFactory.getLogger(this.getClass());
-        log.info("onCreate");
+        log = Logger.INSTANCE;
+        log.info(TAG, "onCreate");
         m_fileChangedListener = fileChangedListener;
         m_observer = null;
         this.bm = LocalBroadcastManager.getInstance(ctx);
@@ -78,28 +79,10 @@ public class FileStore implements FileStoreInterface {
     }
 
     @Override
-    synchronized public List<Task> loadTasksFromFile(final String path,  @Nullable BackupInterface backup, String eol) {
-        log.info("Loading tasks from file: {}" , path);
-        final List<Task> result= new CopyOnWriteArrayList();
-        mIsLoading = true;
-        try {
-            for (String line : TaskIo.loadFromFile(new File(path))) {
-                ArrayList<String> completeFile = new ArrayList<>();
-
-                completeFile.add(line);
-                result.add(new Task(line));
-
-                if (backup != null) {
-                    backup.backup(path, Util.join(completeFile, "\n"));
-                }
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            mIsLoading = false;
-        }
+    public void loadTasksFromFile(EntryDao entryDao, final String path, @Nullable BackupInterface backup, String eol) throws IOException {
+        Log.i(TAG, "Loading tasks from file:" + path);
+        TaskIo.loadDaoFromFile(entryDao, new File(path));
         setWatching(path);
-        return result;
     }
 
     @Override
@@ -111,15 +94,9 @@ public class FileStore implements FileStoreInterface {
     public String readFile(String file, FileReadListener fileRead) {
         log.info("Reading file: {}", file);
         mIsLoading = true;
-        String contents = "";
-        try {
-            contents = Util.join(TaskIo.loadFromFile(new File(file)), "\n");
-        } catch (IOException e) {
-            e.printStackTrace();
-            return "";
-        } finally {
-            mIsLoading = false;
-        }
+        String contents = TaskIo.getFileContents(new File(file));
+        mIsLoading = false;
+
         if (fileRead != null) {
             fileRead.fileRead(contents);
         }
@@ -155,7 +132,7 @@ public class FileStore implements FileStoreInterface {
        log.info("Observer: adding {} " , new File(path).getParentFile().getAbsolutePath());
         TodoObserver obs = getObserver();
         if (obs != null && path.equals(obs.path)) {
-            log.warn("Observer: already watching: {}");
+            log.warn(TAG, "Observer: already watching: {}");
             return;
         } else if (obs != null) {
             log.warn("Observer: already watching different path: {}", obs.path);
@@ -163,7 +140,7 @@ public class FileStore implements FileStoreInterface {
             obs.stopWatching();
         }
         m_observer = new TodoObserver(path, m_fileChangedListener);
-        log.info("Observer: modifying done");
+        log.info(TAG, "Observer: modifying done");
     }
 
     @Override
@@ -208,7 +185,7 @@ public class FileStore implements FileStoreInterface {
         queueRunnable("Appending " + size + " tasks to " + path, new Runnable() {
             @Override
             public void run() {
-                log.info("Appending " + size + " tasks to " + path);
+                log.info(TAG, "Appending " + size + " tasks to " + path);
                 try {
                     TaskIo.writeToFile(Util.joinTasks(tasks, eol) + eol, new File(path), true);
                 } catch (IOException e) {
@@ -347,17 +324,17 @@ public class FileStore implements FileStoreInterface {
         private Runnable delayedEnable = new Runnable() {
             @Override
             public void run() {
-                log.info("Observer: Delayed enabling events for: " + path);
+                log.info(TAG, "Observer: Delayed enabling events for: " + path);
                 ignoreEvents(false);
             }
         };
 
         public TodoObserver(String path, FileChangeListener fileChanged) {
             super(new File(path).getParentFile().getAbsolutePath());
-            this.log = LoggerFactory.getLogger(this.getClass());
+            this.log = Logger.INSTANCE;
             this.startWatching();
             this.fileName = new File(path).getName();
-            log.info("Observer: creating observer on: {}");
+            log.info(TAG, "Observer: creating observer on: {}");
             this.path = path;
             this.ignoreEvents = false;
             this.fileChangedListener = fileChanged;
@@ -366,14 +343,14 @@ public class FileStore implements FileStoreInterface {
         }
 
         public void ignoreEvents(boolean ignore) {
-            log.info("Observer: observing events on " + this.path + "? ignoreEvents: " + ignore);
+            log.info(TAG, "Observer: observing events on " + this.path + "? ignoreEvents: " + ignore);
             this.ignoreEvents = ignore;
         }
 
         @Override
         public void onEvent(int event, String eventPath) {
             if (eventPath != null && eventPath.equals(fileName)) {
-                log.debug("Observer event: " + path + ":" + event);
+                log.debug(TAG, "Observer event: " + path + ":" + event);
                 if (event == FileObserver.CLOSE_WRITE ||
                         event == FileObserver.MODIFY ||
                         event == FileObserver.MOVED_TO) {
@@ -392,7 +369,7 @@ public class FileStore implements FileStoreInterface {
             // Cancel any running timers
             handler.removeCallbacks(delayedEnable);
             // Reschedule
-            log.info("Observer: Adding delayed enabling to queue");
+            log.info(TAG, "Observer: Adding delayed enabling to queue");
             handler.postDelayed(delayedEnable, ms);
         }
     }

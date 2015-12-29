@@ -63,7 +63,8 @@ import kotlin.text.indexOf
 import kotlin.text.toLowerCase
 
 
-    val log = getLogger("Util")
+    val log = Logger
+    val tag = "Util"
     val todayAsString: String
         get() = DateTime.today(TimeZone.getDefault()).format(Constants.DATE_FORMAT)
 
@@ -104,7 +105,7 @@ import kotlin.text.toLowerCase
 
     @Throws(TodoException::class)
     fun createParentDirectory(dest: File?) {
-        val log = getLogger("Util")
+        val log = Logger
         if (dest == null) {
             throw TodoException("createParentDirectory: dest is null")
         }
@@ -113,7 +114,7 @@ import kotlin.text.toLowerCase
             createParentDirectory(dir)
             if (!dir.exists()) {
                 if (!dir.mkdirs()) {
-                    log.error("Could not create dirs: " + dir.absolutePath)
+                    log.error(tag, "Could not create dirs: " + dir.absolutePath)
                     throw TodoException("Could not create dirs: " + dir.absolutePath)
                 }
             }
@@ -169,12 +170,14 @@ import kotlin.text.toLowerCase
         return builder.toString()
     }
 
-    fun join(s: Collection<String>?, delimiter: String): String {
-        if (s == null) {
-            return ""
-        }
-        return s.joinToString(delimiter)
+
+fun join(s: Collection<Any>?, delimiter: String): String {
+    if (s == null) {
+        return ""
     }
+    return s.joinToString(delimiter)
+}
+
 
     fun setColor(ss: SpannableString, color: Int, s: String) {
         val strList = ArrayList<String>()
@@ -415,7 +418,7 @@ import kotlin.text.toLowerCase
                 val fileUri = Uri.parse("content://" + CachedFileProvider.AUTHORITY + "/" + Constants.SHARE_FILE_NAME)
                 shareIntent.putExtra(android.content.Intent.EXTRA_STREAM, fileUri)
             } catch (e: Exception) {
-                log.warn("Failed to create file for sharing")
+                log.warn(tag, "Failed to create file for sharing")
             }
 
         }

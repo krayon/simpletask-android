@@ -70,7 +70,7 @@ public class FilterSortFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        log = LoggerFactory.getLogger(this.getClass());
+        log = Logger.INSTANCE;
 
         Bundle arguments = getArguments();
         if (originalItems == null) {
@@ -80,7 +80,7 @@ public class FilterSortFragment extends Fragment {
                 originalItems = arguments.getStringArrayList(FilterActivity.FILTER_ITEMS);
             }
         }
-        log.debug("Created view with: " + originalItems);
+        log.debug(TAG, "Created view with: " + originalItems);
         m_app = (TodoApplication) getActivity().getApplication();
 
         // Set the proper theme

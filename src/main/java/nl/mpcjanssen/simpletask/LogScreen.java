@@ -13,17 +13,16 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
-import nl.mpcjanssen.simpletask.util.TaskIo;
 import nl.mpcjanssen.simpletask.util.Util;
 import org.jetbrains.annotations.NotNull;
 
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 
 public class LogScreen extends ThemedActivity {
 
+    private static final String TAG = LogScreen.class.getSimpleName() ;
     private Logger log;
 
     private ArrayList<String> myDataset;
@@ -31,26 +30,14 @@ public class LogScreen extends ThemedActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        log = LoggerFactory.getLogger(this.getClass());
+        log = Logger.INSTANCE;
         setContentView(R.layout.log);
         ListView mListView = (ListView) findViewById(R.id.listView);
 
         mListView.setFastScrollEnabled(true);
 
         myDataset = new ArrayList<>();
-        File logFile = getLogFile();
-        try {
-            for (String line : TaskIo.loadFromFile(logFile)) {
 
-                if (!line.trim().isEmpty()) {
-                    myDataset.add(line);
-                }
-            }
-
-
-        } catch (IOException e) {
-            log.error("Failed to load logfile", e);
-        }
 
         // specify an adapter (see also next example)
         ArrayAdapter mAdapter = new ArrayAdapter(this, R.layout.log_item, myDataset);
@@ -69,7 +56,7 @@ public class LogScreen extends ThemedActivity {
             Uri fileUri = Uri.parse("content://" + CachedFileProvider.AUTHORITY + "/" + "log.txt");
             shareIntent.putExtra(Intent.EXTRA_STREAM, fileUri);
         } catch (Exception e) {
-            log.warn("Failed to create file for sharing");
+            log.warn(TAG, "Failed to create file for sharing");
         }
         startActivity(Intent.createChooser(shareIntent, "Share Logging File"));
 

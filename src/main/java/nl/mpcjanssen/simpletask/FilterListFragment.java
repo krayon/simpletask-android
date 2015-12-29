@@ -27,20 +27,20 @@ public class FilterListFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        log = LoggerFactory.getLogger(this.getClass());
-        log.debug("onCreate() this:" + this);
+        log = Logger.INSTANCE;
+        log.debug(TAG, "onCreate() this:" + this);
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        log.debug("onDestroy() this:" + this);
+        log.debug(TAG, "onDestroy() this:" + this);
     }
 
     @Override
     public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
-        log.debug("onSaveInstanceState() this:" + this);
+        log.debug(TAG, "onSaveInstanceState() this:" + this);
         outState.putStringArrayList("selectedItems", getSelectedItems());
         outState.putBoolean("not", getNot());
 
@@ -49,7 +49,7 @@ public class FilterListFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        log.debug("onCreateView() this:" + this + " savedInstance:" + savedInstanceState);
+        log.debug(TAG, "onCreateView() this:" + this + " savedInstance:" + savedInstanceState);
 
         Bundle arguments = getArguments();
         ArrayList<String> items = arguments.getStringArrayList(FilterActivity.FILTER_ITEMS);
@@ -63,7 +63,7 @@ public class FilterListFragment extends Fragment {
             not = arguments.getBoolean(FilterActivity.INITIAL_NOT);
         }
 
-        log.debug("Fragment bundle:" + this + " arguments:" + arguments);
+        log.debug(TAG, "Fragment bundle:" + this + " arguments:" + arguments);
         LinearLayout layout = (LinearLayout) inflater.inflate(R.layout.multi_filter,
                 container, false);
 

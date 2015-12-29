@@ -28,14 +28,19 @@ import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
-import com.orm.SugarTransactionHelper;
+
+import android.util.Log;
 import hirondelle.date4j.DateTime;
 import nl.mpcjanssen.simpletask.*;
+
+import nl.mpcjanssen.simpletask.dao.Entry;
 import nl.mpcjanssen.simpletask.remote.BackupInterface;
 import nl.mpcjanssen.simpletask.remote.FileStoreInterface;
 import nl.mpcjanssen.simpletask.sort.MultiComparator;
+import nl.mpcjanssen.simpletask.util.TaskIo;
 import nl.mpcjanssen.simpletask.util.Util;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.ArrayList;
@@ -43,6 +48,7 @@ import java.util.TimeZone;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.Collections;
+import java.util.concurrent.Callable;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 
@@ -56,6 +62,7 @@ public class TodoList implements TodoListInterface {
     final static String TAG = TodoList.class.getSimpleName();
     private final Logger log;
     private final boolean startLooper;
+    private final TodoApplication app;
 
     @NonNull
     private List<Task> mTasks = new CopyOnWriteArrayList();
@@ -71,14 +78,15 @@ public class TodoList implements TodoListInterface {
     private boolean loadQueued = false;
 
 
-    public TodoList(TodoListChanged todoListChanged) {
-        this(todoListChanged, true);
+    public TodoList(TodoListChanged todoListChanged, TodoApplication app) {
+        this(todoListChanged, app, true);
     }
 
 
-    public TodoList(TodoListChanged todoListChanged,
+    public TodoList(TodoListChanged todoListChanged, TodoApplication app,
                     boolean startLooper) {
         this.startLooper = startLooper;
+        this.app = app;
         // Set up the message queue
         if (startLooper) {
             Thread t = new Thread(new Runnable() {
@@ -91,7 +99,7 @@ public class TodoList implements TodoListInterface {
             });
             t.start();
         }
-        log = LoggerFactory.getLogger(this.getClass());
+        log = Logger.INSTANCE;
         this.mTodoListChanged = todoListChanged;
 
 
@@ -99,7 +107,7 @@ public class TodoList implements TodoListInterface {
 
 
     public void queueRunnable(final String description, Runnable r) {
-        log.info("Handler: Queue " + description);
+        log.info(TAG, "Handler: Queue " + description);
         while (todolistQueue==null && startLooper ) {
             try {
                 Thread.sleep(100);
@@ -124,7 +132,7 @@ public class TodoList implements TodoListInterface {
         queueRunnable("Add task", new Runnable() {
             @Override
             public void run() {
-                log.debug("Adding task of length {} into {} atEnd", t.inFileFormat().length(), TodoList.this, atEnd);
+                log.debug(TAG, "Adding task of length {} into {} atEnd", t.inFileFormat().length(), TodoList.this, atEnd);
                 if (atEnd) {
                     mTasks.add(t);
                 } else {
@@ -296,41 +304,35 @@ public class TodoList implements TodoListInterface {
 
     @Override
     public void notifyChanged(final FileStoreInterface filestore, final String todoname, final String eol, final BackupInterface backup, final boolean save) {
-        log.info("Handler: Queue notifychanged");
+        log.info(TAG, "Handler: Queue notifychanged");
         todolistQueue.post(new Runnable() {
             @Override
             public void run() {
                 if (save) {
-                    log.info("Handler: Handle notifychanged");
-                    log.info("Saving todo list, size {}", mTasks.size());
+                    log.info(TAG, "Handler: Handle notifychanged");
+                    log.info(TAG, "Saving todo list, size {}", mTasks.size());
                     save(filestore, todoname, backup, eol);
                 }
                 clearSelectedTasks();
                 if (mTodoListChanged != null) {
-                    log.info("TodoList changed, notifying listener and invalidating cached values");
+                    log.info(TAG, "TodoList changed, notifying listener and invalidating cached values");
                     mTags = null;
                     mLists = null;
                     mTodoListChanged.todoListChanged();
                 } else {
-                    log.info("TodoList changed, but nobody is listening");
+                    log.info(TAG, "TodoList changed, but nobody is listening");
                 }
             }
         });
     }
 
-    @Override
-    public List<Task> getTasks() {
-        return mTasks;
-    }
+
 
     @Override
     public List<Task> getSortedTasksCopy(@NonNull ActiveFilter filter, @NonNull ArrayList<String> sorts, boolean caseSensitive) {
-        List<Task> filteredTasks = filter.apply(mTasks);
-        List<Task> originalOrder = new ArrayList<>();
-        originalOrder.addAll(filteredTasks);
-        MultiComparator comp = new MultiComparator(sorts, caseSensitive, originalOrder);
-        Collections.sort(filteredTasks, comp);
-        return filteredTasks;
+        // Fixme
+
+        return getTasks();
     }
 
     @Override
@@ -361,7 +363,7 @@ public class TodoList implements TodoListInterface {
     @Override
     public void reload(final FileStoreInterface fileStore, final String filename, final BackupInterface backup, final LocalBroadcastManager lbm, final boolean background, final String eol) {
         if (TodoList.this.loadQueued()) {
-            log.info("Todolist reload is already queued waiting");
+            log.info(TAG, "Todolist reload is already queued waiting");
             return;
         }
         lbm.sendBroadcast(new Intent(Constants.BROADCAST_SYNC_START));
@@ -370,35 +372,34 @@ public class TodoList implements TodoListInterface {
             @Override
             public void run() {
                 clearSelectedTasks();
+                Log.i(TAG,"Loading entries into DB");
                 try {
-                    mTasks = fileStore.loadTasksFromFile(filename, backup, eol);
-                } catch (IOException e) {
-                    log.error("Todolist load failed: {}", filename, e);
+                    app.daoSession.callInTx(new Callable<Object>() {
+                        @Override
+                        public Object call() throws Exception {
+                            fileStore.loadTasksFromFile(app.entryDao, filename, backup, eol);
+                            return null;
+                        }
+                    });
+                }
+                 catch (Exception e) {
+                    Log.e(TAG, "Todolist load failed:" +  filename, e);
                     Util.showToastShort(TodoApplication.getAppContext(), "Loading of todo file failed");
                 }
                 loadQueued = false;
-                SugarTransactionHelper.doInTransaction(
-                        new SugarTransactionHelper.Callback() {
-                            @Override
-                            public void manipulateInTransaction() {
-                                Entry.deleteAll(Entry.class);
-                                Long line  = 1L;
-                                for (Task t: mTasks) {
-                                    new Entry(line,t).save();
-                                    line++;
-                                }
-                            }
-                        }
-                );
-                log.info("Todolist loaded, refresh UI");
+
+
+                Log.i(TAG,"Stored " + app.entryDao.count() + " entries in DB");
+                Log.i(TAG,"Todolist loaded, refresh UI");
+
                 notifyChanged(fileStore,filename,eol,backup, false);
             }};
         if (background ) {
-            log.info("Loading todolist asynchronously into {}", this);
+            log.info(TAG, "Loading todolist asynchronously into {}", this);
             queueRunnable("Reload", r);
 
         } else {
-            log.info("Loading todolist synchronously into {}", this);
+            log.info(TAG, "Loading todolist synchronously into {}", this);
             r.run();
         }
     }
@@ -469,7 +470,7 @@ public class TodoList implements TodoListInterface {
         private final Runnable runnable;
 
         LoggingRunnable(String description, Runnable r) {
-            log.info("Creating action " + description);
+            log.info(TAG, "Creating action " + description);
             this.description = description;
             this.runnable = r;
         }
@@ -481,9 +482,20 @@ public class TodoList implements TodoListInterface {
 
         @Override
         public void run() {
-            log.info("Execution action " + description);
+            log.info(TAG, "Execution action " + description);
             runnable.run();
         }
 
+    }
+
+    @Override
+    public List<Task> getTasks() {
+        Log.i(TAG, "Loading tasks from DB");
+        ArrayList<Task> tasks = new ArrayList<>();
+        for (Entry entry: app.entryDao.loadAll()) {
+            tasks.add(new Task(entry.getText()));
+        }
+        Log.i(TAG, "Got " + tasks.size() + " tasks from db");
+        return tasks;
     }
 }
