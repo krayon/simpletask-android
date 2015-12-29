@@ -39,9 +39,7 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
 import android.widget.EditText;
 import hirondelle.date4j.DateTime;
-import nl.mpcjanssen.simpletask.dao.DaoMaster;
-import nl.mpcjanssen.simpletask.dao.DaoSession;
-import nl.mpcjanssen.simpletask.dao.EntryDao;
+import nl.mpcjanssen.simpletask.dao.*;
 import nl.mpcjanssen.simpletask.remote.BackupInterface;
 import nl.mpcjanssen.simpletask.remote.FileStore;
 import nl.mpcjanssen.simpletask.remote.FileStoreInterface;
@@ -72,10 +70,12 @@ public class TodoApplication extends Application implements
     private int m_Theme = -1;
     private Logger log;
     private FileStore mFileStore;
-    private SQLiteDatabase db;
+    public SQLiteDatabase db;
     private DaoMaster daoMaster;
     public DaoSession daoSession;
     public EntryDao entryDao;
+    public EntryListDao entryListDao;
+    public EntryTagDao entryTagDao;
 
     public static Context getAppContext() {
         return m_appContext;
@@ -99,6 +99,8 @@ public class TodoApplication extends Application implements
         daoMaster = new DaoMaster(db);
         daoSession = daoMaster.newSession();
         entryDao = daoSession.getEntryDao();
+        entryListDao = daoSession.getEntryListDao();
+        entryTagDao = daoSession.getEntryTagDao();
 
         TodoApplication.m_appContext = getApplicationContext();
         TodoApplication.m_prefs = PreferenceManager.getDefaultSharedPreferences(getAppContext());

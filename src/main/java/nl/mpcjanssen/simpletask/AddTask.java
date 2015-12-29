@@ -470,7 +470,7 @@ public class AddTask extends ThemedActivity {
         Set<String> items = new TreeSet<>();
         TodoList todoList = m_app.getTodoList();
 
-        items.addAll(todoList.getProjects());
+        items.addAll(todoList.getLists());
         // Also display contexts in tasks being added
         final Task task = new Task(textInputField.getText().toString());
         items.addAll(task.getTags());
@@ -549,7 +549,7 @@ public class AddTask extends ThemedActivity {
         Set<String> items = new TreeSet<>();
         TodoList todoList = m_app.getTodoList();
 
-        items.addAll(todoList.getContexts());
+        items.addAll(todoList.getTags());
         // Also display contexts in tasks being added
         final Task task = new Task(textInputField.getText().toString());
         items.addAll(task.getLists());

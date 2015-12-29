@@ -18,6 +18,8 @@ import nl.mpcjanssen.simpletask.Logger;
 
 import nl.mpcjanssen.simpletask.TodoApplication;
 import nl.mpcjanssen.simpletask.dao.EntryDao;
+import nl.mpcjanssen.simpletask.dao.EntryListDao;
+import nl.mpcjanssen.simpletask.dao.EntryTagDao;
 import nl.mpcjanssen.simpletask.task.Task;
 import nl.mpcjanssen.simpletask.util.ListenerList;
 import nl.mpcjanssen.simpletask.util.TaskIo;
@@ -79,9 +81,9 @@ public class FileStore implements FileStoreInterface {
     }
 
     @Override
-    public void loadTasksFromFile(EntryDao entryDao, final String path, @Nullable BackupInterface backup, String eol) throws IOException {
+    public void loadTasksFromFile(EntryDao entryDao, EntryListDao entryListDao, EntryTagDao entryTagDao, final String path, @Nullable BackupInterface backup, String eol) throws IOException {
         Log.i(TAG, "Loading tasks from file:" + path);
-        TaskIo.loadDaoFromFile(entryDao, new File(path));
+        TaskIo.loadDaoFromFile(entryDao, entryListDao, entryTagDao, new File(path));
         setWatching(path);
     }
 

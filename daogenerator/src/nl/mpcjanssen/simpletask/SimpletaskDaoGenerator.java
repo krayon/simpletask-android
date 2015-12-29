@@ -20,15 +20,36 @@ public class SimpletaskDaoGenerator {
     public static void main(String[] args) throws Exception {
         Schema schema = new Schema(1000, "nl.mpcjanssen.simpletask.dao");
 
-        addEntry(schema);
+        addEntities(schema);
 
         new DaoGenerator().generateAll(schema, "src/main/java");
     }
 
-    private static void addEntry(Schema schema) {
+    private static void addEntities(Schema schema) {
+
+        Entity list = schema.addEntity("EntryList");
+        Property listProperty = list.addLongProperty("entryLine").notNull().getProperty();
+        list.addStringProperty("text").notNull();
+
+        Entity tag = schema.addEntity("EntryTag");
+        Property tagProperty = tag.addLongProperty("entryLine").notNull().getProperty();
+        tag.addStringProperty("text").notNull();
+
+
         Entity entry = schema.addEntity("Entry");
-        entry.addLongProperty("line").notNull();
+        entry.addLongProperty("line").notNull().primaryKey();
+        entry.addBooleanProperty("hidden").notNull();
         entry.addStringProperty("text").notNull();
+        entry.addBooleanProperty("completed").notNull();
+        entry.addStringProperty("priority").notNull();
+        entry.addStringProperty("completionDate");
+        entry.addStringProperty("createDate");
+        entry.addStringProperty("thresholdDate");
+        entry.addStringProperty("dueDate");
+        entry.addIntProperty("endOfCompPrefix").notNull();
+
+        entry.addToMany(tag, tagProperty);
+        entry.addToMany(list, listProperty);
     }
 
 }

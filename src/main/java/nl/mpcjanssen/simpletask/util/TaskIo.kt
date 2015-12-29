@@ -32,16 +32,22 @@ package nl.mpcjanssen.simpletask.util
 
 import nl.mpcjanssen.simpletask.dao.Entry
 import nl.mpcjanssen.simpletask.dao.EntryDao
+import nl.mpcjanssen.simpletask.dao.EntryListDao
+import nl.mpcjanssen.simpletask.dao.EntryTagDao
+import nl.mpcjanssen.simpletask.task.TodoTxtTask
 import java.io.*
 
 
 private val TAG = "TaskIo"
 
 @Throws(IOException::class)
-fun loadDaoFromFile(dao: EntryDao, file: File) {
+fun loadDaoFromFile(dao: EntryDao, listDao: EntryListDao, tagDao: EntryTagDao,  file: File) {
+    dao.deleteAll();
+    listDao.deleteAll();
+    tagDao.deleteAll();
     var line = 0L
     file.forEachLine {
-        dao.insert(Entry(line, it))
+        TodoTxtTask.addToDatabase(dao,listDao,tagDao,line,it);
         line++;
     }
 }

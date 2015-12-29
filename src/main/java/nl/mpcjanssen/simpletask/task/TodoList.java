@@ -23,6 +23,7 @@
 package nl.mpcjanssen.simpletask.task;
 
 import android.content.Intent;
+import android.database.Cursor;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.annotation.NonNull;
@@ -36,11 +37,8 @@ import nl.mpcjanssen.simpletask.*;
 import nl.mpcjanssen.simpletask.dao.Entry;
 import nl.mpcjanssen.simpletask.remote.BackupInterface;
 import nl.mpcjanssen.simpletask.remote.FileStoreInterface;
-import nl.mpcjanssen.simpletask.sort.MultiComparator;
-import nl.mpcjanssen.simpletask.util.TaskIo;
 import nl.mpcjanssen.simpletask.util.Util;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.ArrayList;
@@ -186,43 +184,37 @@ public class TodoList implements TodoListInterface {
 
     @Override
     @NonNull
-    public ArrayList<String> getContexts() {
-        if (mLists != null) {
-            return mLists;
+    public ArrayList<String> getTags() {
+        ArrayList<String> result = new ArrayList<String>();
+        Cursor cursor = app.db.rawQuery("SELECT DISTINCT text FROM " + app.entryTagDao.getTablename(), null);
+        while (cursor.moveToNext()) {
+            result.add(cursor.getString(0));
         }
-        Set<String> res = new HashSet<>();
-        for (Task item : mTasks) {
-            res.addAll(item.getLists());
-        }
-        mLists = new ArrayList<>();
-        mLists.addAll(res);
-        return mLists;
+        cursor.close();
+        return result;
     }
 
     @Override
     @NonNull
-    public ArrayList<String> getProjects() {
-        if (mTags != null) {
-            return mTags;
+    public ArrayList<String> getLists() {
+        ArrayList<String> result = new ArrayList<String>();
+        Cursor cursor = app.db.rawQuery("SELECT DISTINCT text FROM " + app.entryListDao.getTablename(), null);
+        while (cursor.moveToNext()) {
+            result.add(cursor.getString(0));
         }
-        Set<String> res = new HashSet<>();
-        for (Task item : mTasks) {
-            res.addAll(item.getTags());
-        }
-        mTags = new ArrayList<>();
-        mTags.addAll(res);
-        return mTags;
+        cursor.close();
+        return result;
     }
 
 
     @Override
-    public ArrayList<String> getDecoratedContexts() {
-        return Util.prefixItems("@", getContexts());
+    public ArrayList<String> getDecoratedLists() {
+        return Util.prefixItems("@", getLists());
     }
 
     @Override
-    public ArrayList<String> getDecoratedProjects() {
-        return Util.prefixItems("+", getProjects());
+    public ArrayList<String> getDecoratedTags() {
+        return Util.prefixItems("+", getTags());
     }
 
 
@@ -377,7 +369,7 @@ public class TodoList implements TodoListInterface {
                     app.daoSession.callInTx(new Callable<Object>() {
                         @Override
                         public Object call() throws Exception {
-                            fileStore.loadTasksFromFile(app.entryDao, filename, backup, eol);
+                            fileStore.loadTasksFromFile(app.entryDao, app.entryListDao, app.entryTagDao, filename, backup, eol);
                             return null;
                         }
                     });
@@ -388,8 +380,12 @@ public class TodoList implements TodoListInterface {
                 }
                 loadQueued = false;
 
-
                 Log.i(TAG,"Stored " + app.entryDao.count() + " entries in DB");
+                long numLists =  getLists().size();
+                long numTags =  getTags().size();
+                Log.i(TAG,"Stored " + app.entryDao.count() + " entries in DB");
+                Log.i(TAG,"" + numLists + " distinct lists and " + numTags + " distinct tags" );
+
                 Log.i(TAG,"Todolist loaded, refresh UI");
 
                 notifyChanged(fileStore,filename,eol,backup, false);
@@ -495,7 +491,7 @@ public class TodoList implements TodoListInterface {
         for (Entry entry: app.entryDao.loadAll()) {
             tasks.add(new Task(entry.getText()));
         }
-        Log.i(TAG, "Got " + tasks.size() + " tasks from db");
+        Log.i(TAG, "Got " + tasks.size() + " tasks from DB");
         return tasks;
     }
 }

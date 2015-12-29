@@ -100,7 +100,7 @@ public class FilterActivity extends ThemedActivity {
         // Fill arguments for fragment
         arguments = new Bundle();
         arguments.putStringArrayList(FILTER_ITEMS,
-                Util.sortWithPrefix(m_app.getTodoList().getContexts(), m_app.sortCaseSensitive(), "-"));
+                Util.sortWithPrefix(m_app.getTodoList().getTags(), m_app.sortCaseSensitive(), "-"));
         arguments.putStringArrayList(INITIAL_SELECTED_ITEMS, mFilter.getContexts());
         arguments.putBoolean(INITIAL_NOT, mFilter.getContextsNot());
         arguments.putString(TAB_TYPE, CONTEXT_TAB);
@@ -112,7 +112,7 @@ public class FilterActivity extends ThemedActivity {
         // Fill arguments for fragment
         arguments = new Bundle();
         arguments.putStringArrayList(FILTER_ITEMS,
-                Util.sortWithPrefix(m_app.getTodoList().getProjects(), m_app.sortCaseSensitive(), "-"));
+                Util.sortWithPrefix(m_app.getTodoList().getLists(), m_app.sortCaseSensitive(), "-"));
         arguments.putStringArrayList(INITIAL_SELECTED_ITEMS, mFilter.getProjects());
         arguments.putBoolean(INITIAL_NOT, mFilter.getProjectsNot());
         arguments.putString(TAB_TYPE, PROJECT_TAB);

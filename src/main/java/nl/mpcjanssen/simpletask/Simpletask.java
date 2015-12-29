@@ -49,7 +49,6 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.View.OnFocusChangeListener;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
@@ -1154,8 +1153,8 @@ public class Simpletask extends ThemedActivity implements
 
     private void updateLeftDrawer() {
         TodoList taskBag = getTodoList();
-        ArrayList<String> decoratedContexts = Util.sortWithPrefix(taskBag.getDecoratedContexts(), m_app.sortCaseSensitive(), "@-");
-        ArrayList<String> decoratedProjects = Util.sortWithPrefix(taskBag.getDecoratedProjects(), m_app.sortCaseSensitive(), "+-");
+        ArrayList<String> decoratedContexts = Util.sortWithPrefix(taskBag.getDecoratedLists(), m_app.sortCaseSensitive(), "@-");
+        ArrayList<String> decoratedProjects = Util.sortWithPrefix(taskBag.getDecoratedTags(), m_app.sortCaseSensitive(), "+-");
         DrawerAdapter drawerAdapter = new DrawerAdapter(getLayoutInflater(),
                 m_app.getListTerm(),
                 decoratedContexts,
@@ -1655,7 +1654,7 @@ public class Simpletask extends ThemedActivity implements
         final ArrayList<String> contexts = new ArrayList<>();
         Set<String> selectedContexts = new HashSet<>();
         final TodoList todoList = getTodoList();
-        contexts.addAll(Util.sortWithPrefix(todoList.getContexts(), m_app.sortCaseSensitive(), null));
+        contexts.addAll(Util.sortWithPrefix(todoList.getLists(), m_app.sortCaseSensitive(), null));
         for (Task t : checkedTasks) {
             selectedContexts.addAll(t.getLists());
         }
@@ -1719,7 +1718,7 @@ public class Simpletask extends ThemedActivity implements
         final ArrayList<String> projects = new ArrayList<>();
         Set<String> selectedProjects = new HashSet<>();
         final TodoList taskbag = getTodoList();
-        projects.addAll(Util.sortWithPrefix(taskbag.getProjects(), m_app.sortCaseSensitive(), null));
+        projects.addAll(Util.sortWithPrefix(taskbag.getTags(), m_app.sortCaseSensitive(), null));
         for (Task t : checkedTasks) {
             selectedProjects.addAll(t.getTags());
         }

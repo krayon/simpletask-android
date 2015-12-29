@@ -14,7 +14,7 @@ import nl.mpcjanssen.simpletask.dao.Entry;
 /** 
  * DAO for table "ENTRY".
 */
-public class EntryDao extends AbstractDao<Entry, Void> {
+public class EntryDao extends AbstractDao<Entry, Long> {
 
     public static final String TABLENAME = "ENTRY";
 
@@ -23,9 +23,19 @@ public class EntryDao extends AbstractDao<Entry, Void> {
      * Can be used for QueryBuilder and for referencing column names.
     */
     public static class Properties {
-        public final static Property Line = new Property(0, long.class, "line", false, "LINE");
-        public final static Property Text = new Property(1, String.class, "text", false, "TEXT");
+        public final static Property Line = new Property(0, long.class, "line", true, "LINE");
+        public final static Property Hidden = new Property(1, boolean.class, "hidden", false, "HIDDEN");
+        public final static Property Text = new Property(2, String.class, "text", false, "TEXT");
+        public final static Property Completed = new Property(3, boolean.class, "completed", false, "COMPLETED");
+        public final static Property Priority = new Property(4, String.class, "priority", false, "PRIORITY");
+        public final static Property CompletionDate = new Property(5, String.class, "completionDate", false, "COMPLETION_DATE");
+        public final static Property CreateDate = new Property(6, String.class, "createDate", false, "CREATE_DATE");
+        public final static Property ThresholdDate = new Property(7, String.class, "thresholdDate", false, "THRESHOLD_DATE");
+        public final static Property DueDate = new Property(8, String.class, "dueDate", false, "DUE_DATE");
+        public final static Property EndOfCompPrefix = new Property(9, int.class, "endOfCompPrefix", false, "END_OF_COMP_PREFIX");
     };
+
+    private DaoSession daoSession;
 
 
     public EntryDao(DaoConfig config) {
@@ -34,14 +44,23 @@ public class EntryDao extends AbstractDao<Entry, Void> {
     
     public EntryDao(DaoConfig config, DaoSession daoSession) {
         super(config, daoSession);
+        this.daoSession = daoSession;
     }
 
     /** Creates the underlying database table. */
     public static void createTable(SQLiteDatabase db, boolean ifNotExists) {
         String constraint = ifNotExists? "IF NOT EXISTS ": "";
         db.execSQL("CREATE TABLE " + constraint + "\"ENTRY\" (" + //
-                "\"LINE\" INTEGER NOT NULL ," + // 0: line
-                "\"TEXT\" TEXT NOT NULL );"); // 1: text
+                "\"LINE\" INTEGER PRIMARY KEY NOT NULL ," + // 0: line
+                "\"HIDDEN\" INTEGER NOT NULL ," + // 1: hidden
+                "\"TEXT\" TEXT NOT NULL ," + // 2: text
+                "\"COMPLETED\" INTEGER NOT NULL ," + // 3: completed
+                "\"PRIORITY\" TEXT NOT NULL ," + // 4: priority
+                "\"COMPLETION_DATE\" TEXT," + // 5: completionDate
+                "\"CREATE_DATE\" TEXT," + // 6: createDate
+                "\"THRESHOLD_DATE\" TEXT," + // 7: thresholdDate
+                "\"DUE_DATE\" TEXT," + // 8: dueDate
+                "\"END_OF_COMP_PREFIX\" INTEGER NOT NULL );"); // 9: endOfCompPrefix
     }
 
     /** Drops the underlying database table. */
@@ -55,13 +74,43 @@ public class EntryDao extends AbstractDao<Entry, Void> {
     protected void bindValues(SQLiteStatement stmt, Entry entity) {
         stmt.clearBindings();
         stmt.bindLong(1, entity.getLine());
-        stmt.bindString(2, entity.getText());
+        stmt.bindLong(2, entity.getHidden() ? 1L: 0L);
+        stmt.bindString(3, entity.getText());
+        stmt.bindLong(4, entity.getCompleted() ? 1L: 0L);
+        stmt.bindString(5, entity.getPriority());
+ 
+        String completionDate = entity.getCompletionDate();
+        if (completionDate != null) {
+            stmt.bindString(6, completionDate);
+        }
+ 
+        String createDate = entity.getCreateDate();
+        if (createDate != null) {
+            stmt.bindString(7, createDate);
+        }
+ 
+        String thresholdDate = entity.getThresholdDate();
+        if (thresholdDate != null) {
+            stmt.bindString(8, thresholdDate);
+        }
+ 
+        String dueDate = entity.getDueDate();
+        if (dueDate != null) {
+            stmt.bindString(9, dueDate);
+        }
+        stmt.bindLong(10, entity.getEndOfCompPrefix());
+    }
+
+    @Override
+    protected void attachEntity(Entry entity) {
+        super.attachEntity(entity);
+        entity.__setDaoSession(daoSession);
     }
 
     /** @inheritdoc */
     @Override
-    public Void readKey(Cursor cursor, int offset) {
-        return null;
+    public Long readKey(Cursor cursor, int offset) {
+        return cursor.getLong(offset + 0);
     }    
 
     /** @inheritdoc */
@@ -69,7 +118,15 @@ public class EntryDao extends AbstractDao<Entry, Void> {
     public Entry readEntity(Cursor cursor, int offset) {
         Entry entity = new Entry( //
             cursor.getLong(offset + 0), // line
-            cursor.getString(offset + 1) // text
+            cursor.getShort(offset + 1) != 0, // hidden
+            cursor.getString(offset + 2), // text
+            cursor.getShort(offset + 3) != 0, // completed
+            cursor.getString(offset + 4), // priority
+            cursor.isNull(offset + 5) ? null : cursor.getString(offset + 5), // completionDate
+            cursor.isNull(offset + 6) ? null : cursor.getString(offset + 6), // createDate
+            cursor.isNull(offset + 7) ? null : cursor.getString(offset + 7), // thresholdDate
+            cursor.isNull(offset + 8) ? null : cursor.getString(offset + 8), // dueDate
+            cursor.getInt(offset + 9) // endOfCompPrefix
         );
         return entity;
     }
@@ -78,20 +135,32 @@ public class EntryDao extends AbstractDao<Entry, Void> {
     @Override
     public void readEntity(Cursor cursor, Entry entity, int offset) {
         entity.setLine(cursor.getLong(offset + 0));
-        entity.setText(cursor.getString(offset + 1));
+        entity.setHidden(cursor.getShort(offset + 1) != 0);
+        entity.setText(cursor.getString(offset + 2));
+        entity.setCompleted(cursor.getShort(offset + 3) != 0);
+        entity.setPriority(cursor.getString(offset + 4));
+        entity.setCompletionDate(cursor.isNull(offset + 5) ? null : cursor.getString(offset + 5));
+        entity.setCreateDate(cursor.isNull(offset + 6) ? null : cursor.getString(offset + 6));
+        entity.setThresholdDate(cursor.isNull(offset + 7) ? null : cursor.getString(offset + 7));
+        entity.setDueDate(cursor.isNull(offset + 8) ? null : cursor.getString(offset + 8));
+        entity.setEndOfCompPrefix(cursor.getInt(offset + 9));
      }
     
     /** @inheritdoc */
     @Override
-    protected Void updateKeyAfterInsert(Entry entity, long rowId) {
-        // Unsupported or missing PK type
-        return null;
+    protected Long updateKeyAfterInsert(Entry entity, long rowId) {
+        entity.setLine(rowId);
+        return rowId;
     }
     
     /** @inheritdoc */
     @Override
-    public Void getKey(Entry entity) {
-        return null;
+    public Long getKey(Entry entity) {
+        if(entity != null) {
+            return entity.getLine();
+        } else {
+            return null;
+        }
     }
 
     /** @inheritdoc */

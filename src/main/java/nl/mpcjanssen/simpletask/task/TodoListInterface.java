@@ -27,14 +27,14 @@ public interface TodoListInterface {
     ArrayList<Priority> getPriorities();
 
     @NonNull
-    ArrayList<String> getContexts();
+    ArrayList<String> getTags();
 
     @NonNull
-    ArrayList<String> getProjects();
+    ArrayList<String> getLists();
 
-    ArrayList<String> getDecoratedContexts();
+    ArrayList<String> getDecoratedLists();
 
-    ArrayList<String> getDecoratedProjects();
+    ArrayList<String> getDecoratedTags();
 
     void undoComplete(@NonNull List<Task> tasks);
 
