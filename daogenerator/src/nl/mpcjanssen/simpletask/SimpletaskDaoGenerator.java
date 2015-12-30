@@ -27,15 +27,6 @@ public class SimpletaskDaoGenerator {
 
     private static void addEntities(Schema schema) {
 
-        Entity list = schema.addEntity("EntryList");
-        Property listProperty = list.addLongProperty("entryLine").notNull().getProperty();
-        list.addStringProperty("text").notNull();
-
-        Entity tag = schema.addEntity("EntryTag");
-        Property tagProperty = tag.addLongProperty("entryLine").notNull().getProperty();
-        tag.addStringProperty("text").notNull();
-
-
         Entity entry = schema.addEntity("Entry");
         entry.addLongProperty("line").notNull().primaryKey();
         entry.addBooleanProperty("selected").notNull();
@@ -48,9 +39,13 @@ public class SimpletaskDaoGenerator {
         entry.addStringProperty("thresholdDate");
         entry.addStringProperty("dueDate");
         entry.addIntProperty("endOfCompPrefix").notNull();
+        entry.addStringProperty("lists").customType(
+                "nl.mpcjanssen.simpletask.dao.Lists",
+                "nl.mpcjanssen.simpletask.dao.ListsPropertyConverter");
+        entry.addStringProperty("tags").customType(
+                "nl.mpcjanssen.simpletask.dao.Tags",
+                "nl.mpcjanssen.simpletask.dao.TagsPropertyConverter");
 
-        entry.addToMany(tag, tagProperty);
-        entry.addToMany(list, listProperty);
 
         Entity visibleLine = schema.addEntity("VisibleLine");
         visibleLine.addLongProperty("position").notNull().primaryKey();

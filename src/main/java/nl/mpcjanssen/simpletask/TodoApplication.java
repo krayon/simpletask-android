@@ -99,8 +99,6 @@ public class TodoApplication extends Application implements
         daoSession = daoMaster.newSession();
         daos = new Daos(
             daoSession.getEntryDao(),
-            daoSession.getEntryListDao(),
-            daoSession.getEntryTagDao(),
             daoSession.getVisibleLineDao());
 
         TodoApplication.m_appContext = getApplicationContext();

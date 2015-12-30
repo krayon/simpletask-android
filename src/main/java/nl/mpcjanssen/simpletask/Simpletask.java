@@ -1591,12 +1591,11 @@ public class Simpletask extends ThemedActivity implements
 
     private void updateLists(@NonNull final List<Entry> checkedTasks) {
         final ArrayList<String> contexts = new ArrayList<>();
-        Set<EntryList> selectedContexts = new HashSet<>();
+        Set<String> selectedContexts = new HashSet<>();
         final TodoList todoList = getTodoList();
         contexts.addAll(Util.sortWithPrefix(todoList.getLists(), m_app.sortCaseSensitive(), null));
         for (Entry e : checkedTasks) {
-            List<EntryList> lists = e.getEntryListList();
-            selectedContexts.addAll(lists);
+            selectedContexts.addAll(e.getLists().getSorted());
         }
 
 
@@ -1606,7 +1605,7 @@ public class Simpletask extends ThemedActivity implements
         lv.setAdapter(new ArrayAdapter<>(this, R.layout.simple_list_item_multiple_choice,
                 contexts.toArray(new String[contexts.size()])));
         lv.setChoiceMode(AbsListView.CHOICE_MODE_MULTIPLE);
-        for (EntryList context : selectedContexts) {
+        for (String context : selectedContexts) {
             int position = contexts.indexOf(context);
             if (position != -1) {
                 lv.setItemChecked(position, true);
@@ -1649,11 +1648,11 @@ public class Simpletask extends ThemedActivity implements
 
     private void updateTags(@NonNull final List<Entry> checkedTasks) {
         final ArrayList<String> projects = new ArrayList<>();
-        Set<EntryTag> selectedProjects = new HashSet<>();
+        Set<String> selectedProjects = new HashSet<>();
         final TodoList taskbag = getTodoList();
         projects.addAll(Util.sortWithPrefix(taskbag.getTags(), m_app.sortCaseSensitive(), null));
         for (Entry t : checkedTasks) {
-            selectedProjects.addAll(t.getEntryTagList());
+            selectedProjects.addAll(t.getTags().getSorted());
         }
 
 
@@ -1662,7 +1661,7 @@ public class Simpletask extends ThemedActivity implements
         lv.setAdapter(new ArrayAdapter<>(this, R.layout.simple_list_item_multiple_choice,
                 projects.toArray(new String[projects.size()])));
         lv.setChoiceMode(AbsListView.CHOICE_MODE_MULTIPLE);
-        for (EntryTag context : selectedProjects) {
+        for (String context : selectedProjects) {
             int position = projects.indexOf(context);
             if (position != -1) {
                 lv.setItemChecked(position, true);

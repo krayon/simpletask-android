@@ -25,6 +25,7 @@ package nl.mpcjanssen.simpletask.task;
 
 import nl.mpcjanssen.simpletask.dao.*;
 
+import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -53,14 +54,14 @@ public class TodoTxtTask {
 
     public static void addToDatabase(Daos daos , int line, String text) {
         EntryDao entryDao = daos.getEntryDao();
-        EntryListDao  listDao = daos.getListDao();
-        EntryTagDao tagDao  = daos.getTagDao();
 
         Entry entry = new Entry();
         entry.setLine(line);
         entry.setSelected(false);
         entry.setText(text);
         Matcher m;
+        ArrayList<String> lists = new ArrayList<>();
+        ArrayList<String> tags = new ArrayList<>();
         String remaining = text;
         if (remaining.startsWith(COMPLETED_PREFIX)) {
             entry.setCompleted(true);
@@ -109,20 +110,14 @@ public class TodoTxtTask {
             }
             m = LIST_PATTERN.matcher(remaining);
             if (m.matches()) {
-                EntryList entryList = new EntryList();
-                entryList.setEntryLine(entry.getLine());
-                entryList.setText(m.group(1));
+                lists.add(m.group(1));
                 remaining = m.group(2);
-                listDao.insert(entryList);
                 continue;
             }
             m = TAG_PATTERN.matcher(remaining);
             if (m.matches()) {
-                EntryTag entryTag = new EntryTag();
-                entryTag.setEntryLine(entry.getLine());
-                entryTag.setText(m.group(1));
+                tags.add(m.group(1));
                 remaining = m.group(2);
-                tagDao.insert(entryTag);
                 continue;
             }
             m = THRESHOLD_PATTERN.matcher(remaining);
@@ -153,6 +148,8 @@ public class TodoTxtTask {
             }
 
         }
+        entry.setLists(new Lists(lists));
+        entry.setTags(new Tags(tags));
         entryDao.insert(entry);
     }
 

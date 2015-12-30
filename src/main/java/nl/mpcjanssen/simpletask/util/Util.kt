@@ -142,11 +142,16 @@ import kotlin.text.toLowerCase
             }
             result.add(VisibleLine(0, false, e.line, header, if (t.isVisible) 1 else 0))
         }
+        // Append last needed header
+        if (!result.last().isHeader) {
+            result.add(VisibleLine(0, true, null, result.last().header, count.toLong()))
+        }
 
         // Remove hidden tasks
         val resultToShow = result.filter { it ->
             it.isHeader || showHidden || it.count == 1L
         }
+
         val indexedResult = resultToShow.reversed().mapIndexed { i, visibleLine ->
             visibleLine.position = i.toLong()
             visibleLine
@@ -236,7 +241,7 @@ fun join(s: Collection<Any>?, delimiter: String): String {
         return date
     }
 
-    fun prefixItems(prefix: String, items: ArrayList<String>): ArrayList<String> {
+    fun prefixItems(prefix: String, items: List<String>): ArrayList<String> {
         val result = ArrayList<String>()
         for (item in items) {
             result.add(prefix + item)

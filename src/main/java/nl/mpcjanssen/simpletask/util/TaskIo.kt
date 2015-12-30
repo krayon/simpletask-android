@@ -40,8 +40,6 @@ private val TAG = "TaskIo"
 @Throws(IOException::class)
 fun loadDaoFromFile(daos: Daos,  file: File) {
     daos.entryDao.deleteAll();
-    daos.listDao.deleteAll();
-    daos.tagDao.deleteAll();
     var line = 0
     file.forEachLine {
         TodoTxtTask.addToDatabase(daos,line,it);

@@ -34,10 +34,12 @@ public class EntryDao extends AbstractDao<Entry, Long> {
         public final static Property ThresholdDate = new Property(8, String.class, "thresholdDate", false, "THRESHOLD_DATE");
         public final static Property DueDate = new Property(9, String.class, "dueDate", false, "DUE_DATE");
         public final static Property EndOfCompPrefix = new Property(10, int.class, "endOfCompPrefix", false, "END_OF_COMP_PREFIX");
+        public final static Property Lists = new Property(11, String.class, "lists", false, "LISTS");
+        public final static Property Tags = new Property(12, String.class, "tags", false, "TAGS");
     };
 
-    private DaoSession daoSession;
-
+    private final ListsPropertyConverter listsConverter = new ListsPropertyConverter();
+    private final TagsPropertyConverter tagsConverter = new TagsPropertyConverter();
 
     public EntryDao(DaoConfig config) {
         super(config);
@@ -45,7 +47,6 @@ public class EntryDao extends AbstractDao<Entry, Long> {
     
     public EntryDao(DaoConfig config, DaoSession daoSession) {
         super(config, daoSession);
-        this.daoSession = daoSession;
     }
 
     /** Creates the underlying database table. */
@@ -62,7 +63,9 @@ public class EntryDao extends AbstractDao<Entry, Long> {
                 "\"CREATE_DATE\" TEXT," + // 7: createDate
                 "\"THRESHOLD_DATE\" TEXT," + // 8: thresholdDate
                 "\"DUE_DATE\" TEXT," + // 9: dueDate
-                "\"END_OF_COMP_PREFIX\" INTEGER NOT NULL );"); // 10: endOfCompPrefix
+                "\"END_OF_COMP_PREFIX\" INTEGER NOT NULL ," + // 10: endOfCompPrefix
+                "\"LISTS\" TEXT," + // 11: lists
+                "\"TAGS\" TEXT);"); // 12: tags
     }
 
     /** Drops the underlying database table. */
@@ -102,12 +105,16 @@ public class EntryDao extends AbstractDao<Entry, Long> {
             stmt.bindString(10, dueDate);
         }
         stmt.bindLong(11, entity.getEndOfCompPrefix());
-    }
-
-    @Override
-    protected void attachEntity(Entry entity) {
-        super.attachEntity(entity);
-        entity.__setDaoSession(daoSession);
+ 
+        Lists lists = entity.getLists();
+        if (lists != null) {
+            stmt.bindString(12, listsConverter.convertToDatabaseValue(lists));
+        }
+ 
+        Tags tags = entity.getTags();
+        if (tags != null) {
+            stmt.bindString(13, tagsConverter.convertToDatabaseValue(tags));
+        }
     }
 
     /** @inheritdoc */
@@ -130,7 +137,9 @@ public class EntryDao extends AbstractDao<Entry, Long> {
             cursor.isNull(offset + 7) ? null : cursor.getString(offset + 7), // createDate
             cursor.isNull(offset + 8) ? null : cursor.getString(offset + 8), // thresholdDate
             cursor.isNull(offset + 9) ? null : cursor.getString(offset + 9), // dueDate
-            cursor.getInt(offset + 10) // endOfCompPrefix
+            cursor.getInt(offset + 10), // endOfCompPrefix
+            cursor.isNull(offset + 11) ? null : listsConverter.convertToEntityProperty(cursor.getString(offset + 11)), // lists
+            cursor.isNull(offset + 12) ? null : tagsConverter.convertToEntityProperty(cursor.getString(offset + 12)) // tags
         );
         return entity;
     }
@@ -149,6 +158,8 @@ public class EntryDao extends AbstractDao<Entry, Long> {
         entity.setThresholdDate(cursor.isNull(offset + 8) ? null : cursor.getString(offset + 8));
         entity.setDueDate(cursor.isNull(offset + 9) ? null : cursor.getString(offset + 9));
         entity.setEndOfCompPrefix(cursor.getInt(offset + 10));
+        entity.setLists(cursor.isNull(offset + 11) ? null : listsConverter.convertToEntityProperty(cursor.getString(offset + 11)));
+        entity.setTags(cursor.isNull(offset + 12) ? null : tagsConverter.convertToEntityProperty(cursor.getString(offset + 12)));
      }
     
     /** @inheritdoc */

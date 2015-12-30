@@ -9,13 +9,9 @@ import de.greenrobot.dao.AbstractDaoSession;
 import de.greenrobot.dao.identityscope.IdentityScopeType;
 import de.greenrobot.dao.internal.DaoConfig;
 
-import nl.mpcjanssen.simpletask.dao.EntryList;
-import nl.mpcjanssen.simpletask.dao.EntryTag;
 import nl.mpcjanssen.simpletask.dao.Entry;
 import nl.mpcjanssen.simpletask.dao.VisibleLine;
 
-import nl.mpcjanssen.simpletask.dao.EntryListDao;
-import nl.mpcjanssen.simpletask.dao.EntryTagDao;
 import nl.mpcjanssen.simpletask.dao.EntryDao;
 import nl.mpcjanssen.simpletask.dao.VisibleLineDao;
 
@@ -28,13 +24,9 @@ import nl.mpcjanssen.simpletask.dao.VisibleLineDao;
  */
 public class DaoSession extends AbstractDaoSession {
 
-    private final DaoConfig entryListDaoConfig;
-    private final DaoConfig entryTagDaoConfig;
     private final DaoConfig entryDaoConfig;
     private final DaoConfig visibleLineDaoConfig;
 
-    private final EntryListDao entryListDao;
-    private final EntryTagDao entryTagDao;
     private final EntryDao entryDao;
     private final VisibleLineDao visibleLineDao;
 
@@ -42,42 +34,22 @@ public class DaoSession extends AbstractDaoSession {
             daoConfigMap) {
         super(db);
 
-        entryListDaoConfig = daoConfigMap.get(EntryListDao.class).clone();
-        entryListDaoConfig.initIdentityScope(type);
-
-        entryTagDaoConfig = daoConfigMap.get(EntryTagDao.class).clone();
-        entryTagDaoConfig.initIdentityScope(type);
-
         entryDaoConfig = daoConfigMap.get(EntryDao.class).clone();
         entryDaoConfig.initIdentityScope(type);
 
         visibleLineDaoConfig = daoConfigMap.get(VisibleLineDao.class).clone();
         visibleLineDaoConfig.initIdentityScope(type);
 
-        entryListDao = new EntryListDao(entryListDaoConfig, this);
-        entryTagDao = new EntryTagDao(entryTagDaoConfig, this);
         entryDao = new EntryDao(entryDaoConfig, this);
         visibleLineDao = new VisibleLineDao(visibleLineDaoConfig, this);
 
-        registerDao(EntryList.class, entryListDao);
-        registerDao(EntryTag.class, entryTagDao);
         registerDao(Entry.class, entryDao);
         registerDao(VisibleLine.class, visibleLineDao);
     }
     
     public void clear() {
-        entryListDaoConfig.getIdentityScope().clear();
-        entryTagDaoConfig.getIdentityScope().clear();
         entryDaoConfig.getIdentityScope().clear();
         visibleLineDaoConfig.getIdentityScope().clear();
-    }
-
-    public EntryListDao getEntryListDao() {
-        return entryListDao;
-    }
-
-    public EntryTagDao getEntryTagDao() {
-        return entryTagDao;
     }
 
     public EntryDao getEntryDao() {

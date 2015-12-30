@@ -40,8 +40,7 @@ import nl.mpcjanssen.simpletask.remote.FileStoreInterface;
 import nl.mpcjanssen.simpletask.util.Util;
 
 import java.io.IOException;
-import java.util.List;
-import java.util.ArrayList;
+import java.util.*;
 import java.util.concurrent.Callable;
 
 
@@ -191,37 +190,34 @@ public class TodoList {
 
     
     @NonNull
-    public ArrayList<String> getTags() {
-        ArrayList<String> result = new ArrayList<String>();
-        Cursor cursor = app.db.rawQuery("SELECT DISTINCT text FROM " + app.daos.getTagDao().getTablename(), null);
-        while (cursor.moveToNext()) {
-            result.add(cursor.getString(0));
+    public SortedSet<String> getTags() {
+        SortedSet<String> result = new TreeSet<>();
+        QueryBuilder<Entry> qb = app.daos.getEntryDao().queryBuilder();
+        for (Entry e : qb.list()) {
+            result.addAll(e.getTags().getSorted());
         }
-        cursor.close();
         return result;
     }
 
-    
     @NonNull
-    public ArrayList<String> getLists() {
-        ArrayList<String> result = new ArrayList<String>();
-        Cursor cursor = app.db.rawQuery("SELECT DISTINCT text FROM " + app.daos.getListDao().getTablename(), null);
-        while (cursor.moveToNext()) {
-            result.add(cursor.getString(0));
+    public SortedSet<String> getLists() {
+        SortedSet<String> result = new TreeSet<>();
+        QueryBuilder<Entry> qb = app.daos.getEntryDao().queryBuilder();
+        for (Entry e : qb.list()) {
+            result.addAll(e.getLists().getSorted());
         }
-        cursor.close();
         return result;
     }
 
 
     
     public ArrayList<String> getDecoratedLists() {
-        return Util.prefixItems("@", getLists());
+        return Util.prefixItems("@", new ArrayList<>(getLists()));
     }
 
     
     public ArrayList<String> getDecoratedTags() {
-        return Util.prefixItems("+", getTags());
+        return Util.prefixItems("@", new ArrayList<>(getTags()));
     }
 
 
@@ -265,7 +261,7 @@ public class TodoList {
     public QueryBuilder<Entry> getSortedTasksQueryBuilder(@NonNull ActiveFilter filter, @NonNull ArrayList<String> sorts, boolean caseSensitive) {
         // Fixme
 
-        return app.daos.getEntryDao().queryBuilder();
+        return app.daos.getEntryDao().queryBuilder().orderAsc(EntryDao.Properties.Lists);
     }
 
 

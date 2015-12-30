@@ -8,8 +8,6 @@ import android.util.Log;
 import de.greenrobot.dao.AbstractDaoMaster;
 import de.greenrobot.dao.identityscope.IdentityScopeType;
 
-import nl.mpcjanssen.simpletask.dao.EntryListDao;
-import nl.mpcjanssen.simpletask.dao.EntryTagDao;
 import nl.mpcjanssen.simpletask.dao.EntryDao;
 import nl.mpcjanssen.simpletask.dao.VisibleLineDao;
 
@@ -22,16 +20,12 @@ public class DaoMaster extends AbstractDaoMaster {
 
     /** Creates underlying database table using DAOs. */
     public static void createAllTables(SQLiteDatabase db, boolean ifNotExists) {
-        EntryListDao.createTable(db, ifNotExists);
-        EntryTagDao.createTable(db, ifNotExists);
         EntryDao.createTable(db, ifNotExists);
         VisibleLineDao.createTable(db, ifNotExists);
     }
     
     /** Drops underlying database table using DAOs. */
     public static void dropAllTables(SQLiteDatabase db, boolean ifExists) {
-        EntryListDao.dropTable(db, ifExists);
-        EntryTagDao.dropTable(db, ifExists);
         EntryDao.dropTable(db, ifExists);
         VisibleLineDao.dropTable(db, ifExists);
     }
@@ -65,8 +59,6 @@ public class DaoMaster extends AbstractDaoMaster {
 
     public DaoMaster(SQLiteDatabase db) {
         super(db, SCHEMA_VERSION);
-        registerDaoClass(EntryListDao.class);
-        registerDaoClass(EntryTagDao.class);
         registerDaoClass(EntryDao.class);
         registerDaoClass(VisibleLineDao.class);
     }
