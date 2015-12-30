@@ -17,9 +17,9 @@ import nl.mpcjanssen.simpletask.Constants;
 import nl.mpcjanssen.simpletask.Logger;
 
 import nl.mpcjanssen.simpletask.TodoApplication;
+import nl.mpcjanssen.simpletask.dao.Daos;
+import nl.mpcjanssen.simpletask.dao.Entry;
 import nl.mpcjanssen.simpletask.dao.EntryDao;
-import nl.mpcjanssen.simpletask.dao.EntryListDao;
-import nl.mpcjanssen.simpletask.dao.EntryTagDao;
 import nl.mpcjanssen.simpletask.task.Task;
 import nl.mpcjanssen.simpletask.util.ListenerList;
 import nl.mpcjanssen.simpletask.util.TaskIo;
@@ -81,9 +81,9 @@ public class FileStore implements FileStoreInterface {
     }
 
     @Override
-    public void loadTasksFromFile(EntryDao entryDao, EntryListDao entryListDao, EntryTagDao entryTagDao, final String path, @Nullable BackupInterface backup, String eol) throws IOException {
+    public void loadTasksFromFile(Daos daos, final String path, @Nullable BackupInterface backup, String eol) throws IOException {
         Log.i(TAG, "Loading tasks from file:" + path);
-        TaskIo.loadDaoFromFile(entryDao, entryListDao, entryTagDao, new File(path));
+        TaskIo.loadDaoFromFile(daos, new File(path));
         setWatching(path);
     }
 
@@ -153,9 +153,12 @@ public class FileStore implements FileStoreInterface {
     }
 
     @Override
-    synchronized public void saveTasksToFile(final String path, List<Task> tasks, @Nullable final BackupInterface backup, final String eol) {
+    synchronized public void saveTasksToFile(final String path, EntryDao tasks, @Nullable final BackupInterface backup, final String eol) {
         log.info("Saving tasks to file: {}" ,path);
-        final List<String> output = Util.tasksToString(tasks);
+        final List<String> output = new ArrayList<>();
+        for (Entry e : tasks.queryBuilder().list()) {
+            output.add(e.getText());
+        }
         if (backup != null) {
             backup.backup(path, Util.join(output, "\n"));
         }

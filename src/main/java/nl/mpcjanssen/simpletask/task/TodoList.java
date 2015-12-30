@@ -64,13 +64,6 @@ public class TodoList {
     private final boolean startLooper;
     private final TodoApplication app;
 
-    @NonNull
-    private List<Task> mTasks = new CopyOnWriteArrayList();
-
-    @Nullable
-    private ArrayList<String> mLists = null;
-    @Nullable
-    private ArrayList<String> mTags = null;
     private TodoListChanged mTodoListChanged;
 
     private Handler todolistQueue;
@@ -137,23 +130,24 @@ public class TodoList {
                     app.daoSession.callInTx(new Callable<Object>() {
                         @Override
                         public Object call() throws Exception {
+                            EntryDao dao = app.daos.getEntryDao();
                             int line;
                             if (atEnd) {
-                                Cursor c = app.db.rawQuery("SELECT max(line) FROM " + app.entryDao.getTablename(),null);
+                                Cursor c = app.db.rawQuery("SELECT max(line) FROM " + dao.getTablename(),null);
                                 c.moveToFirst();
                                 line = c.getInt(0);
                                 line++;
                                 c.close();
 
                             } else {
-                                Cursor c = app.db.rawQuery("SELECT min(line) FROM " + app.entryDao.getTablename(),null);
+                                Cursor c = app.db.rawQuery("SELECT min(line) FROM " + dao.getTablename(),null);
                                 c.moveToFirst();
                                 line = c.getInt(0);
                                 line--;
                                 c.close();
 
                             }
-                            TodoTxtTask.addToDatabase(app.entryDao,app.entryListDao,app.entryTagDao,line,t.inFileFormat());
+                            TodoTxtTask.addToDatabase(app.daos,line,t.inFileFormat());
 
                             return null;
                         }
@@ -172,47 +166,41 @@ public class TodoList {
         queueRunnable("Remove", new Runnable() {
             
             public void run() {
-                mTasks.remove(t);
+                //Fixme
             }
         });
     }
 
 
     
-    public int size() {
-        return mTasks.size();
+    public long size() {
+        return app.daos.getEntryDao().count();
     }
 
     
     public int find(Task t) {
-        if (mTasks == null) {
-            return -1;
-        }
-        return mTasks.indexOf(t);
+        // Fixme
+        return -1;
     }
 
     
     public Task get(int position) {
-        return mTasks.get(position);
+        // Fixme
+        return null;
     }
 
     
     @NonNull
     public ArrayList<Priority> getPriorities() {
-        Set<Priority> res = new HashSet<>();
-        for (Task item : mTasks) {
-            res.add(item.getPriority());
-        }
-        ArrayList<Priority> ret = new ArrayList<>(res);
-        Collections.sort(ret);
-        return ret;
+        // Fixme
+        return new ArrayList<>();
     }
 
     
     @NonNull
     public ArrayList<String> getTags() {
         ArrayList<String> result = new ArrayList<String>();
-        Cursor cursor = app.db.rawQuery("SELECT DISTINCT text FROM " + app.entryTagDao.getTablename(), null);
+        Cursor cursor = app.db.rawQuery("SELECT DISTINCT text FROM " + app.daos.getTagDao().getTablename(), null);
         while (cursor.moveToNext()) {
             result.add(cursor.getString(0));
         }
@@ -224,7 +212,7 @@ public class TodoList {
     @NonNull
     public ArrayList<String> getLists() {
         ArrayList<String> result = new ArrayList<String>();
-        Cursor cursor = app.db.rawQuery("SELECT DISTINCT text FROM " + app.entryListDao.getTablename(), null);
+        Cursor cursor = app.db.rawQuery("SELECT DISTINCT text FROM " + app.daos.getListDao().getTablename(), null);
         while (cursor.moveToNext()) {
             result.add(cursor.getString(0));
         }
@@ -245,65 +233,16 @@ public class TodoList {
 
 
     
-    public void undoComplete(@NonNull final List<Task> tasks) {
-        queueRunnable("Uncomplete", new Runnable() {
-            
-            public void run() {
-                for (Task t : tasks) {
-                    t.markIncomplete();
-                }
-            }
-        });
-    }
 
     
-    public void complete(@NonNull final Task task,
-                         final boolean keepPrio) {
 
-        queueRunnable("Complete", new Runnable() {
-            
-            public void run() {
-
-                Task extra = task.markComplete(DateTime.now(TimeZone.getDefault()));
-                if (extra != null) {
-                    mTasks.add(extra);
-                }
-                if (!keepPrio) {
-                    task.setPriority(Priority.NONE);
-                }
-            }
-        });
-    }
 
 
     
-    public void prioritize(final List<Task> tasks, final Priority prio) {
-        queueRunnable("Complete", new Runnable() {
-            
-            public void run() {
-                for (Task t : tasks) {
-                    t.setPriority(prio);
-                }
-            }
-        });
-    }
+
 
     
-    public void defer(@NonNull final String deferString, @NonNull final Task tasksToDefer, final int dateType) {
-        queueRunnable("Defer", new Runnable() {
-            
-            public void run() {
-                switch (dateType) {
-                    case Task.DUE_DATE:
-                        tasksToDefer.deferDueDate(deferString, Util.getTodayAsString());
-                        break;
-                    case Task.THRESHOLD_DATE:
-                        tasksToDefer.deferThresholdDate(deferString, Util.getTodayAsString());
-                        break;
-                }
-            }
-        });
-    }
+
 
     
     public void notifyChanged(final FileStoreInterface filestore, final String todoname, final String eol, final BackupInterface backup, final boolean save) {
@@ -313,14 +252,12 @@ public class TodoList {
             public void run() {
                 if (save) {
                     log.info(TAG, "Handler: Handle notifychanged");
-                    log.info(TAG, "Saving todo list, size {}", mTasks.size());
+                    log.info(TAG, "Saving todo list, size {}", app.daos.getEntryDao().count());
                     save(filestore, todoname, backup, eol);
                 }
                 clearSelectedTasks();
                 if (mTodoListChanged != null) {
                     log.info(TAG, "TodoList changed, notifying listener and invalidating cached values");
-                    mTags = null;
-                    mLists = null;
                     mTodoListChanged.todoListChanged();
                 } else {
                     log.info(TAG, "TodoList changed, but nobody is listening");
@@ -332,10 +269,10 @@ public class TodoList {
 
 
     
-    public List<Task> getSortedTasksCopy(@NonNull ActiveFilter filter, @NonNull ArrayList<String> sorts, boolean caseSensitive) {
+    public List<Entry> getSortedTasksCopy(@NonNull ActiveFilter filter, @NonNull ArrayList<String> sorts, boolean caseSensitive) {
         // Fixme
 
-        return getTasks();
+        return app.daos.getEntryDao().queryBuilder().list();
     }
 
 
@@ -360,15 +297,10 @@ public class TodoList {
                     app.daoSession.callInTx(new Callable<Object>() {
                         
                         public Object call() throws Exception {
-                            fileStore.loadTasksFromFile(app.entryDao, app.entryListDao, app.entryTagDao, filename, backup, eol);
+                            fileStore.loadTasksFromFile(app.daos, filename, backup, eol);
                             return null;
                         }
                     });
-                    CopyOnWriteArrayList<Task> newTasks = new CopyOnWriteArrayList<>();
-                    for (Entry ent: app.entryDao.loadAll()) {
-                        newTasks.add(new Task(ent.getText()));
-                    }
-                    mTasks = newTasks;
                 }
                  catch (Exception e) {
                     Log.e(TAG, "Todolist load failed:" +  filename, e);
@@ -376,10 +308,10 @@ public class TodoList {
                 }
                 loadQueued = false;
 
-                Log.i(TAG,"Stored " + app.entryDao.count() + " entries in DB");
+                Log.i(TAG,"Stored " + app.daos.getEntryDao().count() + " entries in DB");
                 long numLists =  getLists().size();
                 long numTags =  getTags().size();
-                Log.i(TAG,"Stored " + app.entryDao.count() + " entries in DB");
+                Log.i(TAG,"Stored " + app.daos.getEntryDao().count() + " entries in DB");
                 Log.i(TAG,"" + numLists + " distinct lists and " + numTags + " distinct tags" );
 
                 Log.i(TAG,"Todolist loaded, refresh UI");
@@ -402,7 +334,7 @@ public class TodoList {
             
             public void run() {
                 try {
-                    filestore.saveTasksToFile(todoFileName, mTasks, backup, eol);
+                    filestore.saveTasksToFile(todoFileName, app.daos.getEntryDao(), backup, eol);
                 } catch (IOException e) {
                     e.printStackTrace();
                     Util.showToastLong(TodoApplication.getAppContext(), R.string.write_failed);
@@ -410,47 +342,6 @@ public class TodoList {
             }
         });
 
-    }
-
-    
-    public void archive(final FileStoreInterface filestore, final String todoFilename, final String doneFileName, final List<Task> tasks, final String eol) {
-        queueRunnable("Archive", new Runnable() {
-            
-            public void run() {
-                List<Task> tasksToArchive;
-                if (tasks == null) {
-                    tasksToArchive = mTasks;
-                } else {
-                    tasksToArchive = tasks;
-                }
-                List<Task> tasksToDelete = new ArrayList<>();
-                for (Task t : tasksToArchive) {
-                    if (t.isCompleted()) {
-                        tasksToDelete.add(t);
-                    }
-                }
-                try {
-                    filestore.appendTaskToFile(doneFileName, tasksToDelete, eol);
-                    for (Task t : tasksToDelete) {
-                        mTasks.remove(t);
-                    }
-                    notifyChanged(filestore, todoFilename, eol, null, true);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    Util.showToastShort(TodoApplication.getAppContext(), "Task archiving failed");
-                }
-            }
-        });
-    }
-
-    
-    public void replace(Task old, Task updated) {
-        int index = mTasks.indexOf(old);
-        if (index>-1) {
-            mTasks.set(index,updated);
-        } else {
-            mTasks.add(updated);
-        }
     }
 
     public interface TodoListChanged {
@@ -484,7 +375,7 @@ public class TodoList {
     public List<Task> getTasks() {
         Log.i(TAG, "Loading tasks from DB");
         ArrayList<Task> tasks = new ArrayList<>();
-        for (Entry entry: app.entryDao.loadAll()) {
+        for (Entry entry: app.daos.getEntryDao().loadAll()) {
             tasks.add(new Task(entry.getText()));
         }
         Log.i(TAG, "Got " + tasks.size() + " tasks from DB");
@@ -493,11 +384,11 @@ public class TodoList {
 
     private void setSelectTask(Task t, boolean select) {
         // Fixme try to remove this and replace with selectEntry
-        List<Entry> items = app.entryDao.queryBuilder().where(EntryDao.Properties.Text.eq(t.inFileFormat())).limit(1).list();
+        List<Entry> items = app.daos.getEntryDao().queryBuilder().where(EntryDao.Properties.Text.eq(t.inFileFormat())).limit(1).list();
         if (items.size()>0) {
             Entry item = items.get(0);
             item.setSelected(select);
-            app.entryDao.insertOrReplace(item);
+            app.daos.getEntryDao().insertOrReplace(item);
         }
 
     }
@@ -523,19 +414,15 @@ public class TodoList {
     }
 
     private void setSelectAllTasks(boolean select) {
-        List<Entry> entries = app.entryDao.loadAll();
+        List<Entry> entries = app.daos.getEntryDao().loadAll();
         for (Entry e : entries) {
             e.setSelected(select);
         }
-        app.entryDao.updateInTx(entries);
+        app.daos.getEntryDao().updateInTx(entries);
     }
 
     @NonNull
-    public List<Task> getSelectedTasks() {
-        ArrayList<Task> selected = new ArrayList<>();
-        for (Entry e : app.entryDao.queryBuilder().where(EntryDao.Properties.Selected.eq(true)).list()) {
-            selected.add(new Task(e.getText()));
-        }
-        return selected;
+    public List<Entry> getSelectedTasks() {
+        return app.daos.getEntryDao().queryBuilder().where(EntryDao.Properties.Selected.eq(true)).list();
     }
 }

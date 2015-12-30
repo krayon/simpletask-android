@@ -51,7 +51,10 @@ public class TodoTxtTask {
             .compile("^(\\d{4}-\\d{2}-\\d{2} )(.*)");
     private final static String COMPLETED_PREFIX = "x ";
 
-    public static void addToDatabase(EntryDao entryDao, EntryListDao listDao, EntryTagDao tagDao , long line, String text) {
+    public static void addToDatabase(Daos daos , int line, String text) {
+        EntryDao entryDao = daos.getEntryDao();
+        EntryListDao  listDao = daos.getListDao();
+        EntryTagDao tagDao  = daos.getTagDao();
 
         Entry entry = new Entry();
         entry.setLine(line);

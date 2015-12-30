@@ -51,6 +51,13 @@ public class SimpletaskDaoGenerator {
 
         entry.addToMany(tag, tagProperty);
         entry.addToMany(list, listProperty);
+
+        Entity visibleLine = schema.addEntity("VisibleLine");
+        visibleLine.addLongProperty("position").notNull().primaryKey();
+        visibleLine.addBooleanProperty("isHeader").notNull();
+        Property taskLine = visibleLine.addLongProperty("taskLine").getProperty();
+        visibleLine.addToOne(entry, taskLine);
+        visibleLine.addStringProperty("header");
     }
 
 }

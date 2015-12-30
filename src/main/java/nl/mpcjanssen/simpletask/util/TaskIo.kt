@@ -30,10 +30,7 @@
 @file:JvmName("TaskIo")
 package nl.mpcjanssen.simpletask.util
 
-import nl.mpcjanssen.simpletask.dao.Entry
-import nl.mpcjanssen.simpletask.dao.EntryDao
-import nl.mpcjanssen.simpletask.dao.EntryListDao
-import nl.mpcjanssen.simpletask.dao.EntryTagDao
+import nl.mpcjanssen.simpletask.dao.*
 import nl.mpcjanssen.simpletask.task.TodoTxtTask
 import java.io.*
 
@@ -41,13 +38,13 @@ import java.io.*
 private val TAG = "TaskIo"
 
 @Throws(IOException::class)
-fun loadDaoFromFile(dao: EntryDao, listDao: EntryListDao, tagDao: EntryTagDao,  file: File) {
-    dao.deleteAll();
-    listDao.deleteAll();
-    tagDao.deleteAll();
-    var line = 0L
+fun loadDaoFromFile(daos: Daos,  file: File) {
+    daos.entryDao.deleteAll();
+    daos.listDao.deleteAll();
+    daos.tagDao.deleteAll();
+    var line = 0
     file.forEachLine {
-        TodoTxtTask.addToDatabase(dao,listDao,tagDao,line,it);
+        TodoTxtTask.addToDatabase(daos,line,it);
         line++;
     }
 }

@@ -170,7 +170,7 @@ public class ActiveFilter {
                 || !Strings.isEmptyOrNull(m_search) || !Strings.isEmptyOrNull(m_script);
     }
 
-    public String getTitle (int visible, int total, CharSequence prio, CharSequence tag, CharSequence list, CharSequence search, CharSequence script, CharSequence filterApplied, CharSequence noFilter) {
+    public String getTitle (int visible, long total, CharSequence prio, CharSequence tag, CharSequence list, CharSequence search, CharSequence script, CharSequence filterApplied, CharSequence noFilter) {
         String filterTitle = "" + filterApplied ;
         if (hasFilter()) {
             filterTitle = "(" + visible + "/" + total +  ") " + filterTitle;

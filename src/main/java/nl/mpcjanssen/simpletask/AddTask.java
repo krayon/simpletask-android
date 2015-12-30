@@ -58,6 +58,7 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import nl.mpcjanssen.simpletask.dao.Entry;
 import nl.mpcjanssen.simpletask.util.InputDialogListener;
 
 
@@ -88,7 +89,7 @@ public class AddTask extends ThemedActivity {
     private EditText textInputField;
     private BroadcastReceiver m_broadcastReceiver;
     private LocalBroadcastManager localBroadcastManager;
-    private List<Task> m_backup = new ArrayList<>();
+    private List<Entry> m_backup = new ArrayList<>();
     private Logger log;
 
 
@@ -154,8 +155,8 @@ public class AddTask extends ThemedActivity {
 
         if (m_backup!=null && m_backup.size()>0) {
             ArrayList<String> prefill = new ArrayList<>();
-            for (Task t : m_backup) {
-                prefill.add(t.inFileFormat());
+            for (Entry t : m_backup) {
+                prefill.add(t.getText());
             }
             String sPrefill = Util.join(prefill,"\n");
             textInputField.setText(sPrefill);
@@ -391,12 +392,13 @@ public class AddTask extends ThemedActivity {
 
         // Update tasks that where selected for update
         if (m_backup!=null){
-            for (Task t : m_backup) {
+            for (Entry t : m_backup) {
                 if (updated.size()>0) {
-                    todoList.replace(t,updated.get(0));
-                    updated.remove(0);
+                    // Fixme todoList.replace(t,updated.get(0));
+                    // updated.remove(0);
                 } else {
-                    todoList.remove(t);
+                    // Fixme
+                    // todoList.remove(t);
                 }
             }
         }

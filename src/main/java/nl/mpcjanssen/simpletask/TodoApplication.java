@@ -73,9 +73,8 @@ public class TodoApplication extends Application implements
     public SQLiteDatabase db;
     private DaoMaster daoMaster;
     public DaoSession daoSession;
-    public EntryDao entryDao;
-    public EntryListDao entryListDao;
-    public EntryTagDao entryTagDao;
+    public Daos daos;
+
 
     public static Context getAppContext() {
         return m_appContext;
@@ -98,9 +97,11 @@ public class TodoApplication extends Application implements
         db = helper.getWritableDatabase();
         daoMaster = new DaoMaster(db);
         daoSession = daoMaster.newSession();
-        entryDao = daoSession.getEntryDao();
-        entryListDao = daoSession.getEntryListDao();
-        entryTagDao = daoSession.getEntryTagDao();
+        daos = new Daos(
+            daoSession.getEntryDao(),
+            daoSession.getEntryListDao(),
+            daoSession.getEntryTagDao(),
+            daoSession.getVisibleLineDao());
 
         TodoApplication.m_appContext = getApplicationContext();
         TodoApplication.m_prefs = PreferenceManager.getDefaultSharedPreferences(getAppContext());

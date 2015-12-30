@@ -48,6 +48,9 @@ import android.widget.ProgressBar
 import android.widget.Toast
 import hirondelle.date4j.DateTime
 import nl.mpcjanssen.simpletask.*
+import nl.mpcjanssen.simpletask.dao.Entry
+import nl.mpcjanssen.simpletask.dao.VisibleLine
+import nl.mpcjanssen.simpletask.dao.VisibleLineDao
 import nl.mpcjanssen.simpletask.sort.AlphabeticalStringComparator
 import nl.mpcjanssen.simpletask.task.Task
 import org.luaj.vm2.*
@@ -121,35 +124,44 @@ import kotlin.text.toLowerCase
         }
     }
 
-    fun addHeaderLines(visibleTasks: List<Task>, firstSort: String, no_header: String, showHidden: Boolean, showEmptyLists: Boolean): List<VisibleLine> {
+    fun addHeaderLines(visibleLineDao: VisibleLineDao, visibleEntries: List<Entry>, firstSort: String, no_header: String, showHidden: Boolean, showEmptyLists: Boolean): List<VisibleLine> {
         var header = ""
         var newHeader: String
         val result = ArrayList<VisibleLine>()
-        for (t in visibleTasks) {
-            newHeader = t.getHeader(firstSort, no_header)
-            if (header != newHeader) {
-                val headerLine = HeaderLine(newHeader)
-                val last = result.size - 1
-                if (last != -1 && result[last].header && !showEmptyLists) {
-                    // replace empty preceding header
-                    result[last] = headerLine
-                } else {
-                    result.add(headerLine)
+        visibleLineDao.session.callInTx {
+            visibleLineDao.deleteAll()
+            var line = 1L;
+            for (e in visibleEntries) {
+                val t = Task(e.text)
+                newHeader = t.getHeader(firstSort, no_header)
+                if (header != newHeader) {
+                    val headerLine = VisibleLine(line, true, null, newHeader)
+
+                    val last = result.size - 1
+                    if (last != -1 && result[last].isHeader && !showEmptyLists) {
+                        // replace empty preceding header
+                        result[last] = headerLine
+                    } else {
+                        result.add(headerLine)
+                        visibleLineDao.insert(headerLine)
+                        line ++
+                    }
+                    header = newHeader
                 }
-                header = newHeader
+
+                if (t.isVisible || showHidden) {
+                    // enduring tasks should not be displayed
+                    val taskLine = VisibleLine(line, false, e.line, null)
+                    visibleLineDao.insert(taskLine)
+                    line++
+                }
             }
 
-            if (t.isVisible || showHidden) {
-                // enduring tasks should not be displayed
-                val taskLine = TaskLine(t)
-                result.add(taskLine)
+            // Clean up possible last empty list header that should be hidden
+            val i = result.size
+            if (i > 0 && result[i - 1].isHeader && !showEmptyLists) {
+                result.removeAt(i - 1)
             }
-        }
-
-        // Clean up possible last empty list header that should be hidden
-        val i = result.size
-        if (i > 0 && result[i - 1].header && !showEmptyLists) {
-            result.removeAt(i - 1)
         }
         return result
     }
