@@ -130,12 +130,12 @@ import kotlin.text.toLowerCase
         val result = ArrayList<VisibleLine>()
         visibleLineDao.session.callInTx {
             visibleLineDao.deleteAll()
-            var line = 1L;
+            var position = 0L;
             for (e in visibleEntries) {
                 val t = Task(e.text)
                 newHeader = t.getHeader(firstSort, no_header)
                 if (header != newHeader) {
-                    val headerLine = VisibleLine(line, true, null, newHeader)
+                    val headerLine = VisibleLine(position, true, null, newHeader)
 
                     val last = result.size - 1
                     if (last != -1 && result[last].isHeader && !showEmptyLists) {
@@ -144,16 +144,16 @@ import kotlin.text.toLowerCase
                     } else {
                         result.add(headerLine)
                         visibleLineDao.insert(headerLine)
-                        line ++
+                        position ++
                     }
                     header = newHeader
                 }
 
                 if (t.isVisible || showHidden) {
                     // enduring tasks should not be displayed
-                    val taskLine = VisibleLine(line, false, e.line, null)
+                    val taskLine = VisibleLine(position, false, e.line, null)
                     visibleLineDao.insert(taskLine)
-                    line++
+                    position++
                 }
             }
 

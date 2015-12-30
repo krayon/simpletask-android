@@ -66,6 +66,7 @@ import android.widget.SearchView;
 import android.widget.TextView;
 import android.view.inputmethod.InputMethodManager;
 
+import de.greenrobot.dao.query.LazyList;
 import de.greenrobot.dao.query.QueryBuilder;
 import nl.mpcjanssen.simpletask.dao.*;
 
@@ -1204,6 +1205,7 @@ public class Simpletask extends ThemedActivity implements
                         break;
                     case R.id.select_all:
                         getTodoList().selectAllTasks();
+                        m_adapter.setFilteredTasks();
                         return true;
                     case R.id.uncomplete:
                         undoCompleteTasks(checkedTasks);
@@ -1302,9 +1304,8 @@ public class Simpletask extends ThemedActivity implements
     public class TaskAdapter extends BaseAdapter implements ListAdapter {
 
         @NonNull
-        List<VisibleLine> visibleLines = new ArrayList<>();
-        @NonNull
         private LayoutInflater m_inflater;
+        private List<VisibleLine> visibleLines;
 
 
         public TaskAdapter(@NonNull LayoutInflater inflater) {
@@ -1344,6 +1345,7 @@ public class Simpletask extends ThemedActivity implements
                     m_app.showEmptyLists());
             visibleLines = m_app.daos.getVisibleLineDao().queryBuilder().list();
             notifyDataSetChanged();
+            highlightSelection();
             updateFilterBar();
         }
 
