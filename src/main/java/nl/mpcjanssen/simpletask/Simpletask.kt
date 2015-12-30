@@ -5,7 +5,7 @@ import android.database.sqlite.SQLiteDatabase
 import nl.mpcjanssen.simpletask.dao.DaoMaster
 import nl.mpcjanssen.simpletask.dao.DaoSession
 
-class SimpletaskApplication : Application() {
+class Simpletask : Application() {
     var daoDb : SQLiteDatabase? = null
     var daoMaster : DaoMaster? = null
     var daoSession: DaoSession? = null
@@ -13,7 +13,7 @@ class SimpletaskApplication : Application() {
     override fun onCreate() {
         super.onCreate()
         val helper = DaoMaster.DevOpenHelper(this, "entries-db", null)
-        daoDb = helper.getWritableDatabase()
+        daoDb = helper.writableDatabase
         daoMaster = DaoMaster(daoDb)
         daoSession = daoMaster?.newSession()
     }
