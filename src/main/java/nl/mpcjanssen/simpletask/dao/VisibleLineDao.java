@@ -30,6 +30,7 @@ public class VisibleLineDao extends AbstractDao<VisibleLine, Long> {
         public final static Property IsHeader = new Property(1, boolean.class, "isHeader", false, "IS_HEADER");
         public final static Property TaskLine = new Property(2, Long.class, "taskLine", false, "TASK_LINE");
         public final static Property Header = new Property(3, String.class, "header", false, "HEADER");
+        public final static Property Count = new Property(4, Long.class, "count", false, "COUNT");
     };
 
     private DaoSession daoSession;
@@ -51,7 +52,8 @@ public class VisibleLineDao extends AbstractDao<VisibleLine, Long> {
                 "\"POSITION\" INTEGER PRIMARY KEY NOT NULL ," + // 0: position
                 "\"IS_HEADER\" INTEGER NOT NULL ," + // 1: isHeader
                 "\"TASK_LINE\" INTEGER," + // 2: taskLine
-                "\"HEADER\" TEXT);"); // 3: header
+                "\"HEADER\" TEXT," + // 3: header
+                "\"COUNT\" INTEGER);"); // 4: count
     }
 
     /** Drops the underlying database table. */
@@ -76,6 +78,11 @@ public class VisibleLineDao extends AbstractDao<VisibleLine, Long> {
         if (header != null) {
             stmt.bindString(4, header);
         }
+ 
+        Long count = entity.getCount();
+        if (count != null) {
+            stmt.bindLong(5, count);
+        }
     }
 
     @Override
@@ -97,7 +104,8 @@ public class VisibleLineDao extends AbstractDao<VisibleLine, Long> {
             cursor.getLong(offset + 0), // position
             cursor.getShort(offset + 1) != 0, // isHeader
             cursor.isNull(offset + 2) ? null : cursor.getLong(offset + 2), // taskLine
-            cursor.isNull(offset + 3) ? null : cursor.getString(offset + 3) // header
+            cursor.isNull(offset + 3) ? null : cursor.getString(offset + 3), // header
+            cursor.isNull(offset + 4) ? null : cursor.getLong(offset + 4) // count
         );
         return entity;
     }
@@ -109,6 +117,7 @@ public class VisibleLineDao extends AbstractDao<VisibleLine, Long> {
         entity.setIsHeader(cursor.getShort(offset + 1) != 0);
         entity.setTaskLine(cursor.isNull(offset + 2) ? null : cursor.getLong(offset + 2));
         entity.setHeader(cursor.isNull(offset + 3) ? null : cursor.getString(offset + 3));
+        entity.setCount(cursor.isNull(offset + 4) ? null : cursor.getLong(offset + 4));
      }
     
     /** @inheritdoc */

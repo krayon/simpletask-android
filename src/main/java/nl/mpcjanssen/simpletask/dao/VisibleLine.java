@@ -13,6 +13,7 @@ public class VisibleLine {
     private boolean isHeader;
     private Long taskLine;
     private String header;
+    private Long count;
 
     /** Used to resolve relations */
     private transient DaoSession daoSession;
@@ -31,11 +32,12 @@ public class VisibleLine {
         this.position = position;
     }
 
-    public VisibleLine(long position, boolean isHeader, Long taskLine, String header) {
+    public VisibleLine(long position, boolean isHeader, Long taskLine, String header, Long count) {
         this.position = position;
         this.isHeader = isHeader;
         this.taskLine = taskLine;
         this.header = header;
+        this.count = count;
     }
 
     /** called by internal mechanisms, do not call yourself. */
@@ -74,6 +76,14 @@ public class VisibleLine {
 
     public void setHeader(String header) {
         this.header = header;
+    }
+
+    public Long getCount() {
+        return count;
+    }
+
+    public void setCount(Long count) {
+        this.count = count;
     }
 
     /** To-one relationship, resolved on first access. */

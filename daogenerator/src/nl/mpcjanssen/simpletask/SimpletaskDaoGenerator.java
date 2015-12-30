@@ -58,6 +58,7 @@ public class SimpletaskDaoGenerator {
         Property taskLine = visibleLine.addLongProperty("taskLine").getProperty();
         visibleLine.addToOne(entry, taskLine);
         visibleLine.addStringProperty("header");
+        visibleLine.addLongProperty("count");
     }
 
 }

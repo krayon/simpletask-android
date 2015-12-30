@@ -27,12 +27,10 @@ import android.database.Cursor;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
 
 import android.util.Log;
-import de.greenrobot.dao.query.WhereCondition;
-import hirondelle.date4j.DateTime;
+import de.greenrobot.dao.query.QueryBuilder;
 import nl.mpcjanssen.simpletask.*;
 
 import nl.mpcjanssen.simpletask.dao.Entry;
@@ -44,12 +42,7 @@ import nl.mpcjanssen.simpletask.util.Util;
 import java.io.IOException;
 import java.util.List;
 import java.util.ArrayList;
-import java.util.TimeZone;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.Collections;
 import java.util.concurrent.Callable;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 
 /**
@@ -269,10 +262,10 @@ public class TodoList {
 
 
     
-    public List<Entry> getSortedTasksCopy(@NonNull ActiveFilter filter, @NonNull ArrayList<String> sorts, boolean caseSensitive) {
+    public QueryBuilder<Entry> getSortedTasksQueryBuilder(@NonNull ActiveFilter filter, @NonNull ArrayList<String> sorts, boolean caseSensitive) {
         // Fixme
 
-        return app.daos.getEntryDao().queryBuilder().list();
+        return app.daos.getEntryDao().queryBuilder();
     }
 
 

@@ -33,7 +33,6 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.view.MenuItemCompat.OnActionExpandListener;
-import android.support.v4.widget.CursorAdapter;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -66,7 +65,6 @@ import android.widget.SearchView;
 import android.widget.TextView;
 import android.view.inputmethod.InputMethodManager;
 
-import de.greenrobot.dao.query.LazyList;
 import de.greenrobot.dao.query.QueryBuilder;
 import nl.mpcjanssen.simpletask.dao.*;
 
@@ -1318,10 +1316,10 @@ public class Simpletask extends ThemedActivity implements
             } else {
                 setTitle(R.string.app_label);
             }
-            List<Entry> visibleTasks;
             log.info(TAG, "setFilteredTasks called: " + getTodoList());
             ArrayList<String> sorts = mFilter.getSort(m_app.getDefaultSorts());
-            visibleTasks = getTodoList().getSortedTasksCopy(mFilter, sorts, m_app.sortCaseSensitive());
+            QueryBuilder<Entry> visibleTasksQuery = getTodoList()
+                    .getSortedTasksQueryBuilder(mFilter, sorts, m_app.sortCaseSensitive());
 
 
             int firstGroupSortIndex = 0;
@@ -1338,7 +1336,7 @@ public class Simpletask extends ThemedActivity implements
             String firstSort = sorts.get(firstGroupSortIndex);
             Util.addHeaderLines(
                     m_app.daos.getVisibleLineDao(),
-                    visibleTasks,
+                    visibleTasksQuery.list(),
                     firstSort,
                     getString(R.string.no_header),
                     m_app.showHidden(),
@@ -1382,7 +1380,7 @@ public class Simpletask extends ThemedActivity implements
                 }
                 TextView t = (TextView) convertView
                         .findViewById(R.id.list_header_title);
-                t.setText(line.getHeader());
+                t.setText(line.getHeader() + " (" + line.getCount()+ ")");
 
             } else {
                 final ViewHolder holder;

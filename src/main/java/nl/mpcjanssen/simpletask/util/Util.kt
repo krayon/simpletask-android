@@ -60,8 +60,7 @@ import java.nio.channels.FileChannel
 import java.util.*
 import java.util.regex.Matcher
 import java.util.regex.Pattern
-import kotlin.collections.joinToString
-import kotlin.collections.length
+import kotlin.collections.*
 import kotlin.text.indexOf
 import kotlin.text.toLowerCase
 
@@ -124,46 +123,37 @@ import kotlin.text.toLowerCase
         }
     }
 
-    fun addHeaderLines(visibleLineDao: VisibleLineDao, visibleEntries: List<Entry>, firstSort: String, no_header: String, showHidden: Boolean, showEmptyLists: Boolean): List<VisibleLine> {
-        var header = ""
-        var newHeader: String
-        val result = ArrayList<VisibleLine>()
-        visibleLineDao.session.callInTx {
-            visibleLineDao.deleteAll()
-            var position = 0L;
-            for (e in visibleEntries) {
-                val t = Task(e.text)
-                newHeader = t.getHeader(firstSort, no_header)
-                if (header != newHeader) {
-                    val headerLine = VisibleLine(position, true, null, newHeader)
-
-                    val last = result.size - 1
-                    if (last != -1 && result[last].isHeader && !showEmptyLists) {
-                        // replace empty preceding header
-                        result[last] = headerLine
-                    } else {
-                        result.add(headerLine)
-                        visibleLineDao.insert(headerLine)
-                        position ++
-                    }
-                    header = newHeader
+    fun addHeaderLines(visibleLineDao: VisibleLineDao, visibleEntries: List<Entry>, firstSort: String, no_header: String, showHidden: Boolean, showEmptyLists: Boolean): Unit {
+        val result = ArrayList<VisibleLine>();
+        var count = 0;
+        visibleEntries.reversed().forEach { e ->
+            val t = Task(e.text)
+            val header = t.getHeader(firstSort, no_header)
+            if (result.size > 0 && result.last().header != header) {
+                val previousHeader = result.last().header
+                if (count != 0 || showEmptyLists) {
+                    result.add(VisibleLine(0, true, null, previousHeader, count.toLong()))
                 }
-
-                if (t.isVisible || showHidden) {
-                    // enduring tasks should not be displayed
-                    val taskLine = VisibleLine(position, false, e.line, null)
-                    visibleLineDao.insert(taskLine)
-                    position++
-                }
+                count = 0
             }
 
-            // Clean up possible last empty list header that should be hidden
-            val i = result.size
-            if (i > 0 && result[i - 1].isHeader && !showEmptyLists) {
-                result.removeAt(i - 1)
+            if (t.isVisible || showHidden) {
+                count++
             }
+            result.add(VisibleLine(0, false, e.line, header, if (t.isVisible) 1 else 0))
         }
-        return result
+
+        // Remove hidden tasks
+        val resultToShow = result.filter { it ->
+            it.isHeader || showHidden || it.count == 1L
+        }
+        val indexedResult = resultToShow.reversed().mapIndexed { i, visibleLine ->
+            visibleLine.position = i.toLong()
+            visibleLine
+        }
+
+        visibleLineDao.deleteAll()
+        visibleLineDao.insertInTx(indexedResult)
     }
 
     fun joinTasks(s: Collection<Task>?, delimiter: String): String {
