@@ -27,33 +27,21 @@ public class SimpletaskDaoGenerator {
 
     private static void addEntities(Schema schema) {
 
-        Entity entry = schema.addEntity("Entry");
+        Entity entry = schema.addEntity("TodoEntry");
         entry.addLongProperty("line").notNull().primaryKey();
-        entry.addBooleanProperty("selected").notNull();
-        entry.addBooleanProperty("hidden").notNull();
         entry.addStringProperty("text").notNull();
-        entry.addBooleanProperty("completed").notNull();
-        entry.addStringProperty("priority").notNull();
-        entry.addStringProperty("completionDate");
-        entry.addStringProperty("createDate");
-        entry.addStringProperty("thresholdDate");
-        entry.addStringProperty("dueDate");
-        entry.addIntProperty("endOfCompPrefix").notNull();
-        entry.addStringProperty("lists").customType(
-                "nl.mpcjanssen.simpletask.dao.Lists",
-                "nl.mpcjanssen.simpletask.dao.ListsPropertyConverter");
-        entry.addStringProperty("tags").customType(
-                "nl.mpcjanssen.simpletask.dao.Tags",
-                "nl.mpcjanssen.simpletask.dao.TagsPropertyConverter");
 
 
-        Entity visibleLine = schema.addEntity("VisibleLine");
-        visibleLine.addLongProperty("position").notNull().primaryKey();
-        visibleLine.addBooleanProperty("isHeader").notNull();
-        Property taskLine = visibleLine.addLongProperty("taskLine").getProperty();
-        visibleLine.addToOne(entry, taskLine);
-        visibleLine.addStringProperty("header");
-        visibleLine.addLongProperty("count");
+        Entity tag = schema.addEntity("TodoTags");
+        tag.addStringProperty("tag").notNull().primaryKey();
+
+        Entity list = schema.addEntity("TodoLists");
+        list.addStringProperty("list").notNull().primaryKey();
+
+        Entity status = schema.addEntity("TodoStatus");
+        status.addStringProperty("key").notNull().primaryKey();
+        status.addStringProperty("value");
+
     }
 
 }
