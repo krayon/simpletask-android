@@ -268,10 +268,13 @@ class TodoList(private val app: TodoApplication, private val mTodoListChanged: T
 
 
     fun getSortedTasksCopy(filter: ActiveFilter, sorts: ArrayList<String>, caseSensitive: Boolean): List<TodoListItem> {
-        val filteredTasks = filter.apply(todoItems)
+
         val comp = MultiComparator(sorts, app.today, caseSensitive,filter.createIsThreshold)
-        Collections.sort(filteredTasks, comp)
-        return filteredTasks
+        val items = ArrayList<TodoListItem>()
+        filter.preApply()
+        items.addAll(todoItems?.filter { it ->  filter.apply(it)}?:emptyList())
+        Collections.sort(items, comp)
+        return items
     }
 
     fun reload(fileStore: FileStoreInterface, filename: String, backup: BackupInterface, lbm: LocalBroadcastManager, background: Boolean, eol: String) {

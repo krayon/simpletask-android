@@ -76,9 +76,8 @@ internal class AppWidgetRemoteViewsFactory(private val ctxt: Context, intent: In
 
         val tl = application.todoList
         val items = tl.todoItems
-        for (t in mFilter.apply(items)) {
-            visibleTasks.add(t)
-        }
+        visibleTasks.addAll(items?.filter { it -> mFilter.apply (it)} ?: emptyList())
+
         val comp = MultiComparator(mFilter.getSort(
                 application.defaultSorts),
                 application.today,

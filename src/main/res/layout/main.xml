@@ -61,11 +61,10 @@
                      android:layout_width="match_parent"
                      android:layout_height="0dp"
                      android:layout_weight="1">
-            <ListView
+            <android.support.v7.widget.RecyclerView
                 android:id="@android:id/list"
                 android:layout_width="fill_parent"
-                android:layout_height="fill_parent"
-                android:fastScrollEnabled="true" />
+                android:layout_height="fill_parent" />
             <android.support.design.widget.FloatingActionButton
                     android:id="@+id/fab"
                     android:layout_width="wrap_content"

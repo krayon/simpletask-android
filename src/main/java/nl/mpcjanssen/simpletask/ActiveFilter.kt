@@ -39,6 +39,7 @@ class ActiveFilter {
     var script: String? = null
     var scriptTestTask: String? = null
     val interp = Interp()
+    var filterProcAvailable = false
 
     override fun toString(): String {
         return join(m_sorts, ",")
@@ -221,15 +222,11 @@ class ActiveFilter {
         scriptTestTask = null
     }
 
-    fun apply(items: List<TodoListItem>?): ArrayList<TodoListItem> {
-        val filter = AndFilter()
-        val matched = ArrayList<TodoListItem>()
-        var filterProcAvailable = false
+    private var today: String? = null
 
-        if (items == null) {
-            return ArrayList()
-        }
-        val today = todayAsString
+    fun preApply () {
+        today = todayAsString
+        andFilter = AndFilter()
         if (script == null) script = ""
         script = script?.trim { it <= ' ' }
         if (!script.isNullOrEmpty()) {
@@ -245,44 +242,49 @@ class ActiveFilter {
             }
 
         }
-        var idx = -1
-        for (item in items) {
-            idx++
-            val t = item.task
-            if (this.hideCompleted && t.isCompleted()) {
-                continue
-            }
-            if (this.hideFuture && t.inFuture(today)) {
-                continue
-            }
-            if (this.hideHidden && t.isHidden()) {
-                continue
-            }
-            if ("" == t.inFileFormat().trim { it <= ' ' }) {
-                continue
-            }
-            if (!filter.apply(t)) {
-                continue
-            }
-            if (filterProcAvailable) {
-                try {
-                    // Call the filter proc
-                    interp.eval(buildFilterTclCommand(interp,  t), TCL.EVAL_GLOBAL)
-                    val resultAsBoolean: Boolean
-                    if (interp.returnCode == TCL.ERROR) {
-                        continue
-                    } else {
-                        val obj = interp.getResult()
-                        resultAsBoolean = TclBoolean.get(interp, obj)
-                        if (!resultAsBoolean) continue
-                    }
-                } catch (e: Exception) {
-                    continue
-                }
-            }
-            matched.add(item)
+    }
+
+    private var andFilter: AndFilter? = null
+
+    fun apply(item: TodoListItem): Boolean {
+
+        val matched = ArrayList<TodoListItem>()
+
+        val t = item.task
+        if (this.hideCompleted && t.isCompleted()) {
+            return false
         }
-        return matched
+        if (this.hideFuture && t.inFuture(today!!)) {
+            return false
+        }
+        if (this.hideHidden && t.isHidden()) {
+            return false
+        }
+        if ("" == t.inFileFormat().trim { it <= ' ' }) {
+            return false
+        }
+        if (!(andFilter?.apply(t)?:false)) {
+            return false
+        }
+        if (filterProcAvailable) {
+            try {
+                // Call the filter proc
+                interp.eval(buildFilterTclCommand(interp,  t), TCL.EVAL_GLOBAL)
+                val resultAsBoolean: Boolean
+                if (interp.returnCode == TCL.ERROR) {
+                    return false
+                } else {
+                    val obj = interp.getResult()
+                    resultAsBoolean = TclBoolean.get(interp, obj)
+                    if (!resultAsBoolean) return false
+                }
+            } catch (e: Exception) {
+                return false
+            }
+        }
+        matched.add(item)
+
+        return true
     }
 
     fun setSort(sort: ArrayList<String>) {

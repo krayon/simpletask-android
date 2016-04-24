@@ -45,6 +45,7 @@ import hirondelle.date4j.DateTime
 
 import nl.mpcjanssen.simpletask.adapters.ItemDialogAdapter
 import nl.mpcjanssen.simpletask.adapters.DrawerAdapter
+import nl.mpcjanssen.simpletask.adapters.TaskAdapter
 import nl.mpcjanssen.simpletask.remote.FileStoreInterface
 import nl.mpcjanssen.simpletask.task.Priority
 import nl.mpcjanssen.simpletask.task.TToken
@@ -63,7 +64,7 @@ import java.io.IOException
 import java.util.*
 
 
-class Simpletask : ThemedActivity(), AbsListView.OnScrollListener, AdapterView.OnItemLongClickListener {
+class Simpletask : ThemedActivity() {
 
     internal var options_menu: Menu? = null
     internal lateinit var m_app: TodoApplication
@@ -124,7 +125,7 @@ class Simpletask : ThemedActivity(), AbsListView.OnScrollListener, AdapterView.O
                     if (m_adapter == null) {
                         return
                     }
-                    m_adapter!!.setFilteredTasks()
+                    m_adapter!!.setFilteredTasks(mFilter)
                     updateDrawers()
                 } else if (receivedIntent.action == Constants.BROADCAST_SYNC_START) {
                     mOverlayDialog = showLoadingOverlay(this@Simpletask, mOverlayDialog, true)
@@ -313,21 +314,21 @@ class Simpletask : ThemedActivity(), AbsListView.OnScrollListener, AdapterView.O
 
         // Initialize Adapter
         if (m_adapter == null) {
-            m_adapter = TaskAdapter(layoutInflater, application)
+            m_adapter = TaskAdapter(m_app,this)
         }
-        m_adapter!!.setFilteredTasks()
+        m_adapter!!.setFilteredTasks(mFilter)
 
         listView.adapter = this.m_adapter
-
+        listView.layoutManager = LinearLayoutManager(this);
         val lv = listView
-        lv.isTextFilterEnabled = true
-        lv.choiceMode = ListView.CHOICE_MODE_MULTIPLE
+        //lv.isTextFilterEnabled = true
+        //lv.choiceMode = ListView.CHOICE_MODE_MULTIPLE
         lv.isClickable = true
         lv.isLongClickable = true
-        lv.onItemLongClickListener = this
+        //lv.onItemLongClickListener = this
 
 
-        lv.onItemClickListener = AdapterView.OnItemClickListener { parent, view, position, id ->
+/*        lv.onItemClickListener = AdapterView.OnItemClickListener { parent, view, position, id ->
             val links = ArrayList<String>()
             val actions = ArrayList<String>()
             lv.setItemChecked(position, !lv.isItemChecked(position))
@@ -405,17 +406,17 @@ class Simpletask : ThemedActivity(), AbsListView.OnScrollListener, AdapterView.O
                 }
                 build.create().show()
             }
-        }
+        }*/
 
         mIgnoreScrollEvents = true
         // Setting a scroll listener reset the scroll
-        lv.setOnScrollListener(this)
+        // lv.setOnScrollListener(this)
         mIgnoreScrollEvents = false
         if (m_savedInstanceState != null) {
             m_scrollPosition = m_savedInstanceState!!.getInt("position")
         }
 
-        lv.isFastScrollEnabled = m_app.useFastScroll()
+        // lv.isFastScrollEnabled = m_app.useFastScroll()
 
 
         // If we were started from the widget, select the pushed task
@@ -442,14 +443,14 @@ class Simpletask : ThemedActivity(), AbsListView.OnScrollListener, AdapterView.O
         // Check the selected items in the listView
         setSelectedTasks(selection)
         val fab = findViewById(R.id.fab) as FloatingActionButton
-        lv.setSelectionFromTop(m_scrollPosition, 0)
+        //lv.setSelectionFromTop(m_scrollPosition, 0)
         fab.setOnClickListener { startAddTaskActivity() }
 
         updateDrawers()
         mOverlayDialog = showLoadingOverlay(this, mOverlayDialog, m_app.isLoading)
     }
 
-    private fun updateConnectivityIndicator() {
+    fun updateConnectivityIndicator() {
         // Show connectivity status indicator
         // Red -> changes pending
         // Yellow -> offline
@@ -473,18 +474,18 @@ class Simpletask : ThemedActivity(), AbsListView.OnScrollListener, AdapterView.O
         for (t in items) {
             val position = m_adapter!!.getPosition(t)
             if (position != -1) {
-                lv.setItemChecked(position, true)
-                lv.setSelection(position)
+                //lv.setItemChecked(position, true)
+                //lv.setSelection(position)
             }
         }
     }
 
-    private fun updateFilterBar() {
+    fun updateFilterBar() {
         val lv = listView
-        val index = lv.firstVisiblePosition
+        //val index = lv.firstVisiblePosition
         val v = lv.getChildAt(0)
         val top = if (v == null) 0 else v.top
-        lv.setSelectionFromTop(index, top)
+        //lv.setSelectionFromTop(index, top)
 
         val actionbar = findViewById(R.id.actionbar) as LinearLayout
         val filterText = findViewById(R.id.filter_text) as TextView
@@ -521,7 +522,7 @@ class Simpletask : ThemedActivity(), AbsListView.OnScrollListener, AdapterView.O
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        outState.putInt("position", listView.firstVisiblePosition)
+        //outState.putInt("position", listView.firstVisiblePosition)
     }
 
     override fun onResume() {
@@ -607,7 +608,7 @@ class Simpletask : ThemedActivity(), AbsListView.OnScrollListener, AdapterView.O
                     mFilter!!.search = newText
                     mFilter!!.saveInPrefs(m_app.prefs)
                     if (m_adapter != null) {
-                        m_adapter!!.setFilteredTasks()
+                        m_adapter!!.setFilteredTasks(mFilter)
                     }
                 }
                 return true
@@ -616,16 +617,16 @@ class Simpletask : ThemedActivity(), AbsListView.OnScrollListener, AdapterView.O
     }
 
     private fun getTaskAt(pos: Int): TodoListItem? {
-        if (pos < m_adapter!!.count) {
-            return m_adapter!!.getItem(pos)
+        if (pos < m_adapter!!.itemCount) {
+            return m_adapter!!.getItemAt(pos)
         }
         return null
     }
 
     private fun shareTodoList(format: Int) {
         val text = StringBuilder()
-        for (i in 0..m_adapter!!.count - 1 - 1) {
-            val task = m_adapter!!.getItem(i)
+        for (i in 0..m_adapter!!.itemCount - 1 - 1) {
+            val task = m_adapter!!.getItemAt(i)
             if (task != null) {
                 text.append(task.task.showParts(format)).append("\n")
             }
@@ -655,13 +656,8 @@ class Simpletask : ThemedActivity(), AbsListView.OnScrollListener, AdapterView.O
 
     }
 
-    private fun completeTasks(task: TodoListItem) {
-        val tasks = ArrayList<TodoListItem>()
-        tasks.add(task)
-        completeTasks(tasks)
-    }
 
-    private fun completeTasks(tasks: List<TodoListItem>) {
+    fun completeTasks(tasks: List<TodoListItem>) {
         for (t in tasks) {
             todoList.complete(t, m_app.hasKeepPrio(), m_app.hasAppendAtEnd())
         }
@@ -672,13 +668,9 @@ class Simpletask : ThemedActivity(), AbsListView.OnScrollListener, AdapterView.O
         todoList.notifyChanged(m_app.fileStore, m_app.todoFileName, m_app.eol, m_app, true)
     }
 
-    private fun undoCompleteTasks(task: TodoListItem) {
-        val tasks = ArrayList<TodoListItem>()
-        tasks.add(task)
-        undoCompleteTasks(tasks)
-    }
 
-    private fun undoCompleteTasks(tasks: List<TodoListItem>) {
+
+    fun undoCompleteTasks(tasks: List<TodoListItem>) {
         todoList.undoComplete(tasks)
         closeSelectionMode()
         todoList.notifyChanged(m_app.fileStore, m_app.todoFileName, m_app.eol, m_app, true)
@@ -916,9 +908,9 @@ class Simpletask : ThemedActivity(), AbsListView.OnScrollListener, AdapterView.O
         super.onBackPressed()
     }
 
-    private fun closeSelectionMode() {
+    fun closeSelectionMode() {
         todoList.clearSelection()
-        listView.clearChoices()
+        // listView.clearChoices()
         val toolbar = findViewById(R.id.toolbar) as Toolbar
         val fab = findViewById(R.id.fab) as FloatingActionButton
         fab.visibility = View.VISIBLE
@@ -961,7 +953,7 @@ class Simpletask : ThemedActivity(), AbsListView.OnScrollListener, AdapterView.O
         setIntent(intent)
         closeSelectionMode()
         updateDrawers()
-        m_adapter!!.setFilteredTasks()
+        m_adapter!!.setFilteredTasks(mFilter)
     }
 
     private fun updateDrawers() {
@@ -985,7 +977,7 @@ class Simpletask : ThemedActivity(), AbsListView.OnScrollListener, AdapterView.O
             mFilter!!.saveInIntent(intent)
             setIntent(intent)
             mFilter!!.saveInPrefs(m_app.prefs)
-            m_adapter!!.setFilteredTasks()
+            m_adapter!!.setFilteredTasks(mFilter)
             if (m_drawerLayout != null) {
                 m_drawerLayout!!.closeDrawer(GravityCompat.END)
             }
@@ -1129,7 +1121,7 @@ class Simpletask : ThemedActivity(), AbsListView.OnScrollListener, AdapterView.O
         m_leftDrawerList!!.setItemChecked(drawerAdapter.projectsHeaderPosition, mFilter!!.projectsNot)
     }
 
-    private val todoList: TodoList
+    val todoList: TodoList
         get() = m_app.todoList
 
     private val fileStore: FileStoreInterface
@@ -1139,24 +1131,6 @@ class Simpletask : ThemedActivity(), AbsListView.OnScrollListener, AdapterView.O
         val i = Intent(this, FilterActivity::class.java)
         mFilter!!.saveInIntent(i)
         startActivity(i)
-    }
-
-    override fun onItemLongClick(parent: AdapterView<*>, view: View, position: Int, id: Long): Boolean {
-        val t = getTaskAt(position) ?: return false
-        val selected = !listView.isItemChecked(position)
-        if (selected) {
-            todoList.selectTodoItem(t)
-        } else {
-            todoList.unSelectTodoItem(t)
-        }
-        listView.setItemChecked(position, selected)
-        val numSelected = todoList.selectedTasks.size
-        if (numSelected == 0) {
-            closeSelectionMode()
-        } else {
-            openSelectionMode()
-        }
-        return true
     }
 
     private fun openSelectionMode() {
@@ -1235,354 +1209,11 @@ class Simpletask : ThemedActivity(), AbsListView.OnScrollListener, AdapterView.O
         toolbar.visibility = View.VISIBLE
     }
 
-
-    override fun onScrollStateChanged(view: AbsListView, scrollState: Int) {
-    }
-
-    override fun onScroll(view: AbsListView, firstVisibleItem: Int, visibleItemCount: Int, totalItemCount: Int) {
-        if (!mIgnoreScrollEvents) {
-            m_scrollPosition = firstVisibleItem
-        }
-    }
-
-    val listView: ListView
+    val listView: RecyclerView
         get() {
             val lv = findViewById(android.R.id.list)
-            return lv as ListView
+            return lv as RecyclerView
         }
-
-
-    data class ViewHolder (var taskText: TextView? = null,
-                           var taskAge: TextView? = null,
-                           var taskDue: TextView? = null,
-                           var taskThreshold: TextView? = null,
-                           var cbCompleted: CheckBox? = null)
-
-    inner class TaskAdapter(private val m_inflater: LayoutInflater, val mContext: Context) : BaseAdapter(), ListAdapter {
-
-        internal var visibleLines = ArrayList<VisibleLine>()
-
-        private var displayProcAvailable = false
-
-        internal fun setFilteredTasks() {
-            if (m_app.showTodoPath()) {
-                title = m_app.todoFileName.replace("([^/])[^/]*/".toRegex(), "$1/")
-            } else {
-                setTitle(R.string.app_label)
-            }
-            if (!mFilter?.script.isNullOrEmpty()) {
-                try {
-                    val scriptObj = TclString.newInstance(mFilter?.script)
-                    interp.eval(scriptObj, TCL.EVAL_GLOBAL)
-                    displayProcAvailable = interp.getCommand(Constants.TCL_DISPLAY_COMMAND) != null
-                    if (!displayProcAvailable) {
-                        log.info(ActiveFilter.TAG, "Tcl script doesn't define a ${Constants.TCL_DISPLAY_COMMAND} command")
-                    }
-                } catch (e: Exception) {
-                    log.error(ActiveFilter.TAG, "Error in Tcl script: ${e.cause} -> ${interp.getResult()}")
-                }
-            }
-
-
-            updateConnectivityIndicator();
-            val visibleTasks: List<TodoListItem>
-            log.info(TAG, "setFilteredTasks called: " + todoList)
-            val activeFilter = mFilter ?: return
-            val sorts = activeFilter.getSort(m_app.defaultSorts)
-            visibleTasks = todoList.getSortedTasksCopy(activeFilter, sorts, m_app.sortCaseSensitive())
-            visibleLines.clear()
-
-
-            var firstGroupSortIndex = 0
-            if (sorts.size > 1 && sorts[0].contains("completed") || sorts[0].contains("future")) {
-                firstGroupSortIndex++
-                if (sorts.size > 2 && sorts[1].contains("completed") || sorts[1].contains("future")) {
-                    firstGroupSortIndex++
-                }
-            }
-
-
-            val firstSort = sorts[firstGroupSortIndex]
-            visibleLines.addAll(addHeaderLines(visibleTasks, firstSort, getString(R.string.no_header)))
-            notifyDataSetChanged()
-            updateFilterBar()
-        }
-
-        val countVisibleTodoItems: Int
-            get() {
-                var count = 0
-                for (line in visibleLines) {
-                    if (!line.header) {
-                        count++
-                    }
-                }
-                return count
-            }
-
-        /*
-        ** Get the adapter position for task
-        */
-        fun getPosition(task: TodoListItem): Int {
-            val line = TaskLine(task)
-            return visibleLines.indexOf(line)
-        }
-
-        override fun getCount(): Int {
-            return visibleLines.size + 1
-        }
-
-        override fun getItem(position: Int): TodoListItem? {
-            val line = visibleLines[position]
-            if (line.header) {
-                return null
-            }
-            return line.task
-        }
-
-        override fun getItemId(position: Int): Long {
-            return position.toLong()
-        }
-
-        override fun hasStableIds(): Boolean {
-            return true // To change body of implemented methods use File |
-            // Settings | File Templates.
-        }
-
-        override fun getView(position: Int, convertView: View?, parent: ViewGroup): View? {
-            var view = convertView
-            if (position == visibleLines.size) {
-                if (view == null) {
-                    view = m_inflater.inflate(R.layout.empty_list_item, parent, false)
-                }
-                return view
-            }
-
-            val line = visibleLines[position]
-            if (line.header) {
-                if (view == null) {
-                    view = m_inflater.inflate(R.layout.list_header, parent, false)
-                }
-                val t = view!!.findViewById(R.id.list_header_title) as TextView
-                t.text = line.title
-                t.textSize = m_app.activeFontSize
-
-            } else {
-                var holder: ViewHolder
-                if (view == null) {
-                    view = m_inflater.inflate(R.layout.list_item, parent, false)
-                    holder = ViewHolder()
-                    holder.taskText = view!!.findViewById(R.id.tasktext) as TextView
-                    holder.taskAge = view.findViewById(R.id.taskage) as TextView
-                    holder.taskDue = view.findViewById(R.id.taskdue) as TextView
-                    holder.taskThreshold = view.findViewById(R.id.taskthreshold) as TextView
-                    holder.cbCompleted = view.findViewById(R.id.checkBox) as CheckBox
-                    view.tag = holder
-                } else {
-                    holder = view.tag as ViewHolder
-                }
-                val item = line.task ?: return null
-                val task = item.task
-
-                if (m_app.showCompleteCheckbox()) {
-                    holder.cbCompleted!!.visibility = View.VISIBLE
-                } else {
-                    holder.cbCompleted!!.visibility = View.GONE
-                }
-                if (!m_app.hasExtendedTaskView()) {
-                    val taskBar = view.findViewById(R.id.datebar)
-                    taskBar.visibility = View.GONE
-                }
-
-
-                // Also massage with Tcl
-                val txt = if (displayProcAvailable) {
-                    try {
-                        // Call the filter proc
-                        interp.eval(buildDisplayTclCommand(interp, task), TCL.EVAL_GLOBAL)
-                        interp.result.toString()
-                    } catch (e: Exception) {
-                        interp.result.toString()
-                    }
-                } else {
-                    var tokensToShow = TToken.ALL
-                    // Hide dates if we have a date bar
-                    if (m_app.hasExtendedTaskView()) {
-                        tokensToShow = tokensToShow and TToken.COMPLETED_DATE.inv()
-                        tokensToShow = tokensToShow and TToken.THRESHOLD_DATE.inv()
-                        tokensToShow = tokensToShow and TToken.DUE_DATE.inv()
-                    }
-                    tokensToShow = tokensToShow and TToken.CREATION_DATE.inv()
-                    tokensToShow = tokensToShow and TToken.COMPLETED.inv()
-
-                    if (mFilter!!.hideLists) {
-                        tokensToShow = tokensToShow and TToken.LIST.inv()
-                    }
-                    if (mFilter!!.hideTags) {
-                        tokensToShow = tokensToShow and TToken.TTAG.inv()
-                    }
-                    task.showParts(tokensToShow)
-                }
-
-
-
-
-                val ss = SpannableString(txt)
-
-                val colorizeStrings = ArrayList<String>()
-                val contexts = task.lists
-                for (context in contexts) {
-                    colorizeStrings.add("@" + context)
-                }
-                setColor(ss, Color.GRAY, colorizeStrings)
-                colorizeStrings.clear()
-                val projects = task.tags
-                for (project in projects) {
-                    colorizeStrings.add("+" + project)
-                }
-                setColor(ss, Color.GRAY, colorizeStrings)
-
-                val priorityColor: Int
-                val priority = task.priority
-                when (priority) {
-                    Priority.A -> priorityColor = ContextCompat.getColor(m_app, android.R.color.holo_red_dark)
-                    Priority.B -> priorityColor = ContextCompat.getColor(m_app, android.R.color.holo_orange_dark)
-                    Priority.C -> priorityColor = ContextCompat.getColor(m_app, android.R.color.holo_green_dark)
-                    Priority.D -> priorityColor = ContextCompat.getColor(m_app, android.R.color.holo_blue_dark)
-                    else -> priorityColor = ContextCompat.getColor(m_app, android.R.color.darker_gray)
-                }
-                setColor(ss, priorityColor, priority.inFileFormat())
-                val completed = task.isCompleted()
-                val taskText = holder.taskText!!
-                val taskAge = holder.taskAge!!
-                val taskDue = holder.taskDue!!
-                val taskThreshold = holder.taskThreshold!!
-
-                taskAge.textSize =  m_app.activeFontSize *  m_app.dateBarRelativeSize
-                taskDue.textSize = m_app.activeFontSize * m_app.dateBarRelativeSize
-                taskThreshold.textSize = m_app.activeFontSize * m_app.dateBarRelativeSize
-
-                val cb = holder.cbCompleted!!
-                taskText.text = ss
-
-                handleEllipsis(holder.taskText as TextView)
-
-
-                if (completed) {
-                    // log.info( "Striking through " + task.getText());
-                    taskText.paintFlags = taskText.paintFlags or Paint.STRIKE_THRU_TEXT_FLAG
-                    holder.taskAge!!.paintFlags = taskAge.paintFlags or Paint.STRIKE_THRU_TEXT_FLAG
-                    cb.isChecked = true
-                   cb.setOnClickListener({
-                        undoCompleteTasks(item)
-                        closeSelectionMode()
-                        todoList.notifyChanged(m_app.fileStore, m_app.todoFileName, m_app.eol, m_app, true)
-                    })
-                } else {
-                    taskText.paintFlags = taskText.paintFlags and Paint.STRIKE_THRU_TEXT_FLAG.inv()
-                    taskAge.paintFlags = taskAge.paintFlags and Paint.STRIKE_THRU_TEXT_FLAG.inv()
-                    cb.isChecked = false
-
-                    cb.setOnClickListener {
-                        completeTasks(item)
-                        closeSelectionMode()
-                        todoList.notifyChanged(m_app.fileStore, m_app.todoFileName, m_app.eol, m_app, true)
-                    }
-
-                }
-
-                val relAge = getRelativeAge(task, mContext)
-                val relDue = getRelativeDueDate(task, m_app, ContextCompat.getColor(m_app, android.R.color.holo_green_light),
-                        ContextCompat.getColor(m_app, android.R.color.holo_red_light),
-                        m_app.hasColorDueDates())
-                val relativeThresholdDate = getRelativeThresholdDate(task, mContext)
-                if (!isEmptyOrNull(relAge) && !mFilter!!.hideCreateDate) {
-                    taskAge.text = relAge
-                    taskAge.visibility = View.VISIBLE
-                } else {
-                    taskAge.text = ""
-                    taskAge.visibility = View.GONE
-                }
-
-                if (relDue != null) {
-                    taskDue.text = relDue
-                    taskDue.visibility = View.VISIBLE
-                } else {
-                    taskDue.text = ""
-                    taskDue.visibility = View.GONE
-                }
-                if (!isEmptyOrNull(relativeThresholdDate)) {
-                    taskThreshold.text = relativeThresholdDate
-                    taskThreshold.visibility = View.VISIBLE
-                } else {
-                    taskThreshold.text = ""
-                    taskThreshold.visibility = View.GONE
-                }
-            }
-            return view
-        }
-
-        override fun getItemViewType(position: Int): Int {
-            if (position == visibleLines.size) {
-                return 2
-            }
-            val line = visibleLines[position]
-            if (line.header) {
-                return 0
-            } else {
-                return 1
-            }
-        }
-
-        override fun getViewTypeCount(): Int {
-            return 3
-        }
-
-        override fun isEmpty(): Boolean {
-            return visibleLines.size == 0
-        }
-
-        override fun areAllItemsEnabled(): Boolean {
-            return false
-        }
-
-        override fun isEnabled(position: Int): Boolean {
-            if (position == visibleLines.size) {
-                return false
-            }
-
-            if (visibleLines.size < position + 1) {
-                return false
-            }
-            val line = visibleLines[position]
-            return !line.header
-        }
-    }
-
-    private fun handleEllipsis(taskText: TextView) {
-        val noEllipsizeValue = "no_ellipsize"
-        val ellipsizeKey = m_app.getString(R.string.task_text_ellipsizing_pref_key)
-        val ellipsizePref = m_app.prefs.getString(ellipsizeKey, noEllipsizeValue)
-
-        if (noEllipsizeValue != ellipsizePref) {
-            val truncateAt: TextUtils.TruncateAt?
-            when (ellipsizePref) {
-                "start" -> truncateAt = TextUtils.TruncateAt.START
-                "end" -> truncateAt = TextUtils.TruncateAt.END
-                "middle" -> truncateAt = TextUtils.TruncateAt.MIDDLE
-                "marquee" -> truncateAt = TextUtils.TruncateAt.MARQUEE
-                else -> truncateAt = null
-            }
-
-            if (truncateAt != null) {
-                taskText.maxLines = 1
-                taskText.setHorizontallyScrolling(true)
-                taskText.ellipsize = truncateAt
-            } else {
-                log.warn(TAG, "Unrecognized preference value for task text ellipsis: {} !" + ellipsizePref)
-            }
-        }
-    }
-
 
 
     private fun updateItemsDialog(title: String,
@@ -1721,7 +1352,7 @@ class Simpletask : ThemedActivity(), AbsListView.OnScrollListener, AdapterView.O
             mFilter!!.saveInPrefs(m_app.prefs)
             setIntent(intent)
             closeSelectionMode()
-            m_adapter!!.setFilteredTasks()
+            m_adapter!!.setFilteredTasks(mFilter)
         }
     }
 
